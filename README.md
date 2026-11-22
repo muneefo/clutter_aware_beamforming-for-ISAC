@@ -45,3 +45,27 @@ The aggregate-based Fig. 2 plot can be rebuilt in MATLAB using the archived
 `summary.csv` and `paired_intervals.csv`. Copy those inputs into a fresh
 directory under `results/` and pass that directory to `plot_full_isac_results`
 from `first-isac-paper/result-figures/`.
+
+## IEEE Letters Part A benchmark and CSI audit
+
+Use the same pinned tutorial checkout and CPython as Part 0. Install
+`environment/requirements-parta.lock` into a separate Python environment.
+Use fresh destination subdirectories and set `TUTORIAL` to the tutorial root.
+The two AO shards can run independently on separate CPU cores.
+
+```bash
+export PYTHONDONTWRITEBYTECODE=1
+python scripts/parta_run.py ao "$TUTORIAL" results/parta-new/ao-0 --backend incremental --shard 0 --shards 2
+python scripts/parta_run.py ao "$TUTORIAL" results/parta-new/ao-1 --backend incremental --shard 1 --shards 2
+python scripts/parta_run.py csi "$TUTORIAL" results/parta-new/csi
+curl -fL https://arxiv.org/pdf/2602.10537v2 -o /tmp/isac-liu-tutorial-v2.pdf
+python scripts/parta_digitize.py /tmp/isac-liu-tutorial-v2.pdf results/parta-new/fig12b-digitized.csv
+python scripts/parta_report.py results/parta-new results/parta-new/summary.json \
+  --design-csv results/parta-new/ao-designs.csv
+```
+
+Fig. 12(b) digitization uses Poppler's `pdftocairo`. The raw `ao.jsonl` files
+contain all attempted designs and each SDP's numerical audit.
+`csi-perturbations.csv` contains the individual perturbed-channel margins.
+The startup diagnostics and earlier solver cohorts are retained separately
+from the paired experiment. See the Part A amendments in `PROTOCOL.md`.
