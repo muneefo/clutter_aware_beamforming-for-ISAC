@@ -58,14 +58,17 @@ export PYTHONDONTWRITEBYTECODE=1
 python scripts/parta_run.py ao "$TUTORIAL" results/parta-new/ao-0 --backend incremental --shard 0 --shards 2
 python scripts/parta_run.py ao "$TUTORIAL" results/parta-new/ao-1 --backend incremental --shard 1 --shards 2
 python scripts/parta_run.py csi "$TUTORIAL" results/parta-new/csi
+python scripts/parta_run.py slow-time "$TUTORIAL" results/parta-new/slow-time --backend incremental
 curl -fL https://arxiv.org/pdf/2602.10537v2 -o /tmp/isac-liu-tutorial-v2.pdf
 python scripts/parta_digitize.py /tmp/isac-liu-tutorial-v2.pdf results/parta-new/fig12b-digitized.csv
 python scripts/parta_report.py results/parta-new results/parta-new/summary.json \
   --design-csv results/parta-new/ao-designs.csv
+python scripts/parta_tables.py results/parta-new/summary.json results/parta-new/tables.md
 ```
 
 Fig. 12(b) digitization uses Poppler's `pdftocairo`. The raw `ao.jsonl` files
 contain all attempted designs and each SDP's numerical audit.
 `csi-perturbations.csv` contains the individual perturbed-channel margins.
+`PART_A.md` summarizes the completed Part A findings.
 The startup diagnostics and earlier solver cohorts are retained separately
 from the paired experiment. See the Part A amendments in `PROTOCOL.md`.

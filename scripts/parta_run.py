@@ -157,7 +157,7 @@ def a4(x, destination, shard, shards):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("ao", "csi", "startup"))
+    parser.add_argument("mode", choices=("ao", "csi", "startup", "slow-time"))
     parser.add_argument("tutorial", type=Path)
     parser.add_argument("destination", type=Path)
     parser.add_argument("--shard", type=int, default=0)
@@ -189,6 +189,15 @@ def main():
     x = load_case(args.tutorial)
     if args.mode == "csi":
         a4(x, args.destination, args.shard, args.shards)
+    elif args.mode == "slow-time":
+        cases = []
+        for gamma in THRESHOLDS:
+            y = setup_scene(x, 13001, gamma, "base")
+            for snapshots in (64, 512):
+                y.L = snapshots
+                row, trace = run_ao(y, beam_seed(13001), backend=args.backend)
+                cases.append(dict(seed=13001, gamma_db=gamma, L=snapshots, design=row, trace=trace))
+        (args.destination / "slow-time.json").write_text(json.dumps(cases, indent=2) + "\n")
     else:
         a1_a2(x, args.mode, args.shard, args.shards, args.destination, args.backend)
 

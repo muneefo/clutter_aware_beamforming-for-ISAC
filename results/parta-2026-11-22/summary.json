@@ -1,0 +1,1508 @@
+{
+  "csi": [
+    {
+      "gamma_db": 8,
+      "margin_setting": "legacy",
+      "attempted": 32,
+      "nominal_feasible": 32,
+      "achieved": {
+        "n": 32,
+        "q1": 8.685786603511241e-05,
+        "median": 8.685797226257832e-05,
+        "q3": 8.685801840689446e-05
+      },
+      "true_cost_db_vs_no_tightening": {
+        "n": 32,
+        "q1": 4.0746321561258014e-07,
+        "median": 7.884955364190205e-07,
+        "q3": 1.428341678710865e-06,
+        "med_ci95": [
+          5.2328534210222e-07,
+          1.1879240870982244e-06
+        ]
+      },
+      "relative_error_0.01": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.03": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.05": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      }
+    },
+    {
+      "gamma_db": 8,
+      "margin_setting": 0,
+      "attempted": 32,
+      "nominal_feasible": 32,
+      "achieved": {
+        "n": 32,
+        "q1": -1.0867488384458938e-10,
+        "median": -3.660394197558559e-11,
+        "q3": -5.185188787660139e-12
+      },
+      "true_cost_db_vs_no_tightening": {
+        "n": 32,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "med_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "relative_error_0.01": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.03": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.05": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      }
+    },
+    {
+      "gamma_db": 8,
+      "margin_setting": 0.25,
+      "attempted": 32,
+      "nominal_feasible": 32,
+      "achieved": {
+        "n": 32,
+        "q1": 0.24999999977217485,
+        "median": 0.24999999997181088,
+        "q3": 0.24999999999607625
+      },
+      "true_cost_db_vs_no_tightening": {
+        "n": 32,
+        "q1": 0.0010105617303874936,
+        "median": 0.0022070287219335682,
+        "q3": 0.004450699222628973,
+        "med_ci95": [
+          0.0011928539100001245,
+          0.003401478918554801
+        ]
+      },
+      "relative_error_0.01": {
+        "mean_over_designs": 0.07906250000000001,
+        "mean_ci95": [
+          0.050937500000000004,
+          0.1087578124999999
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.045,
+          "q3": 0.14250000000000002,
+          "med_ci95": [
+            0.01,
+            0.11
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.03": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.05": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      }
+    },
+    {
+      "gamma_db": 8,
+      "margin_setting": 0.5,
+      "attempted": 32,
+      "nominal_feasible": 32,
+      "achieved": {
+        "n": 32,
+        "q1": 0.4999999997960331,
+        "median": 0.499999999970109,
+        "q3": 0.4999999999957004
+      },
+      "true_cost_db_vs_no_tightening": {
+        "n": 32,
+        "q1": 0.0008744094650214862,
+        "median": 0.002857715506544345,
+        "q3": 0.007136003946262015,
+        "med_ci95": [
+          0.002042179314353021,
+          0.006211083446437726
+        ]
+      },
+      "relative_error_0.01": {
+        "mean_over_designs": 0.214375,
+        "mean_ci95": [
+          0.16530468750000002,
+          0.268125
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0775,
+          "median": 0.21000000000000002,
+          "q3": 0.31,
+          "med_ci95": [
+            0.135,
+            0.275
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.03": {
+        "mean_over_designs": 0.010625,
+        "mean_ci95": [
+          0.0037500000000000003,
+          0.0190625
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.01,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.05": {
+        "mean_over_designs": 0.0003125,
+        "mean_ci95": [
+          0.0,
+          0.0009375
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      }
+    },
+    {
+      "gamma_db": 8,
+      "margin_setting": 1,
+      "attempted": 32,
+      "nominal_feasible": 32,
+      "achieved": {
+        "n": 32,
+        "q1": 0.9999999996692123,
+        "median": 0.999999999984685,
+        "q3": 0.9999999999958644
+      },
+      "true_cost_db_vs_no_tightening": {
+        "n": 32,
+        "q1": 0.0031934610701624955,
+        "median": 0.006600261676322106,
+        "q3": 0.015288253209420066,
+        "med_ci95": [
+          0.004489317698029183,
+          0.011986821906095457
+        ]
+      },
+      "relative_error_0.01": {
+        "mean_over_designs": 0.3853125,
+        "mean_ci95": [
+          0.32625,
+          0.4453125
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.265,
+          "median": 0.38,
+          "q3": 0.48,
+          "med_ci95": [
+            0.28500000000000003,
+            0.445
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.03": {
+        "mean_over_designs": 0.04125,
+        "mean_ci95": [
+          0.02375,
+          0.0615625
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.02,
+          "q3": 0.052500000000000005,
+          "med_ci95": [
+            0.005,
+            0.045
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.05": {
+        "mean_over_designs": 0.003125,
+        "mean_ci95": [
+          0.000625,
+          0.006562500000000001
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      }
+    },
+    {
+      "gamma_db": 12,
+      "margin_setting": "legacy",
+      "attempted": 32,
+      "nominal_feasible": 32,
+      "achieved": {
+        "n": 32,
+        "q1": 8.685780886248576e-05,
+        "median": 8.685799790980084e-05,
+        "q3": 8.685801769764577e-05
+      },
+      "true_cost_db_vs_no_tightening": {
+        "n": 32,
+        "q1": 1.2491052325813712e-07,
+        "median": 5.433937371179809e-07,
+        "q3": 1.0109637682553796e-06,
+        "med_ci95": [
+          2.482872822895388e-07,
+          8.210196948965631e-07
+        ]
+      },
+      "relative_error_0.01": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.03": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.05": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      }
+    },
+    {
+      "gamma_db": 12,
+      "margin_setting": 0,
+      "attempted": 32,
+      "nominal_feasible": 32,
+      "achieved": {
+        "n": 32,
+        "q1": -8.233006016246949e-11,
+        "median": -2.7726825482162697e-11,
+        "q3": -1.0005138547368536e-11
+      },
+      "true_cost_db_vs_no_tightening": {
+        "n": 32,
+        "q1": 0.0,
+        "median": 0.0,
+        "q3": 0.0,
+        "med_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "relative_error_0.01": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.03": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.05": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      }
+    },
+    {
+      "gamma_db": 12,
+      "margin_setting": 0.25,
+      "attempted": 32,
+      "nominal_feasible": 32,
+      "achieved": {
+        "n": 32,
+        "q1": 0.2499999997721125,
+        "median": 0.2499999999733531,
+        "q3": 0.24999999998667566
+      },
+      "true_cost_db_vs_no_tightening": {
+        "n": 32,
+        "q1": 0.00026650351302981434,
+        "median": 0.00135152884071843,
+        "q3": 0.0029248845338289975,
+        "med_ci95": [
+          0.00047902194111251257,
+          0.002333374980421965
+        ]
+      },
+      "relative_error_0.01": {
+        "mean_over_designs": 0.021875000000000002,
+        "mean_ci95": [
+          0.010937500000000001,
+          0.03375
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0325,
+          "med_ci95": [
+            0.0,
+            0.015
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.03": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.05": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      }
+    },
+    {
+      "gamma_db": 12,
+      "margin_setting": 0.5,
+      "attempted": 32,
+      "nominal_feasible": 32,
+      "achieved": {
+        "n": 32,
+        "q1": 0.49999999979000964,
+        "median": 0.4999999999661241,
+        "q3": 0.49999999998401223
+      },
+      "true_cost_db_vs_no_tightening": {
+        "n": 32,
+        "q1": 0.000868297639114779,
+        "median": 0.00260711361643029,
+        "q3": 0.005476912281321855,
+        "med_ci95": [
+          0.0013831772925065877,
+          0.0036144385532708156
+        ]
+      },
+      "relative_error_0.01": {
+        "mean_over_designs": 0.05375,
+        "mean_ci95": [
+          0.034062499999999996,
+          0.075
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.04,
+          "q3": 0.0925,
+          "med_ci95": [
+            0.0,
+            0.08
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.03": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.05": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      }
+    },
+    {
+      "gamma_db": 12,
+      "margin_setting": 1,
+      "attempted": 32,
+      "nominal_feasible": 32,
+      "achieved": {
+        "n": 32,
+        "q1": 0.999999999765531,
+        "median": 0.9999999999592093,
+        "q3": 0.9999999999819815
+      },
+      "true_cost_db_vs_no_tightening": {
+        "n": 32,
+        "q1": 0.001676057966025546,
+        "median": 0.005877183282358089,
+        "q3": 0.011035591844457127,
+        "med_ci95": [
+          0.003007403974381262,
+          0.007489090342554405
+        ]
+      },
+      "relative_error_0.01": {
+        "mean_over_designs": 0.1059375,
+        "mean_ci95": [
+          0.0690625,
+          0.14875
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.02,
+          "median": 0.08,
+          "q3": 0.1525,
+          "med_ci95": [
+            0.02,
+            0.125
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.03": {
+        "mean_over_designs": 0.0015625,
+        "mean_ci95": [
+          0.0003125,
+          0.0028125
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      },
+      "relative_error_0.05": {
+        "mean_over_designs": 0.0,
+        "mean_ci95": [
+          0.0,
+          0.0
+        ],
+        "per_design_fraction": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "feasible_in_all_100": 0,
+        "all_100_exact_ci95": [
+          0.0,
+          0.10888116067944287
+        ]
+      }
+    }
+  ],
+  "ao": {
+    "conditions": [
+      {
+        "gamma_db": 8,
+        "arm": "base",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.515320920026884,
+        "digitized_minus_replay_db": 1.5846790799731156,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.829869317192406,
+          "median": 12.909083996734928,
+          "q3": 12.969488875720817,
+          "med_ci95": [
+            12.840239154586758,
+            12.952690402756609
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "full_covariance_reconstruction_change_db": {
+          "n": 32,
+          "q1": -1.2878587085651816e-14,
+          "median": -5.329070518200751e-15,
+          "q3": 3.9968028886505635e-15,
+          "med_ci95": [
+            -9.769962616701378e-15,
+            1.7763568394002505e-15
+          ]
+        },
+        "truncation_change_db": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "material_truncation_true": 0,
+        "material_truncation_design": 0,
+        "designs_with_rank_excess": 0,
+        "target_coefficient_only_true_cov_mean_db": 16.51532092002688,
+        "paired_true_stream_gap_db": {
+          "n": 32,
+          "q1": -0.11236285794260548,
+          "median": 0.0556384958498386,
+          "q3": 0.22149967857452246,
+          "med_ci95": [
+            -0.08936396948760006,
+            0.1519399779699775
+          ]
+        },
+        "paired_design_cov_to_lp_stream_gap_db": {
+          "n": 32,
+          "q1": -0.08283667778157966,
+          "median": 0.06934646203163997,
+          "q3": 0.17851976693366245,
+          "med_ci95": [
+            -0.0563837747808855,
+            0.1615038194767875
+          ]
+        },
+        "paired_design_stream_gap_db": {
+          "n": 32,
+          "q1": -0.08283667778159742,
+          "median": 0.06934646203163997,
+          "q3": 0.178519766933654,
+          "med_ci95": [
+            -0.06132936581601989,
+            0.16124723425628495
+          ]
+        }
+      },
+      {
+        "gamma_db": 8,
+        "arm": "cap_5x3",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.543685070668612,
+        "digitized_minus_replay_db": 1.5563149293313874,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.872255406251947,
+          "median": 12.951342181258681,
+          "q3": 13.007384026722256,
+          "med_ci95": [
+            12.930035374024499,
+            12.969481740783788
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.03378496861847502,
+          "median": -0.0027610995273796846,
+          "q3": 0.058211233400133455,
+          "med_ci95": [
+            -0.015185331606625496,
+            0.006111039898947013
+          ]
+        }
+      },
+      {
+        "gamma_db": 8,
+        "arm": "outer_0.1",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.475402996567317,
+        "digitized_minus_replay_db": 1.624597003432683,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.799817223302227,
+          "median": 12.881381508635375,
+          "q3": 12.938372007896454,
+          "med_ci95": [
+            12.815982589470174,
+            12.928397550516234
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.0570100540511036,
+          "median": -0.007340802246274869,
+          "q3": 0.0,
+          "med_ci95": [
+            -0.03576028137175869,
+            -0.0003997437067813081
+          ]
+        }
+      },
+      {
+        "gamma_db": 8,
+        "arm": "inner_0.01",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.5150145359952,
+        "digitized_minus_replay_db": 1.5849854640048004,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.829816592625843,
+          "median": 12.909370806259993,
+          "q3": 12.969711801960536,
+          "med_ci95": [
+            12.840557364910364,
+            12.952718888520902
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.00046978346881809685,
+          "median": -0.00014675675816189226,
+          "q3": 2.4789703793270945e-05,
+          "med_ci95": [
+            -0.0003814784860818321,
+            0.0
+          ]
+        }
+      },
+      {
+        "gamma_db": 8,
+        "arm": "redraw_distances",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.514789329468435,
+        "digitized_minus_replay_db": 1.5852106705315645,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.830501859091504,
+          "median": 12.909592141663719,
+          "q3": 12.965132873732447,
+          "med_ci95": [
+            12.839109148931087,
+            12.955399526766671
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.0006134469728076297,
+          "median": 0.00012758822545055892,
+          "q3": 0.0009451060441194592,
+          "med_ci95": [
+            -0.00030874417130455356,
+            0.0008267043520389095
+          ]
+        }
+      },
+      {
+        "gamma_db": 8,
+        "arm": "range_100_500",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.514001757394723,
+        "digitized_minus_replay_db": 1.5859982426052763,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.828776842151182,
+          "median": 12.9079944360785,
+          "q3": 12.967958502096309,
+          "med_ci95": [
+            12.839105170616493,
+            12.954194508132854
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.001685277051188372,
+          "median": -0.0012797677185387712,
+          "q3": -0.001103125303352659,
+          "med_ci95": [
+            -0.0015871816627601731,
+            -0.0011573867262431037
+          ]
+        }
+      },
+      {
+        "gamma_db": 8,
+        "arm": "exponent_3.1",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.507530920164392,
+        "digitized_minus_replay_db": 1.5924690798356078,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.824167211349646,
+          "median": 12.902441387211267,
+          "q3": 12.959238070390292,
+          "med_ci95": [
+            12.834493988039,
+            12.946181417380643
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.008978116305359496,
+          "median": -0.007740618352439554,
+          "q3": -0.00600197032628369,
+          "med_ci95": [
+            -0.008532885600962992,
+            -0.00645151556029271
+          ]
+        }
+      },
+      {
+        "gamma_db": 8,
+        "arm": "power_cap_199.53",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.54079497568775,
+        "digitized_minus_replay_db": 1.5592050243122504,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.849879400619615,
+          "median": 12.918714225686166,
+          "q3": 12.986843945391167,
+          "med_ci95": [
+            12.860744327466813,
+            12.972968182721655
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": 0.034728939906049305,
+          "median": 0.050823105081370556,
+          "q3": 0.05959855671685155,
+          "med_ci95": [
+            0.039608418039758675,
+            0.05784666698292362
+          ]
+        }
+      },
+      {
+        "gamma_db": 12,
+        "arm": "base",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.496680045872768,
+        "digitized_minus_replay_db": 1.6033199541272314,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.801059958998675,
+          "median": 12.906143513606672,
+          "q3": 12.957323649336155,
+          "med_ci95": [
+            12.829096366522725,
+            12.939400396246844
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "full_covariance_reconstruction_change_db": {
+          "n": 32,
+          "q1": -1.1102230246251565e-14,
+          "median": 0.0,
+          "q3": 8.881784197001252e-15,
+          "med_ci95": [
+            -7.105427357601002e-15,
+            5.329070518200751e-15
+          ]
+        },
+        "truncation_change_db": {
+          "n": 32,
+          "q1": 0.0,
+          "median": 0.0,
+          "q3": 0.0,
+          "med_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "material_truncation_true": 0,
+        "material_truncation_design": 0,
+        "designs_with_rank_excess": 0,
+        "target_coefficient_only_true_cov_mean_db": 16.49668004587277,
+        "paired_true_stream_gap_db": {
+          "n": 32,
+          "q1": -0.06986140913252292,
+          "median": 0.05612526574277865,
+          "q3": 0.20424498281298797,
+          "med_ci95": [
+            -0.05177879429387833,
+            0.14259993888334144
+          ]
+        },
+        "paired_design_cov_to_lp_stream_gap_db": {
+          "n": 32,
+          "q1": -0.07373506530794982,
+          "median": 0.06620316878784482,
+          "q3": 0.20893310247483887,
+          "med_ci95": [
+            -0.04987738543402376,
+            0.17378483770211162
+          ]
+        },
+        "paired_design_stream_gap_db": {
+          "n": 32,
+          "q1": -0.07373506530795959,
+          "median": 0.06620316878783417,
+          "q3": 0.20893310247483887,
+          "med_ci95": [
+            -0.04369026588153169,
+            0.16632859012949552
+          ]
+        }
+      },
+      {
+        "gamma_db": 12,
+        "arm": "cap_5x3",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.521332014718118,
+        "digitized_minus_replay_db": 1.5786679852818821,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.83189919916336,
+          "median": 12.934031561626794,
+          "q3": 12.989545924899705,
+          "med_ci95": [
+            12.899262329764987,
+            12.94657135432491
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.03868386571176874,
+          "median": -0.0034121463126401963,
+          "q3": 0.05297651033871409,
+          "med_ci95": [
+            -0.0131982405931943,
+            0.01209036314970291
+          ]
+        }
+      },
+      {
+        "gamma_db": 12,
+        "arm": "outer_0.1",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.453585780438782,
+        "digitized_minus_replay_db": 1.6464142195612173,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.760539028070802,
+          "median": 12.881686669915432,
+          "q3": 12.937005090785796,
+          "med_ci95": [
+            12.790823976351586,
+            12.91261657578527
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.06359703771824554,
+          "median": -0.0052469234372880535,
+          "q3": 0.0,
+          "med_ci95": [
+            -0.031461940675470146,
+            -0.000633276488431811
+          ]
+        }
+      },
+      {
+        "gamma_db": 12,
+        "arm": "inner_0.01",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.495932153068564,
+        "digitized_minus_replay_db": 1.6040678469314358,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.801191444933036,
+          "median": 12.906163606351484,
+          "q3": 12.956992815077928,
+          "med_ci95": [
+            12.834938980304546,
+            12.939391358657158
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.0010083620660621406,
+          "median": -0.00032117366800576974,
+          "q3": -4.108982131612038e-05,
+          "med_ci95": [
+            -0.0008270407397450441,
+            -8.47890187909428e-05
+          ]
+        }
+      },
+      {
+        "gamma_db": 12,
+        "arm": "redraw_distances",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.497417954259358,
+        "digitized_minus_replay_db": 1.6025820457406414,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.800602058130073,
+          "median": 12.904049166249177,
+          "q3": 12.962096018899178,
+          "med_ci95": [
+            12.829821236997368,
+            12.940196874038703
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.0011304197222670176,
+          "median": 0.0004329525788762112,
+          "q3": 0.0017571644845690848,
+          "med_ci95": [
+            -0.00025523540491256824,
+            0.0016321773189247324
+          ]
+        }
+      },
+      {
+        "gamma_db": 12,
+        "arm": "range_100_500",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.494820657857343,
+        "digitized_minus_replay_db": 1.605179342142657,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.79916796062999,
+          "median": 12.904599384600033,
+          "q3": 12.961730469893121,
+          "med_ci95": [
+            12.826295338603988,
+            12.938513877007761
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.0030227363277615105,
+          "median": -0.0025367062683692154,
+          "q3": -0.0019191801505180628,
+          "med_ci95": [
+            -0.002873602475245818,
+            -0.0020667687125559553
+          ]
+        }
+      },
+      {
+        "gamma_db": 12,
+        "arm": "exponent_3.1",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.48282117615983,
+        "digitized_minus_replay_db": 1.6171788238401703,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.789700316506169,
+          "median": 12.89827815831078,
+          "q3": 12.954439637878833,
+          "med_ci95": [
+            12.816588115225045,
+            12.926651540399046
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": -0.01782868823813155,
+          "median": -0.013921698591217613,
+          "q3": -0.010442480082582861,
+          "med_ci95": [
+            -0.015668278375599698,
+            -0.010974607716295992
+          ]
+        }
+      },
+      {
+        "gamma_db": 12,
+        "arm": "power_cap_199.53",
+        "attempted": 32,
+        "solved": 32,
+        "nominal_feasible": 32,
+        "digitized_true_db": 15.1,
+        "true_cov_linear_mean_db": 13.535742488847022,
+        "digitized_minus_replay_db": 1.5642575111529773,
+        "design_cov_summary": {
+          "n": 32,
+          "q1": 12.82821485033633,
+          "median": 12.948861479757237,
+          "q3": 12.983799055094273,
+          "med_ci95": [
+            12.85492941583348,
+            12.975441307341349
+          ]
+        },
+        "true_cov_change_vs_baseline_db": {
+          "n": 32,
+          "q1": 0.037924937881094856,
+          "median": 0.04943009834933676,
+          "q3": 0.06552716279474513,
+          "med_ci95": [
+            0.03996959187923288,
+            0.05838480887647002
+          ]
+        }
+      }
+    ],
+    "ao_spread": {
+      "13001": {
+        "attempted": 20,
+        "solved": 20,
+        "design_cov_db": 0.5664032145855895,
+        "true_cov_db": 0.3778968722253815,
+        "design_streams_db": 0.5664032145855913,
+        "true_streams_db": 0.3778968722253886
+      },
+      "13002": {
+        "attempted": 20,
+        "solved": 20,
+        "design_cov_db": 0.3416821931308913,
+        "true_cov_db": 0.21804654766226683,
+        "design_streams_db": 0.34168219313086645,
+        "true_streams_db": 0.2180465476622757
+      },
+      "13003": {
+        "attempted": 20,
+        "solved": 20,
+        "design_cov_db": 0.43356428158681126,
+        "true_cov_db": 0.2804940805507581,
+        "design_streams_db": 0.43356428158678284,
+        "true_streams_db": 0.2804940805507652
+      }
+    },
+    "quality_threshold_db": {
+      "design_cov_db": 0.8671285631736225,
+      "true_cov_db": 0.5609881611015162,
+      "design_streams_db": 0.8671285631735657,
+      "true_streams_db": 0.5609881611015304
+    }
+  }
+}
