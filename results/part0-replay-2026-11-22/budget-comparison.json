@@ -1,0 +1,70 @@
+{
+  "matched_rows": 64,
+  "same_lp_counts_and_feasibility": true,
+  "maximum_absolute_change": {
+    "trueDB": 0.0,
+    "designDB": 0.0,
+    "marginDB": 0.0,
+    "powerW": 0.0
+  },
+  "manuscript_displayed_values": {
+    "median_true_dB": {
+      "6": 13.437,
+      "15": 13.463
+    },
+    "paired_gain_dB_q1_median_q3": [
+      0.034,
+      0.068,
+      0.116
+    ],
+    "positive_gain_draws": 29,
+    "feasible_designs": 64
+  },
+  "matches_manuscript_displayed_precision": {
+    "median_true_dB": {
+      "6": true,
+      "15": true
+    },
+    "paired_gain_dB_q1_median_q3": [
+      true,
+      true,
+      true
+    ],
+    "positive_gain_draws": true,
+    "feasible_designs": true
+  },
+  "archived": {
+    "feasible_designs": 64,
+    "median_true_dB": {
+      "6": 13.437138656049083,
+      "15": 13.463443648508981
+    },
+    "paired_gain_dB_q1_median_q3": [
+      0.034073654989543734,
+      0.06812193084486395,
+      0.11640160642664465
+    ],
+    "positive_gain_draws": 29,
+    "median_seconds": {
+      "6": 0.235922169499986,
+      "15": 0.6413867030000802
+    }
+  },
+  "replayed": {
+    "feasible_designs": 64,
+    "median_true_dB": {
+      "6": 13.437138656049083,
+      "15": 13.463443648508981
+    },
+    "paired_gain_dB_q1_median_q3": [
+      0.034073654989543734,
+      0.06812193084486395,
+      0.11640160642664465
+    ],
+    "positive_gain_draws": 29,
+    "median_seconds": {
+      "6": 0.18261334600001078,
+      "15": 0.5117243135000251
+    }
+  }
+}

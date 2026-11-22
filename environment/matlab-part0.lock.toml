@@ -1,0 +1,30 @@
+# Pinned source/data and unresolved historical MATLAB dependencies.
+# Runtime and solver versions require the original run manifest or a new licensed run.
+[benchmark]
+manuscript_revision = "901213023ce5815e1e470769bfe0dd348a42dba0"
+tutorial_revision = "0f864c45b4775fbe01789b313d81f22bebf65177"
+covariance_sha256 = "99744880b1a6fe5e5f8a0ef57c1738be79fb0ad28629e68db2bfe3a8df67472d"
+
+[requested_stack]
+matlab_minimum_from_tutorial = "R2022a"
+matlab_tested_by_tutorial = "R2023a"
+cvx_minimum_from_tutorial = "2.2"
+sdp_backend_from_source = "MOSEK"
+sdp_cvx_precision_from_source = "high"
+lp_backends_in_probe_order = ["Optimization Toolbox linprog with explicit tolerances", "linprog with defaults", "CVX"]
+parallel_for_figure12b = "Parallel Computing Toolbox or MATLAB serial parfor behavior"
+communications_toolbox_use = "qammod in covariance generation; not used for Part 0 replay"
+
+[historical_run]
+matlab = "unverified"
+cvx = "unverified"
+mosek = "unverified"
+lp_backend = "unverified"
+optimization_toolbox = "unverified"
+threads = "unverified"
+hardware = "unverified"
+
+[current_replay]
+matlab = "unavailable"
+cvx = "unavailable"
+mosek = "unavailable"

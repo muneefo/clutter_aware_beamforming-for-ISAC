@@ -1,0 +1,95 @@
+{
+  "started_utc": "2026-11-22T20:57:00+00:00",
+  "repo_commit_at_run": "f7074bfe1181bd6c17153b003d758b18968253e6",
+  "protocol_commit": "f7074bfe1181bd6c17153b003d758b18968253e6",
+  "tutorial_commit": "0f864c45b4775fbe01789b313d81f22bebf65177",
+  "covariance_sha256": "99744880b1a6fe5e5f8a0ef57c1738be79fb0ad28629e68db2bfe3a8df67472d",
+  "input_sha256": {
+    "first-isac-paper/experiments/heldout_budget.py": "8a5952da606bd254b940db6b56755baa5b5ce69cc45101bcafee9a1c4cb24e89",
+    "first-isac-paper/experiments/verify_fast_beams.py": "589cf9e2d29ad5363fab154d02455ecba44ed12edb3a86acd6c722c2de1769ed",
+    "first-isac-paper/experiments/plot_budget.py": "bdc4c894187b61450ffd2a7849de40de3d052c9e5c31f2563f78705f51764f6d",
+    "first-isac-paper/experiments/heldout_budget.csv": "ac28a17a5de09d2ba6de1c4618bb84bb48f4e3aa077d623c2af90c0dcbe14298",
+    "first-isac-paper/manuscript/mc-summary.csv": "42c4685aef8fbad8894cad13e12660df91c27f9186eb3fbbe90aaf3187a65bb0",
+    "first-isac-paper/manuscript/main.tex": "f7608aad9e42d39b35d643b28f60122d85aa3025bc7535e94feba5c2ca06a5e8",
+    "environment/requirements-part0.lock": "a76f09fcf4d6ff6aa709c3843dd619ef2da11edff858b4f2a99081cb95921619"
+  },
+  "os": "Debian GNU/Linux 13 (trixie)",
+  "kernel": "6.18.57",
+  "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "cpu_affinity": [
+    0,
+    1,
+    2
+  ],
+  "cgroup_cpu_max": "200000 100000",
+  "cgroup_memory_max_bytes": "8589934592",
+  "gpu_used": false,
+  "gpu_device_nodes": [],
+  "python": "3.12.14",
+  "packages": {
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "matplotlib": "3.10.8",
+    "threadpoolctl": "3.6.0"
+  },
+  "blas": [
+    {
+      "internal_api": "openblas",
+      "version": "0.3.30",
+      "threading_layer": "pthreads",
+      "num_threads": 1
+    },
+    {
+      "internal_api": "openblas",
+      "version": "0.3.30",
+      "threading_layer": "pthreads",
+      "num_threads": 1
+    }
+  ],
+  "thread_environment": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1"
+  },
+  "solver": {
+    "interface": "scipy.optimize.linprog(method='highs')",
+    "version": "1.8.0",
+    "githash": "222cce7",
+    "primal_feasibility_tolerance": 1e-09,
+    "dual_feasibility_tolerance": 1e-09,
+    "unchanged_native_defaults": {
+      "solver": "choose",
+      "threads": 0,
+      "parallel": "choose"
+    }
+  },
+  "available_matlab": null,
+  "available_octave": null,
+  "warmup_seed": 8700,
+  "draw_seed_range": [
+    9001,
+    9032
+  ],
+  "outer_inner_budgets": [
+    [
+      3,
+      2
+    ],
+    [
+      5,
+      3
+    ]
+  ],
+  "command": [
+    "/workspace/work/part0-venv/bin/python",
+    "/workspace/clutter_aware_beamforming-for-ISAC/first-isac-paper/experiments/heldout_budget.py",
+    "/workspace/work/Clutter-Aware-ISAC-Tutorial",
+    "--csv",
+    "/workspace/clutter_aware_beamforming-for-ISAC/results/part0-replay-2026-11-22/heldout-budget-replayed.csv"
+  ],
+  "sampled_child_process_thread_counts": [
+    1,
+    2
+  ],
+  "completed_utc": "2026-11-22T20:57:25+00:00"
+}

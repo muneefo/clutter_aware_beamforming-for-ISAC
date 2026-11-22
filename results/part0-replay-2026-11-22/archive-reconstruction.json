@@ -1,0 +1,9 @@
+{
+  "source": "first-isac-paper/manuscript/mc-summary.csv",
+  "archived_summary_rows": 30,
+  "table_i_rows": 9,
+  "matches_mc_rows_tex": true,
+  "matches_main_tex_table_i": true,
+  "figure_1_archived_data_points": 27,
+  "source_matlab_optimization_replayed": false
+}
