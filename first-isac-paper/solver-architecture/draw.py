@@ -1,0 +1,50 @@
+from pathlib import Path
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+p=Path(__file__).resolve().parent
+plt.rcParams.update({'font.family':'DejaVu Sans','pdf.fonttype':42,'mathtext.fontset':'dejavusans'})
+fig,ax=plt.subplots(figsize=(10.7,6.1))
+fig.subplots_adjust(0,0,1,1); ax.set(xlim=(0,10.7),ylim=(0,6.1),aspect='equal');ax.axis('off')
+ink='#142f42'; teal='#00685e'; line='#647782'; light='#e8f4f1'
+def txt(x,y,s,size=10,c=ink,**kw):ax.text(x,y,s,fontsize=size,color=c,va='center',**kw)
+def rect(x,y,w,h,fc='white',ec=line,lw=.9):
+ ax.add_patch(FancyBboxPatch((x,y),w,h,boxstyle='round,pad=0.015,rounding_size=0.035',facecolor=fc,edgecolor=ec,lw=lw))
+def arrow(x,y,xx,yy,c=line):
+ ax.add_patch(FancyArrowPatch((x,y),(xx,yy),arrowstyle='-|>',mutation_scale=10,color=c,lw=1.05,shrinkA=0,shrinkB=0))
+def stage(y,title,detail,accent=False,h=.62):
+ rect(.70,y,4.35,h,light if accent else 'white',teal if accent else line,1.25 if accent else .8)
+ txt(.86,y+h-.18,title,11.2,teal if accent else ink,weight='bold')
+ txt(.86,y+.17,detail,8.8)
+txt(.24,5.85,'Clutter-aware ISAC beam design',17,weight='bold')
+txt(.25,5.54,'Fast solver with a learned transmit proposal',11,c=line)
+ax.plot([.24,10.44],[5.32,5.32],color=ink,lw=.85)
+stage(4.45,'Initialize transmit beams','Zero-forcing user beams and a null-space sensing beam')
+stage(3.43,'Update the receive filter','MVDR from current beams and the supplied clutter kernel')
+stage(2.42,'Propose user-beam directions','Append normalized candidate columns to the beam bank',True)
+stage(1.12,'Allocate power and recover beams','Check SINR, total power, and the design objective',h=.7)
+for y,yy in [(4.45,4.08),(3.43,3.07),(2.42,1.85),(1.12,.72)]:arrow(2.88,y,2.88,yy)
+txt(2.99,2.13,'Up to two power LPs per outer update',8.2,c=line)
+rect(.70,.19,4.35,.51)
+txt(.86,.45,'Return transmit beams and refreshed MVDR filters',9.6,weight='bold')
+ax.plot([.70,.27,.27],[1.48,1.48,3.74],c=line,lw=.9);arrow(.27,3.74,.685,3.74)
+txt(.13,2.61,'Next outer update',8.1,c=line,rotation=90,ha='center')
+rect(5.48,.65,4.96,4.43,fc='#f9fcfb',ec=teal,lw=1.05)
+txt(5.69,4.79,'Inside the learned proposal',13,teal,weight='bold')
+txt(5.69,4.41,'Four inputs per subcarrier and outer update',10.1,weight='bold')
+txt(5.69,4.07,'Clutter fraction  ·  worst-user SINR relative to target',9.6)
+txt(5.69,3.78,'Relative transmit power  ·  fraction of iterations used',9.6)
+arrow(7.96,3.60,7.96,3.38,teal)
+rect(5.76,2.78,4.37,.57,light,teal)
+txt(7.945,3.065,'4 inputs  →  6 tanh units  →  4 bounded outputs',10.4,teal,ha='center',weight='bold')
+arrow(7.96,2.77,7.96,2.53,teal)
+txt(5.69,2.32,'Four controls for a candidate beam update',10.1,weight='bold')
+txt(5.69,1.97,'Target gain  ·  clutter penalty  ·  user-SINR correction',9.6)
+txt(5.69,1.69,'Step multiplier relative to the shared base step',9.6)
+ax.plot([5.69,10.19],[1.45,1.45],color='#bfd0cc',lw=.7)
+txt(5.69,1.21,'58 trained weights and biases, shared across',9.6,teal)
+txt(5.69,.95,'subcarriers and outer updates.',9.6,teal)
+ax.plot([5.06,5.475],[2.74,2.74],ls=':',lw=1.2,color=teal)
+txt(5.5,.34,'LP dual variables also generate classical beam directions.',9.0,c=line)
+for ext in ['pdf','png']:fig.savefig(p/('learned_proposal_architecture.'+ext),dpi=175)

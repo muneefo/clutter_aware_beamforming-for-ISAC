@@ -1,0 +1,6 @@
+{
+  "samples": 100000,
+  "analytic_scnr": 0.283175538242071,
+  "empirical_scnr": 0.28174519439174955,
+  "relative_error": 0.0050510854828806
+}

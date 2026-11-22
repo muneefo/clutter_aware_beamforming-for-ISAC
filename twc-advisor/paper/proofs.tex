@@ -1,0 +1,51 @@
+\appendices
+\section{Receive Update and Transmit Linearization}\label{ap:rx}
+For a fixed tone suppress $n$ and write $R=\widehat{\mathcal C}(Q)+R_\eta$. Assume $R_\eta\succ0$, $b\ne0$, and a positive covariance map. For every distortionless $u$, Cauchy--Schwarz gives
+\begin{equation}
+ 1=|(R^{1/2}u)\Hh R^{-1/2}b|^2
+ \le (u\Hh Ru)(b\Hh R^{-1}b).
+\end{equation}
+Equality requires $R^{1/2}u$ to be proportional to $R^{-1/2}b$; the distortionless equality fixes the constant and yields \eqref{eq:mvdr}. Applying this independently at each tone minimizes the denominator of \eqref{eq:ratio} with its numerator fixed. For any Hermitian $Q$, the Frobenius inner product $\langle X,Y\rangle=\tr(X\Hh Y)$ gives
+\begin{align}
+ u\Hh\widehat{\mathcal C}(Q)u
+ &=\vecop(uu\Hh)\Hh\widehat V\vecop(Q)\\
+ &=\langle\unvec(\widehat V\Hh\vecop(uu\Hh)),Q\rangle .
+\end{align}
+Taking the real part gives $\tr(CQ)$ in \eqref{eq:coeff}. For $Q=vv\Hh$ this scalar is nonnegative for every $v$, so $C\succeq0$. In particular, the denominator used in every restricted allocation is positive.
+\section{Power Allocation and the Price of an Omitted Beam}\label{ap:price}
+\emph{Proposition 1 (exact restricted allocation).} Suppose the fixed bank contains a feasible allocation, $P_s>0$, $d_0>0$, and $s>0$. Then \eqref{eq:lp} attains the maximum fixed-receiver, fixed-bank covariance ratio divided by $s$.
+\par\emph{Proof.} Let $D=h\Hh Xh$ be the desired covariance power of one user and $T=h\Hh Qh$ its total received signal power. Its constraint $D\ge\gamma'(T-D+\sigma_c^2)$ is equivalent to $(1+1/\gamma')D-T\ge\sigma_c^2$. Substituting \eqref{eq:dict} and dividing by $P_s\norm h_2^2$ gives the row $Bx\ge d$. The physical power constraint for this tightened problem is $\mathbf1^\top x\le1$ because each dictionary atom has unit norm. For every feasible $x$, $t=(1+c^\top x)^{-1}>0$ and $y=tx$ satisfy \eqref{eq:lp}. Conversely, if $t=0$, the power bound would imply $y=0$, contradicting the equality constraint. Thus every LP solution gives a feasible $x=y/t$ with the same scaled objective. The original power simplex is compact and the objective is continuous, giving attainment.\hfill$\square$
+
+\emph{Proposition 2 (fixed-receiver certificate).} For an optimal restricted primal--dual pair, let $\theta$ be the scaled LP value and $\varepsilon$ the maximum positive pricing violation. Let $v_\infty$ denote the scaled unrestricted covariance optimum with the same $U,P_s,\gamma'$ and the same objective scale $s$. Then
+\begin{equation}
+ 0\le v_\infty-\theta\le\varepsilon .\label{eq:cert}
+\end{equation}
+\emph{Proof.} With inequality multipliers $\mu,\lambda\ge0$ and equality multiplier $\theta\in\mathbb R$, the maximizing LP has Lagrangian
+\begin{align}
+ \mathcal L={}&\theta+
+ y^\top(\bar\alpha+B^\top\mu-\lambda\mathbf1-\theta c)\notag\\
+ &+t(\lambda-d^\top\mu-\theta).
+\end{align}
+The coefficients of $y,t$ must be nonpositive to bound the supremum over nonnegative variables. Strong LP duality gives the restricted optimum $\theta$. On a new owner-tagged unit vector $v$ at tone $n$, the coefficient of its power equals $v\Hh M_{no}v-\lambda$. Its supremum is the largest eigenvalue of the Hermitian pricing matrix minus $\lambda$. To see why this covers the unrestricted relaxation, spectrally decompose each $X_{nk}$ and the positive semidefinite residual $Q_n-\sum_k X_{nk}$ into nonnegative rank-one terms, assigning the residual owner zero. This gives a finite representation of every unrestricted feasible covariance. Evaluating the same Lagrangian on that representation bounds the primal objective above by $\theta+\varepsilon\mathbf1^\top y$. The equality and $c\ge0$ give $t\le1$, hence $\mathbf1^\top y\le1$. The restricted feasible set is contained in the unrestricted one, giving the other inequality.\hfill$\square$
+
+With zero violation, the current allocation is globally optimal for this tightened, fixed-receiver covariance problem. A finite pricing tolerance gives the additive bound in \eqref{eq:cert}. Numerical eigenvalue and LP residuals matter when the requested tolerance approaches solver precision.
+\section{Physical Recovery, Feasibility and Objective Ascent}\label{ap:recover}
+\emph{Proposition 3 (feasibility under truncation).} Assume exact covariance feasibility and positive desired powers in \eqref{eq:recover}. Retaining the largest $N_s-K$ nonnegative residual eigenmodes yields beams satisfying the same user thresholds and total power bound. Full covariance recovery holds if $\operatorname{rank}(S_n)\le N_s-K$ on every tone.
+\par\emph{Proof.} For each user set $b=X^{1/2}h/\sqrt{h\Hh Xh}$, a unit vector local to this proof. The recovered beam satisfies $ww\Hh=X^{1/2}bb\Hh X^{1/2}\preceq X$ and $|h\Hh w|^2=h\Hh Xh$. The residual $S$ is therefore a sum of positive semidefinite matrices. Its truncation $S_L$ satisfies $0\preceq S_L\preceq S$. The physical covariance $Q_{\rm ph}=\sum_k w_kw_k\Hh+S_L$ obeys $Q_{\rm ph}\preceq Q$. Each user's desired power is preserved and its interference $h\Hh Q_{\rm ph}h-|h\Hh w|^2$ can only decrease. The trace can only decrease as well. The rank condition gives $S_L=S$ and hence equality of covariances.\hfill$\square$
+
+Both target and cold-clutter powers can decrease upon truncation. Their ratio need not improve, which explains the physical design-score acceptance test. In exact arithmetic, with a feasible start and a strictly nondecreasing acceptance rule, the sequence of accepted estimated-kernel scores is nondecreasing. Its numerator is bounded by $P\max_n\kappa_n$ for unit transmit steering vectors and distortionless reception. Its denominator is bounded below by $\sum_n\lambda_{\min}(R_{\eta,n})/\norm{b_n}_2^2>0$, since distortionless reception requires $\norm{u_n}_2\ge1/\norm{b_n}_2$. Thus the objective values of an indefinitely repeated ideal update converge. This proves a statement about scalar values. Joint stationarity would additionally require controlling the transmit approximation, recovery and block optimality in the limit. The measured code uses finite budgets and a relative acceptance tolerance of $10^{-10}$.
+\section{Feasible Decoding and an Observable Unfolding Bound}\label{ap:decode}
+Flatten the user indices $(n,k)$ into rows $i$. Let $e_i$ denote the coordinate vector of the zero-forcing atom owned by that row and $b_i=(Be_i)_i>0$. Exact zero forcing implies $(Be_i)_j=0$ for $j\ne i$. For any nonnegative candidate $x$, define
+\begin{align}
+ x_+ &=x+\sum_i e_i[d_i-(Bx)_i]_+/b_i,\\
+ x_0 &=\sum_i e_i d_i/b_i .
+\end{align}
+Then $Bx_+\ge d$ and $Bx_0=d$. Assume $m_0=\mathbf1^\top x_0<1$. If $m_+=\mathbf1^\top x_+\le1$, return $x_+$. Otherwise put $\omega=(1-m_0)/(m_+-m_0)$ and return $(1-\omega)x_0+\omega x_+$. This is a convex combination of two QoS-feasible allocations with unit total mass. These formulas justify the decoder only when the zero-forcing structure and anchor-power condition hold.
+
+For any feasible decoded point of value $r>0$ and prices $z\ge0$, set $q=a-rc+B^\top z$. For every other feasible $x$,
+\begin{align}
+ (a-rc)^\top x-r
+ &\le q^\top x-d^\top z-r\\
+ &\le \max(0,\max_j q_j)-d^\top z-r .
+\end{align}
+Let $e_r$ be the positive part of the final bound. Dividing by $1+c^\top x\ge1$ when the residual is positive gives $\phi(x)-r\le e_r$; a nonpositive residual satisfies the same bound directly. Hence $10\log_{10}(1+e_r/r)$ bounds the attainable improvement in dB for this bank. The bound is computable without the exact LP. A large bound can reflect inaccurate prices even when the returned power allocation is good.

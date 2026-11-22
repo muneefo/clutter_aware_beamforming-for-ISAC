@@ -1,0 +1,74 @@
+{
+  "test_before": {
+    "mean_gain_db_per_seed": [
+      -0.12188304653120388,
+      -0.056195130607705805,
+      -0.13259484797233814
+    ],
+    "common_feasible_counts": [
+      104,
+      104,
+      104
+    ]
+  },
+  "test_inside": {
+    "mean_gain_db_per_seed": [
+      0.5007565059799639,
+      0.451333704778568,
+      0.485089239428948
+    ],
+    "common_feasible_counts": [
+      104,
+      104,
+      104
+    ]
+  },
+  "test_combined": {
+    "mean_gain_db_per_seed": [
+      0.4620324213003978,
+      0.28523062116166104,
+      0.21875762933786286
+    ],
+    "common_feasible_counts": [
+      104,
+      104,
+      104
+    ]
+  },
+  "clutter_shift_before": {
+    "mean_gain_db_per_seed": [
+      -0.15932314928008956,
+      -0.020850944967297426,
+      -0.07489581859862184
+    ],
+    "common_feasible_counts": [
+      107,
+      107,
+      107
+    ]
+  },
+  "clutter_shift_inside": {
+    "mean_gain_db_per_seed": [
+      0.4952074366365,
+      0.4472953454221167,
+      0.4534465654311366
+    ],
+    "common_feasible_counts": [
+      107,
+      107,
+      107
+    ]
+  },
+  "clutter_shift_combined": {
+    "mean_gain_db_per_seed": [
+      0.42158812405913054,
+      0.31092388527585746,
+      0.23710229397996097
+    ],
+    "common_feasible_counts": [
+      107,
+      107,
+      107
+    ]
+  }
+}

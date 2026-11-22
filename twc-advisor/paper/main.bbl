@@ -1,0 +1,59 @@
+\begin{thebibliography}{10}
+
+\bibitem{liu2026clutter}
+R.~Liu, P.~Li, M.~Li, and A.~L. Swindlehurst, ``Clutter-aware integrated
+  sensing and communication: Models, methods, and future directions,'' {\em
+  Proceedings of the IEEE}, vol.~114, no.~1, pp.~52--92, 2026.
+
+\bibitem{liuCode}
+R.~Liu, P.~Li, M.~Li, and A.~L. Swindlehurst, ``Simulation code for
+  clutter-aware integrated sensing and communication.''
+  \url{https://github.com/RangLiu0706/Clutter-Aware-ISAC-Tutorial}, 2026.
+\newblock Revision 0f864c4. See the Fig. 12(b) benchmark and the transmit,
+  receive, and covariance-estimation routines.
+
+\bibitem{xiang2020}
+X.~Liu, T.~Huang, N.~Shlezinger, Y.~Liu, J.~Zhou, and Y.~C. Eldar, ``Joint
+  transmit beamforming for multiuser {MIMO} communications and {MIMO} radar,''
+  {\em IEEE Transactions on Signal Processing}, vol.~68, pp.~3929--3944, 2020.
+
+\bibitem{zhao}
+Y.~Zhao, Y.~Zhou, Z.~Wang, Y.~Shi, N.~Cheng, and H.~Zhou, ``Learning to
+  beamform for integrated sensing and communication: A graph neural network
+  with implicit projection approach,'' {\em IEEE Transactions on Wireless
+  Communications}, vol.~24, no.~7, pp.~5931--5945, 2025.
+
+\bibitem{chiu2025mimoofdm}
+T.-C. Chiu, M.-C. Lee, and T.-S. Lee, ``Deep unfolding learning-based
+  beamforming design for multi-user {MIMO-OFDM} integrated sensing and
+  communication systems,'' in {\em IEEE Global Communications Conference
+  (GLOBECOM)}, pp.~3783--3788, 2025.
+
+\bibitem{dinkelbach}
+W.~Dinkelbach, ``On nonlinear fractional programming,'' {\em Management
+  Science}, vol.~13, no.~7, pp.~492--498, 1967.
+
+\bibitem{charnes}
+A.~Charnes and W.~W. Cooper, ``Programming with linear fractional
+  functionals,'' {\em Naval Research Logistics Quarterly}, vol.~9, no.~3--4,
+  pp.~181--186, 1962.
+
+\bibitem{dantzig}
+G.~B. Dantzig and P.~Wolfe, ``Decomposition principle for linear programs,''
+  {\em Operations Research}, vol.~8, no.~1, pp.~101--111, 1960.
+
+\bibitem{spall}
+J.~C. Spall, ``Multivariate stochastic approximation using a simultaneous
+  perturbation gradient approximation,'' {\em IEEE Transactions on Automatic
+  Control}, vol.~37, no.~3, pp.~332--341, 1992.
+
+\bibitem{adam}
+D.~P. Kingma and J.~Ba, ``{Adam}: A method for stochastic optimization,'' in
+  {\em International Conference on Learning Representations}, 2015.
+
+\bibitem{wangclutter}
+J.~Wang, Y.~Zhang, and M.~Temiz, ``Clutter-aware precoder design for integrated
+  sensing and communication systems,'' {\em IEEE Access}, vol.~13,
+  pp.~190630--190643, 2025.
+
+\end{thebibliography}

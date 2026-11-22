@@ -1,0 +1,47 @@
+{
+  "config": {
+    "N": 6,
+    "M": 12,
+    "K": 2,
+    "L": 3,
+    "wavelength": 0.1,
+    "aperture_bs": 0.35,
+    "aperture_ris": 0.55,
+    "power": 1.0,
+    "noise_comm": 1e-06,
+    "noise_sense": 1e-09,
+    "gamma": 2.0,
+    "blockage_amplitude": 0.35,
+    "penalty": 2.0
+  },
+  "depth": 8,
+  "training_instances": 64,
+  "validation_instances": 32,
+  "test_instances": 128,
+  "shift_instances": 128,
+  "training_seeds": [
+    17,
+    23,
+    31
+  ],
+  "split_seeds": [
+    1001,
+    2002,
+    3003,
+    4004
+  ],
+  "base": {
+    "init": "mixture",
+    "alpha": 0.15,
+    "phase_step": 0.15
+  },
+  "training_seconds": 61.21097002200008,
+  "training_algorithm": "Cross-entropy method: 15 generations x 20 candidates, elite 5; validation-selected checkpoint",
+  "python": "3.12.14",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "numpy": "2.3.5",
+  "cpu": "AMD EPYC 9V45 96-Core Processor",
+  "threads": "1",
+  "common_synthetic_input_preparation_median_ms": 0.1187294999454025,
+  "timing_protocol": "Randomized interleaved methods, same 32 geometries x 3 repetitions, batch 1; immediate return on failed initialization."
+}

@@ -1,0 +1,22 @@
+{
+  "gradient_relative_errors": [
+    7.091997319060823e-11,
+    1.350382372303145e-10,
+    1.0124893378616477e-10,
+    7.7986479907974e-11,
+    8.752853835470682e-11
+  ],
+  "receiver_relative_errors": [
+    1.4621590189700987e-16,
+    0.0,
+    3.683358641289819e-16,
+    1.1697569609860363e-15,
+    3.615433127518302e-16
+  ],
+  "zf_feasible_count": 103,
+  "zf_instances": 128,
+  "minimum_accepted_zf_sinr": 2.033950400892259,
+  "backtracking_monotonic": true,
+  "power_max": 1.0000000000000002,
+  "phase_modulus_max_error": 2.220446049250313e-16
+}

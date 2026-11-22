@@ -1,0 +1,16 @@
+\begin{thebibliography}{1}
+
+\bibitem{nguyen2023unfolding}
+N.~T. Nguyen, L.~V. Nguyen, N.~Shlezinger, Y.~C. Eldar, A.~L. Swindlehurst, and
+  M.~Juntti, ``\href{https://arxiv.org/abs/2307.04376}{Joint Communications and
+  Sensing Hybrid Beamforming Design via Deep Unfolding},'' {\em arXiv preprint
+  arXiv:2307.04376}, 2023.
+
+\bibitem{avrahami2026approx}
+D.~Avrahami, A.~Milstein, C.~Chaux, T.~Routtenberg, and N.~Shlezinger,
+  ``\href{https://arxiv.org/abs/2509.00782}{Deep Unfolding with Approximated
+  Computations for Rapid Optimization},'' {\em arXiv preprint
+  arXiv:2509.00782}, 2026.
+\newblock Version 2, March 2026.
+
+\end{thebibliography}

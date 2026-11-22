@@ -1,0 +1,41 @@
+\documentclass[11pt,border=5pt]{standalone}
+\usepackage[T1]{fontenc}\usepackage{lmodern,tikz,amsmath}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+
+\newcommand{\systemdrawing}{%
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=Stealth,
+ link/.style={->,line width=.9pt,blue!60!black},
+ targetlink/.style={<->,line width=.9pt,black!80},
+ clutterlink/.style={<->,dashed,line width=.9pt,brown!80!black},
+ stage/.style={anchor=north west,align=left,font=\footnotesize,text width=4.55cm,inner sep=0pt}]
+\node[anchor=west,font=\bfseries] at (0,4.75) {(a)\quad Fixed-array monostatic ISAC};
+\draw[black!55] (.65,1.45) rectangle (2.5,3.7);
+\node[align=center,font=\footnotesize] at (1.54,3.32) {Base station};
+\foreach \y in {2.1,2.32,2.54,2.76}{\fill[blue!60!black] (1.1,\y) rectangle ++(.15,.1);\draw (1.85,\y) rectangle ++(.15,.1);}
+\node[font=\scriptsize] at (1.18,1.8) {Tx};\node[font=\scriptsize] at (1.91,1.8) {Rx};
+\coordinate (u1) at (8.1,4.05);\coordinate (uk) at (11.45,3.45);
+\draw[link] (2.52,3.48)--(u1);\draw[link] (2.52,3.15)--(uk);
+\fill[blue!60!black] (u1) circle (2.6pt);\fill[blue!60!black] (uk) circle (2.6pt);
+\node[anchor=west] at (8.25,4.05) {User 1};\node[anchor=west] at (11.6,3.45) {User $K$};
+\node[font=\footnotesize,blue!60!black] at (5.2,4.05) {Downlink data};
+\draw[targetlink] (2.53,2.7)--(11.38,2.45);
+\node[diamond,draw,minimum size=6pt,inner sep=1pt] at (11.5,2.45) {};
+\node[anchor=west] at (11.68,2.45) {Target, $j=0$};
+\node[fill=white,font=\footnotesize] at (6.5,2.6) {Illumination and target return};
+\draw[clutterlink] (2.53,2.25)--(7.92,1.42);
+\draw[clutterlink] (2.53,1.92)--(10.82,.8);
+\node[draw=brown!80!black,circle,inner sep=2pt] at (8.02,1.4) {};
+\node[draw=brown!80!black,circle,inner sep=2pt] at (10.92,.79) {};
+\node[anchor=west] at (8.18,1.42) {Clutter 1};
+\node[anchor=west] at (11.08,.8) {Clutter $L$};
+\node[anchor=west,font=\footnotesize,brown!80!black] at (.65,1.03) {Mapped positions, unknown powers $q_\ell$};
+\draw[black!30] (0,.26)--(14,.26);
+\node[anchor=west,font=\bfseries] at (0,-.12) {(b)\quad Information available in one design interval};
+\draw[->,black!65] (.05,-.52)--(13.9,-.52);
+\foreach \x in {.06,4.84,9.60} {\fill (\x,-.52) circle (1.7pt);}
+\node[stage] at (.06,-.75) {\textbf{Probe}\\Transmit known beams and measure clutter-only returns.};
+\node[stage] at (4.84,-.75) {\textbf{Estimate and design}\\Infer clutter powers. Select the data beams and receive filter.};
+\node[stage] at (9.60,-.75) {\textbf{Operate}\\Serve all users and evaluate the target echo under the selected beams.};
+\end{tikzpicture}}
+
+\begin{document}\systemdrawing\end{document}

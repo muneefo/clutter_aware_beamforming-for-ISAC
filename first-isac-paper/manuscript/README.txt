@@ -1,0 +1,1 @@
+Compile main.tex with pdfLaTeX, BibTeX, and pdfLaTeX twice. The project includes the compiled article, the vector figures, and the 30-row summary and nine-row paired learning table transcribed at the precision of the completed MATLAB run.

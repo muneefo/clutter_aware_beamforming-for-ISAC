@@ -1,0 +1,64 @@
+Fast beam design for the Liu et al. clutter-aware ISAC tutorial
+
+MATLAB
+Place fast_tutorial_beams.m on your MATLAB path. Use the same repo folder
+and outWU structure as your W/U run. The data file and the authors' kernel,
+MVDR, and SCNR functions are read from that repository.
+
+    fast = fast_tutorial_beams(repo, outWU);
+    disp(fast.trials)
+    fast.designs{1}.W
+    fast.designs{1}.U
+
+One row is returned per saved AO scene. seconds times beam design, including
+initialization, filtering, LPs, pricing, and beam recovery. File loading,
+channel generation and final true-kernel scoring are outside the timer.
+aoSeconds comes from the saved run. For a steady-state comparison, repeat
+once after MATLAB has loaded the functions. linprog is preferred. CVX is
+available as an LP fallback and can have a different runtime and solution
+within numerical tolerances.
+
+Algorithm
+The initial bank contains zero-forcing, target and partially nulled target
+directions. Each direction has a communication user or sensing stream as
+its owner. Given a receive filter, both the desired echo and the cold
+clutter powers are linear in the nonnegative transmit powers. The user
+SINR inequalities are linear in these same powers, including interference
+from sensing. Fractional normalization converts their allocation into one
+LP with a shared power budget. The LP dual prices are used to construct
+a Hermitian matrix for each tone and owner. Its leading eigenvector is a
+candidate for the next LP. Covariances are recovered into actual beams,
+audited, and scored at the current receiver before accepting an update.
+The next outer step updates the MVDR filter using the estimated kernel.
+A zero-forcing feasible seed is required. The default budget is 5 outer
+steps and 3 LPs per step. The stopping bound is conditional on the current
+receiver and tightened allocation constraints. It gives no global guarantee
+for the jointly optimized true SCNR.
+
+Learning ablation (optional, requires the trained outWU.model)
+    fixed = fast_tutorial_beams(repo,outWU,struct('mode',"fixedProposal"));
+    learned = fast_tutorial_beams(repo,outWU,struct('mode',"learnedProposal"));
+
+These two runs append the same number of possible user-beam directions using
+the fixed or learned W rule. The LP chooses their powers. The default physics
+mode omits this extra proposal block. The supplied benchmark is for physics.
+The source MATLAB policy weights from the user's PC were not available here.
+
+Python reproduction
+    python -m pip install numpy scipy threadpoolctl
+    python verify_fast_beams.py /path/to/Clutter-Aware-ISAC-Tutorial
+
+The script writes fast_results.csv. Its four AO scores are the rounded
+measurements supplied from MATLAB. It replays all four earlier fixed-anchor
+scores as a guard against a scene or covariance mismatch. After a separate
+warm-up, the fast solver is timed five times per scene with one BLAS thread.
+The true clutter kernel is used for scoring only. The simulation budget was
+explored using these four scenes. These are development results.
+
+Public benchmark
+https://github.com/RangLiu0706/Clutter-Aware-ISAC-Tutorial
+Commit 0f864c45b4775fbe01789b313d81f22bebf65177
+SHA-256 of data/covMat_BLP.mat
+99744880b1a6fe5e5f8a0ef57c1738be79fb0ad28629e68db2bfe3a8df67472d
+Tested in Python (NumPy 2.3.5, SciPy 1.17.0). MATLAB code passed MISS_HIT
+syntax analysis. MATLAB and CVX execution require the user's environment.

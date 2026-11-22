@@ -1,0 +1,220 @@
+Muneef Mohammed                                                               First paper · System model
+
+
+Fixed-array near-field ISAC with limited clutter observa-
+tions
+
+1    Architecture and information assumptions
+A monostatic base station (BS) uses fixed transmit and receive arrays to serve K single-antenna downlink
+users and sense one point target. Environmental reflections enter the sensing receiver through the
+same transmitted signal. The design question is how accurately a finite probing interval predicts the
+interference seen by a new transmit beam. The design variables are the downlink precoder and one
+spatial receive filter.
+
+ (a)     Fixed-array monostatic ISAC
+                              Downlink data                  User 1
+
+    Base station                                                                      User K
+
+                                Illumination and target return
+                                                                                      Target, j = 0
+       Tx, NRx,
+            t   Nr
+                                                             Clutter 1
+       Mapped positions, unknown powers qℓ
+                                                                                  Clutter L
+
+ (b)     Information available in one design interval
+Probe                              Estimate and design                Operate
+Transmit known beams and           Infer clutter powers. Update       Serve all users and evaluate the
+measure clutter-only returns.      data beams and the receive fil-    target echo under the selected
+                                   ter.                               beams.
+
+Figure 1: Fixed-array architecture and observation protocol. Solid one-way paths carry user data. Solid
+and dashed two-way paths represent the target and environmental reflections, respectively. Locations in
+the schematic are illustrative.
+
+Information at the BS. During one interval the BS knows its element coordinates, the user channels,
+the nominal target response and the receiver noise power. An environmental map supplies L candidate
+clutter positions. The baseline treats these positions as exact and estimates their nonnegative reflec-
+tion powers from echoes. Power statistics and geometry persist from calibration into operation. The
+target location is supplied by an external estimate or preceding acquisition stage. The sensing task is
+maintaining target echo quality at that location.
+Receiver assumptions. Narrowband, synchronized, spatial processing uses a common delay reference
+for the modeled returns. Transmit leakage has been cancelled to a negligible level, or a separately
+calibrated residual can be included in the known noise covariance. The baseline uses spatially white
+noise. Clutter-aware covariance modeling follows the physical principle in [1]. The fixed-array geometry
+and observation protocol below specify this paper’s proposed model.
+
+                                                   1
+2    Propagation, downlink and echo model
+Let btn , brm ∈ R3 be the calibrated positions of transmit element n = 1, . . . , Nt and receive element
+m = 1, . . . , Nr . The index j = 0 denotes the target at p0 , and j = 1, . . . , L denotes mapped scatterers
+at pj . Define dtjn = ∥pj − btn ∥2 and drjm = ∥pj − brm ∥2 . For carrier wavelength λ, take
+
+                   λ
+            g(d) =      exp(−i2πd/λ),                   [aj ]n = g(dtjn ),           [bj ]m = g(drjm ),        (1)
+                  4πd
+             Aj = bj ajT ∈ CNr ×Nt .                                                                           (2)
+
+The vectors contain physical forward propagation coefficients, hence the ordinary transpose on the trans-
+mit leg. Hermitian transposes apply to filtering and covariances. This scalar model assumes identical
+isotropic element gains and single scattering. It retains spherical phase and range-dependent attenu-
+ation. For a deployment, specify aperture D, wavelength and ranges relative to 2D2 /λ, and justify
+radiative propagation and negligible envelope delay spread across the modeled paths relative to the
+inverse bandwidth.
+For one data symbol, the BS transmits x = Ws, where W = [w1 , . . . , wK ] ∈ CNt ×K and the zero-mean
+streams have covariance E[ssH ] = IK . They also provide the sensing illumination. Thus
+
+                             Q = E[xxH ] = WWH ,                 tr Q = ∥W∥2F ≤ P.                             (3)
+
+Write the known forward user channel as a row hkT . A line-of-sight baseline sets its entries to g(d) at
+the individual user-to-element distances. With independent receiver noise nk ∼ CN (0, σk2 ), the data and
+SINR models are
+                                                                |hkT wk |2
+                          yk = hkT Ws + nk ,    γk (W) = P         T     2   2
+                                                                               .                       (4)
+                                                            i̸=k |hk wi | + σk
+
+The corresponding BS echo is
+                                          L
+                                          X
+                         y = α0 A 0 x +         αℓ Aℓ x + nr ,     nr ∼ CN (0, σr2 INr ).                      (5)
+                                          ℓ=1
+
+The scattering coefficients have mean zero and are mutually uncorrelated and independent of the symbols
+and noise. Let β0 = E|α0 |2 > 0 be a known reference target power and qℓ = E|αℓ |2 ≥ 0 the unknown
+effective clutter powers in this propagation convention. A common positive target-power scale affects
+absolute SCNR and its thresholds but leaves the maximizing design unchanged.
+Define Sj (Q) = Aj QAH
+                     j . The preceding second moments give
+
+                                                                                            L
+                                                                                            X
+                      Rt (Q) = β0 S0 (Q),                          Rc+n (Q; q) = σr2 I +          qℓ Sℓ (Q),   (6)
+                                                                                            ℓ=1
+                                  uH Rt (Q)u
+            SCNR(W, u; q) =                     ,                              u ∈ CNr ,      ∥u∥2 = 1.        (7)
+                                uH Rc+n (Q; q)u
+
+This ensemble output-power ratio concerns a specified target and a linear spatial combiner. A detection
+probability would additionally require a test statistic and false-alarm criterion.
+
+
+
+
+                                                          2
+3    Finite probing and identification of clutter powers
+Choose B probe settings in advance. At setting b, transmit a known vector fb with ∥fb ∥22 ≤ Pprobe and
+apply a known unit receive combiner vb . Collect Sb independent clutter-only snapshots. A concrete
+protocol is a target-absent calibration interval followed by target operation while the clutter statistics
+persist. An online alternative requires secondary training data with the same clutter statistics and
+verified target exclusion. Otherwise target leakage must enter the observation model.
+                           L
+                           X
+                   zbs =         αℓbs vbH Aℓ fb + vbH nbs ,                Hbℓ = |vbH Aℓ fb |2 ,            (8)
+                           ℓ=1
+                                                                                         Sb
+                                                                            b b = Sb−1
+                                                                                         X
+                  mb = E|zbs |2 = σr2 + [Hq]b ,                             m                  |zbs |2 .    (9)
+                                                                                         s=1
+
+For subsequent finite-sample uncertainty calculations assume independent circular complex Gaussian
+scatterer coefficients with variances qℓ and independent Gaussian noise across snapshots. Snapshot
+spacing must support this independence even though the mean powers persist. Equations (6) and (9)
+themselves use only second moments and decorrelation.
+     c = (m
+With m    b b )b , a baseline estimate is
+
+                                            q                  c − σr2 1)∥22 .
+                                            b ∈ arg min ∥Hz − (m                                           (10)
+                                                     z≥0
+
+Full column rank of the real B × L matrix H is sufficient for unique noiseless recovery and necessary for
+identifiability over all interior power vectors. Hence this scalar-energy protocol needs B ≥ L for general
+recovery. More snapshots improve moment precision. They cannot distinguish two identical columns.
+Inspect the smallest singular value and column conditioning when choosing probes. Nearly coincident
+mapped points may be resolvable only as an aggregate.
+
+
+A simultaneous uncertainty set
+
+For desired miscoverage 0 < δ < 1, set a = δ/(2B). Denote the p-quantile of a chi-square distribution
+                                                                 b b /mb ∼ χ22Sb . Inverting this pivot gives
+with d degrees of freedom by cd,p . Since zbs ∼ CN (0, mb ), 2Sb m
+
+                lb = 2Sb m
+                         b b /c2Sb ,1−a ,                                        hb = 2Sb m
+                                                                                          b b /c2Sb ,a ,   (11)
+               Cδ = {z ≥ 0 :       lb ≤ σr2 + [Hz]b ≤ hb      ∀b}.                                         (12)
+
+A union bound gives Pr(q ∈ Cδ ) ≥ 1 − δ over repeated probing under the stated model. This single
+event controls every downstream choice of (W, u), including one selected using these observations. It is
+conditional on the correct mapped responses, independent Gaussian snapshots within each setting and
+known noise power. Basis or statistics drift requires a separate mismatch analysis. If the set is empty,
+flag the interval for recalibration. Require every component to be illuminated and observed by at least
+one probe to obtain finite individual upper bounds.
+
+
+
+
+                                                              3
+4    Design, learning and assessment
+Three information settings use the same power and communication constraints. An ideal-information
+reference uses the true q, an estimated design substitutes q
+                                                           b from (10), and a conservative design uses (12).
+                                    H
+For a candidate (W, u) let dℓ = u Sℓ (Q)u ≥ 0 and d = (dℓ )ℓ . The conservative objective and design
+problem are
+
+                       β0 uH S0 (Q)u
+      Jδ (W, u) =                      ,                                                                   (13)
+                    σr2 + maxz∈Cδ dT z
+         max    Jδ (W, u) subject to γk (W) ≥ Γk (k = 1, . . . , K),       ∥W∥2F ≤ P,     ∥u∥2 = 1.        (14)
+         W,u
+
+The inner maximization is a linear program. On the event q ∈ Cδ , the true SCNR of the returned design
+is at least Jδ . Communication feasibility follows by checking (4) using known user CSI. Clutter-parameter
+coverage and user QoS are distinct statements.
+Receive update. For any fixed admissible strength vector z, the rank-one target response and positive
+receiver noise yield
+                                              Rc+n (Q; z)−1 b0
+                                u⋆ (Q; z) =                       .                             (15)
+                                             ∥Rc+n (Q; z)−1 b0 ∥2
+This maximizes the fixed-strength Rayleigh quotient when the target is illuminated. Implement the
+inverse action via a linear solve. For a simple conservative variant compute q̄ℓ = maxz∈Cδ zℓ once per
+component. The box [0, q̄] contains Cδ and gives an upper covariance at q̄ for every Q ⪰ 0. The formula
+at q̄ is then exact for the box-based receive update. The coupled set in (13) can be tighter and requires
+its own receive optimization.
+Where learning enters. A learned initializer maps user channels, mapped responses and estimated
+clutter powers to a beam matrix. Project it onto the feasible set and unroll a fixed number of transmit
+updates with learned positive step sizes, following the general unfolded-optimization approach [2]. For
+projection, fix each beam phase so hkT wk is real
+                                                √ and nonnegative. Then the SINR constraint is the second-
+                 T                       T
+order cone ∥((hk wi )i̸=k , σk )∥2 ≤ Re(hk wk )/ Γk for Γk > 0. Independent beam phase rotations preserve
+Q and all SINRs. Euclidean projection onto these cones, phase equalities and the power ball supplies
+a reference feasibility step when the set is nonempty. Count its cost. Compare initializer-only, learned-
+steps-only and combined designs. Give conventional and learned solvers identical probe observations and
+the same objective (plug-in or conservative). Recompute the receive filter and verify each returned beam
+design against the original power and SINR inequalities. Count unresolved initializations, rejections, and
+deadline misses in all-instance service metrics.
+Measurements. Vary probe diversity B and snapshots Sb separately. Assess covariance prediction
+on held-out beams, then measure true SCNR, sensing-bound coverage, per-user violations and feasible
+outcomes on new geometries. Report solver time alongside probing, estimation and checking costs. The
+latter determine the observation-to-action budget. The unobserved true powers are available to the
+evaluator and ideal reference only.
+
+
+References
+[1] R. Liu, P. Li, M. Li, and A. L. Swindlehurst, “Clutter-aware integrated sensing and communication: Models,
+    methods, and future directions,” arXiv:2602.10537, 2026. Author manuscript, version 2.
+[2] N. T. Nguyen, L. V. Nguyen, N. Shlezinger, Y. C. Eldar, A. L. Swindlehurst, and M. Juntti, “Joint communi-
+    cations and sensing hybrid beamforming design via deep unfolding,” IEEE Journal of Selected Topics in Signal
+    Processing, 2024. Publisher version.
+
+
+
+                                                       4
+

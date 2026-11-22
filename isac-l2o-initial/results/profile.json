@@ -1,0 +1,7 @@
+{
+  "effective_channels": 0.006500000154119334,
+  "receiver_including_channels": 0.027587000090534275,
+  "loss_and_gradients_including_receiver": 0.14525500000672764,
+  "power_repair_including_channels": 0.07095750015650992,
+  "metric_check_including_receiver": 0.0653040000315741
+}

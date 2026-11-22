@@ -1,0 +1,70 @@
+[
+  {
+    "method": "Initialization",
+    "feasible_percent": 81.25,
+    "mean_scnr_db_feasible": -5.21054525086163,
+    "median_ms": 0.31067450004229613,
+    "p95_ms": 0.5276255000126184,
+    "ood_feasible_percent": 83.59375
+  },
+  {
+    "method": "Fixed steps (8)",
+    "feasible_percent": 81.25,
+    "mean_scnr_db_feasible": 2.3561241313741514,
+    "median_ms": 3.7385880000329053,
+    "p95_ms": 5.885373749947576,
+    "ood_feasible_percent": 83.59375
+  },
+  {
+    "method": "Learn before",
+    "feasible_percent": 82.29166666666667,
+    "mean_scnr_db_feasible": 2.1529068847559234,
+    "median_ms": 3.850673166652996,
+    "p95_ms": 6.201939000069008,
+    "ood_feasible_percent": 84.375
+  },
+  {
+    "method": "Learn inside",
+    "feasible_percent": 81.25,
+    "mean_scnr_db_feasible": 2.8351839481033116,
+    "median_ms": 3.758952833284942,
+    "p95_ms": 5.990587833347642,
+    "ood_feasible_percent": 83.59375
+  },
+  {
+    "method": "Before + inside",
+    "feasible_percent": 81.77083333333333,
+    "mean_scnr_db_feasible": 2.6628490108352465,
+    "median_ms": 3.8401848333554276,
+    "p95_ms": 6.544065750025159,
+    "ood_feasible_percent": 84.63541666666667
+  },
+  {
+    "method": "Backtracking (80)",
+    "feasible_percent": 81.25,
+    "mean_scnr_db_feasible": 3.157726092987471,
+    "median_ms": 126.62249449999763,
+    "p95_ms": 179.12661850004952,
+    "ood_feasible_percent": 83.59375
+  }
+]
+{
+  "before": {
+    "mean_db": -0.1035576750370826,
+    "low": -0.2205989059295539,
+    "high": 0.005866894247573854,
+    "n_common": 104
+  },
+  "inside": {
+    "mean_db": 0.4790598167291601,
+    "low": 0.3698269964128028,
+    "high": 0.6003847825172118,
+    "n_common": 104
+  },
+  "combined": {
+    "mean_db": 0.3220068905999739,
+    "low": 0.2129773300757644,
+    "high": 0.4364280548780487,
+    "n_common": 104
+  }
+}

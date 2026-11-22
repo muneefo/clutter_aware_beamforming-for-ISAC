@@ -1,0 +1,31 @@
+{
+  "train_scenes_used": 60,
+  "test_attempts": 128,
+  "empty_sets": 0,
+  "sets_containing_truth": 119,
+  "scnr_bounds_satisfied": 127,
+  "feasible_combined": 128,
+  "heldout_covariance_median_relative_error": 0.07113414736493257,
+  "learned_steps": [
+    0.12,
+    0.12,
+    0.015
+  ],
+  "initializer_weights": [
+    0.48585426240899854,
+    -0.0008094944171145982,
+    0.0010368262449414907,
+    0.013803566232063545,
+    0.1605552128619474,
+    0.021953524359346943
+  ],
+  "median_true_scnr_db": {
+    "known_strengths": 13.417649994841936,
+    "plug_in": 13.417300037846458,
+    "box_classical": 6.23425236253169,
+    "box_geometry_classical": 13.382006149969008,
+    "box_init_only": 13.270296479488211,
+    "box_steps_only": 4.092768142984593,
+    "box_combined": 13.424456612646008
+  }
+}

@@ -1,0 +1,21 @@
+\subsection{First allocation versus complete solver}
+Table~\ref{tab:pd} compares the tied and learned schedules at equal depth. The isolated block uses 12 held-out seeds, three user counts and six thresholds from 0 to 20 dB in 4-dB steps. All three arms share each prepared direction bank and receive filter. The reference for the gap is the optimal estimated-kernel covariance objective on that very bank. This is a stricter control of the learned operation than comparing complete transceiver outputs produced on different banks.
+\begin{table}[t]\centering\footnotesize
+\caption{Effect of learning power updates. Medians are over matched cases. Hits use a one-sided 0.1-dB tolerance.}\label{tab:pd}
+\setlength{\tabcolsep}{4pt}\begin{tabular}{@{}lrrr@{}}\toprule
+& Exact LP & Tied & Learned\\\midrule
+\multicolumn{4}{l}{First allocation, 216 cases}\\
+Bank gap (dB) & 0 & 0.544 & 0.055\\
+Bank-quality hits &216&9&126\\
+Time incl. recovery and audit (ms)&28.18&7.90&7.97\\
+Feasible beams&216&216&216\\\midrule
+\multicolumn{4}{l}{Six allocations, 24 cases, only the first varied}\\
+Physical true-SCNR gap (dB)&0&0.207&0.314\\
+Physical-quality hits&24&9&9\\
+Full design time (ms)&390.80&377.50&377.26\\
+Feasible beams&24&24&24\\\bottomrule
+\end{tabular}\end{table}
+
+On the isolated block, the paired median true-SCNR improvement from learning was 0.215 dB. The mean was 0.704 dB with a 95\% seed-cluster bootstrap interval of $[0.605,0.796]$ dB. Resampling a seed retains its associated loads and thresholds. A certificate changes the latency calculation: requiring the bound in Appendix~\ref{ap:decode} to be within 0.1 dB triggered an exact fallback in 202 of the 216 learned cases and increased median block time to 36.39 ms. The observed 126 quality hits and the small number of certifiable hits answer different questions. An exact reference can measure an error after the experiment even when inexpensive dual information cannot certify that error online.
+
+In the complete solver the comparator is the six-exact-LP fixed-proposal algorithm. The hybrid substitutes only its first solve. Eight held-out seeds at each of three loads and 8 dB give 24 cases. The fixed and learned hybrids each reached the physical true-SCNR target on nine cases. Their mean paired learned-minus-fixed SCNR difference was $-0.018$ dB with a seed-cluster interval of $[-0.061,0.040]$ dB. The first allocation influences both the transmitted power and the directions proposed by its prices. The experiment varies these together, so a final gap cannot be attributed separately to either one. Timings in Table~\ref{tab:pd} use Python and HiGHS on an Intel Xeon Platinum 8573C with one BLAS thread. Methods were interleaved after warm-up, using the within-case median of three repetitions for the block and two for the complete solver. The MATLAB AO times in Table~\ref{tab:mc} belong to a separate benchmark.
