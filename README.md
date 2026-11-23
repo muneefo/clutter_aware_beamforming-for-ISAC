@@ -235,7 +235,7 @@ and Part E ablation plot. The preceding sections give their generation commands.
 ### MATLAB timing and SCNR versus required SINR
 
 In MATLAB R2022a or later, add the scripts directory and pass the pinned
-tutorial checkout. The full sweep uses CVX/MOSEK for AO–SDP and Optimization
+tutorial folder. The full sweep uses CVX/MOSEK for AO–SDP and Optimization
 Toolbox `linprog` for the three matched LP arms. Use a fresh MATLAB process
 per thread setting and a fresh output folder.
 
@@ -287,15 +287,11 @@ curves require a licensed run of the sweep.
 
 Use the `letters-revision` checkout or extract the [MATLAB L2O bundle](https://github.com/muneefo/clutter_aware_beamforming-for-ISAC/raw/refs/heads/letters-revision/results/matlab-sweep-2026-11-23/isac-l2o-matlab.zip).
 
-The sweep uses Optimization Toolbox `linprog` and a separate tutorial Git
-checkout. If you need the tutorial, run these commands in a terminal where
-you want the checkout. The second command also works on an existing clone
-at that location. MATLAB must be able to find `git` on its system path.
-
-```bash
-git clone https://github.com/RangLiu0706/Clutter-Aware-ISAC-Tutorial.git
-git -C Clutter-Aware-ISAC-Tutorial checkout 0f864c45b4775fbe01789b313d81f22bebf65177
-```
+The sweep uses Optimization Toolbox `linprog` and a separate tutorial
+folder. An extracted ZIP or a Git checkout works. MATLAB verifies the
+covariance and the tutorial functions used by the sweep against the pinned
+revision and records their hashes in `environment.json`. If you need the
+files, extract the [pinned tutorial ZIP](https://github.com/RangLiu0706/Clutter-Aware-ISAC-Tutorial/archive/0f864c45b4775fbe01789b313d81f22bebf65177.zip).
 
 From any MATLAB working directory, select the folder containing `scripts`
 and the tutorial root containing `data` and `function`. Start with two scenes
@@ -305,7 +301,7 @@ at one threshold to check the installation.
 bundle = uigetdir(pwd, 'Select the extracted bundle or letters-revision repository');
 assert(ischar(bundle) && isfolder(fullfile(bundle,'scripts')), ...
     'Select the folder containing scripts.');
-tutorial = uigetdir(pwd, 'Select the Clutter-Aware-ISAC-Tutorial Git checkout');
+tutorial = uigetdir(pwd, 'Select the Clutter-Aware-ISAC-Tutorial folder');
 assert(ischar(tutorial), 'Select the tutorial folder.');
 cd(bundle)
 addpath(fullfile(bundle,'scripts'),'-begin')

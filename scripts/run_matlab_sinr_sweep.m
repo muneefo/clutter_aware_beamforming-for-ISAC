@@ -32,7 +32,7 @@ for required = [fullfile(experimentDir,'fast_tutorial_beams.m'), ...
     assert(isfile(required),'L2O:MissingSweepFile', ...
         'Missing %s. Extract the full MATLAB bundle and keep its folder layout.',required);
 end
-[covPath,revision,covHash] = pinned_inputs(tutorial);
+[covPath,revision,covHash,tutorialFunctionHashes] = pinned_inputs(tutorial,opts.IncludeAO);
 
 oldPath = path;
 pathCleanup = onCleanup(@() path(oldPath)); %#ok<NASGU>
@@ -64,6 +64,7 @@ manifest = struct('options',opts,'methods',methods,'matlab',version,'platform',c
     'solverSHA256',sha256(which('fast_tutorial_beams')), ...
     'forwardSHA256',sha256(which('parte_l2o_proposals')), ...
     'tutorialRevision',revision,'covarianceSHA256',covHash, ...
+    'tutorialFunctionSHA256',tutorialFunctionHashes, ...
     'checkpointSHA256',sha256(checkpoint),'reducedCostSHA256',weights.reducedCost.sourceSHA256, ...
     'envelopeSHA256',weights.envelope.sourceSHA256,'warmupSeed',15999, ...
     'orderSeed',606231,'bootstrapSeed',606232,'bootstrapDraws',2000);
@@ -222,38 +223,52 @@ for name = ["reducedCost","envelope"]
 end
 end
 
-function [source,revision,digest] = pinned_inputs(tutorial)
+function [source,revision,digest,functionHashes] = pinned_inputs(tutorial,includeAO)
 source = fullfile(tutorial,'data','covMat_BLP.mat');
 assert(isfile(source) && isfolder(fullfile(tutorial,'function')),'L2O:InvalidTutorialFolder', ...
     ['Pass the Clutter-Aware-ISAC-Tutorial root folder containing data/covMat_BLP.mat ' ...
      'and the function folder. Received %s.'],tutorial);
-if ispc
-    assert(isempty(regexp(tutorial,'["%!?&|^<>\r\n]','once')),'Unsupported tutorial path.');
-    quoted = """" + tutorial + """";
-else
-    q = string(char(39));
-    assert(~any(contains(tutorial,[q,string(char(10)),string(char(13))])),'Unsupported tutorial path.');
-    quoted = q + tutorial + q;
-end
-[code,revision] = system("git -C "+quoted+" rev-parse HEAD");
-revision = strtrim(revision);
-assert(code == 0,'L2O:TutorialGitUnavailable', ...
-    ['Could not read the tutorial Git revision. Check that Git is on MATLAB''s PATH ' ...
-     'and that %s is a Git checkout. Git output: %s'],tutorial,revision);
-expectedRevision = '0f864c45b4775fbe01789b313d81f22bebf65177';
-assert(strcmp(revision,expectedRevision),'L2O:UnexpectedTutorialRevision', ...
-    'Check out tutorial revision %s in %s. Current revision is %s.',expectedRevision,tutorial,revision);
+% Verify the inputs used by this sweep for both source ZIPs and Git checkouts.
+revision = '0f864c45b4775fbe01789b313d81f22bebf65177';
 digest = sha256(source);
 assert(strcmp(digest,'99744880b1a6fe5e5f8a0ef57c1738be79fb0ad28629e68db2bfe3a8df67472d'), ...
-    'Unexpected tutorial covariance file.');
+    'L2O:TutorialInputsMismatch','Unexpected covariance in %s. Use tutorial revision %s.',source,revision);
+expected = [
+    "build_Ac",        "f97013d7ef80789a0450b6ab3aefbb496e544d38b9239e0468fa4a820b10fffd";
+    "compute_SCNR",    "0b0f69af04c7eec37785a33750803372d692622ec6ab8b786c580877876860f7";
+    "kernel_apply",    "c304cf49f4004b55f5d33c5cf9b270dcb49a312b0b7c21c8d4161c7aa32dce01";
+    "mvdr_beamformer", "8f2ed3af90d2ae47ed87efb422778d5a8cdbad4f044f22ac0b49378a23a08729"
+];
+if includeAO
+    expected = [expected;
+        "recover_beams",       "7de2eff032d9ecd606943ba01133b2ff75d8b1398a326671c7c47ebd5176d4e4";
+        "solve_BLP_AO",        "e980590932402b70b0aa9c49085869c27cff946b0f034b2c4cdbd2f750d09daf";
+        "solve_TX_Dinkelbach", "4ee704968e6ffef1d7bf91105b6aa054181ba270ddb092f42023b72ee6f2b657"
+    ];
+end
+functionHashes = struct();
+for i = 1:size(expected,1)
+    name = expected(i,1);
+    file = fullfile(tutorial,'function',name+".m");
+    assert(isfile(file),'L2O:TutorialInputsMismatch', ...
+        'Missing %s. Use tutorial revision %s.',file,revision);
+    actual = sha256(file,true);
+    assert(strcmp(actual,expected(i,2)),'L2O:TutorialInputsMismatch', ...
+        'Unexpected contents in %s. Use tutorial revision %s.',file,revision);
+    functionHashes.(char(name)) = actual;
+end
 end
 
-function value = sha256(filename)
+function value = sha256(filename,normalizeNewlines)
 fid = fopen(filename,'rb');
 assert(fid >= 0,'Could not read %s.',filename);
 closeFile = onCleanup(@() fclose(fid)); %#ok<NASGU>
+bytes = fread(fid,inf,'*uint8');
+if nargin > 1 && normalizeNewlines
+    bytes = uint8(strrep(char(bytes.'),sprintf('\r\n'),char(10)));
+end
 digest = java.security.MessageDigest.getInstance('SHA-256');
-digest.update(typecast(fread(fid,inf,'*uint8'),'int8'));
+digest.update(typecast(bytes,'int8'));
 value = lower(reshape(dec2hex(typecast(digest.digest(),'uint8')).',1,[]));
 end
 
