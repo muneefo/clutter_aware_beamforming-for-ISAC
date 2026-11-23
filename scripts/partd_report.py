@@ -124,22 +124,23 @@ def historical(part_b, rng):
     return stats_b, pairs
 
 
-def draw_plot(rows, destination):
+def draw_plot(rows, destination, letter=False):
     r = [r for r in rows if r["status"] == "converged"]
-    fig, ax = plt.subplots(figsize=(6.5, 4.2), layout="constrained")
+    fig, ax = plt.subplots(figsize=(3.45, 2.30) if letter else (6.5, 4.2), layout="constrained")
     for (o, i), marker, color in zip(CORE, ["o", "s", "^"], ["#365674", "#bd7028", "#28766d"]):
         points = [p for p in r if (p["outer"], p["inner"]) == (o, i)]
         ax.scatter([p["observed_gap_db"] for p in points], [p["nominal_bound_db"] for p in points],
-                   color=color, s=16, alpha=.77, marker=marker, label=f"{o}×{i}")
+                   color=color, s=9 if letter else 16, alpha=.77, marker=marker, label=f"{o}×{i}")
     maximum = max(p["observed_gap_db"] for p in r)
     grid = np.geomspace(1e-5, 1.15 * maximum, 180)
     ax.plot(grid, grid, linestyle="--", color=".4", linewidth=.9, label="Bound = observed gap")
-    ax.set(xlabel="Observed fixed-receiver covariance gap (dB)", ylabel="Certified bound (dB)")
+    ax.set(xlabel="Observed covariance gap (dB)" if letter else "Observed fixed-receiver covariance gap (dB)",
+           ylabel="Certified bound (dB)")
     ax.set_xscale("symlog", linthresh=1e-4)
     ax.set_yscale("symlog", linthresh=1e-4)
     ax.set_xlim(min(-1e-5, min(p["observed_gap_db"] for p in r)), 1.2 * maximum)
     ax.grid(alpha=.22)
-    ax.legend(loc="upper left", fontsize=8)
+    ax.legend(loc="upper left", fontsize=6.6 if letter else 8)
     fig.savefig(destination)
     plt.close(fig)
 

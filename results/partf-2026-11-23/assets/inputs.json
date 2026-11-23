@@ -1,0 +1,34 @@
+[
+  {
+    "path": "results/parta-2026-11-22/summary.json",
+    "sha256": "4fee3760e3d766397a12649a1862fbbb019b85ba25404b42aacdd6ea4168b6f4"
+  },
+  {
+    "path": "results/partb-2026-11-22/summary/summary.json",
+    "sha256": "d3bb5d0de06f2b03a8b65c90da660df1bd0260540829dac5ad50c3000b40b199"
+  },
+  {
+    "path": "results/partc-2026-11-22/summary/summary.json",
+    "sha256": "aaf2eaf1e17c4864285f1d2d2ee36b30b4684818464d71fd9fd4f0c17641b621"
+  },
+  {
+    "path": "results/partd-2026-11-22/summary/summary.json",
+    "sha256": "b3acd2fc972089b6c3070b484ab4dcc0d6240c0f0ca0649797cc0f1e4cb9eefc"
+  },
+  {
+    "path": "results/parte-2026-11-23/summary/summary.json",
+    "sha256": "3ae6d918479b135b2b6a43b6d4427a67591bb57932da0344ada9561db95b2b91"
+  },
+  {
+    "path": "results/partc-2026-11-22/warm/designs.jsonl",
+    "sha256": "06f0f2a9400aba4c70004e3ef1511171521b3d80bb6cd349eadb6beabc51875d"
+  },
+  {
+    "path": "results/partd-2026-11-22/cert-0/bounds.jsonl",
+    "sha256": "4a12ffe616c4bbc69127ac815d70e95bcfcbd9c66685fbef430c920240c2cce0"
+  },
+  {
+    "path": "results/partd-2026-11-22/cert-1/bounds.jsonl",
+    "sha256": "b2b82e25d7e1d2fa8ef8fe07c0fadca47ed3f144ff51a38e5ffac458590afa86"
+  }
+]

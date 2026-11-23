@@ -1,0 +1,17 @@
+[build]
+distribution = "TeX Live 2025/dev/Debian"
+pdftex = "3.141592653-2.6-1.40.26"
+latex_format = "2024-11-01 patch level 2"
+bibtex = "0.99d"
+latexmk = "4.86"
+paper_size = "US Letter"
+
+[ieeetran]
+style_version = "1.14 (2015-08-26)"
+style_source = "https://ctan.org/pkg/ieeetran"
+style_sha256 = "314f0ece704568faf827011bac498650691b2b5ee06320720830e782416d5a5f"
+class_source = "IEEEtran.cls in the supplied manuscript directory"
+
+[assets]
+python_lock = "requirements-parta.lock"
+input_manifest = "../results/partf-2026-11-23/assets/inputs.json"

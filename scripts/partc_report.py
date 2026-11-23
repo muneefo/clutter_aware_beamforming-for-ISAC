@@ -195,36 +195,45 @@ def plot_core(data, target):
     plt.close(fig)
 
 
-def plot_pareto(summary, target):
-    fig, ax = plt.subplots(figsize=(7, 4.3), layout="constrained")
+def plot_pareto(summary, target, letter=False):
+    fig, ax = plt.subplots(figsize=(3.45, 2.65) if letter else (7, 4.3), layout="constrained")
     groups = [r for r in summary if (r["users"], r["gamma"]) == (4, 8)]
     for method, color in zip(METHODS, PALETTE):
         values = {(r["outer"], r["inner"]): r for r in groups
                   if r["method"] == method and r["n_paired"] > 0}
         coords = [(r["seconds"]["median"], r["design_gap_db"]["median"])
                   for b in BUDGETS if (r := values.get(b))]
-        ax.plot(*zip(*coords), label=NAMES[method], linewidth=1.25, color=color)
+        label = "AO, CC" if letter and method == "cooper" else NAMES[method]
+        ax.plot(*zip(*coords), label=label, linewidth=1.25, color=color)
         for b, marker in zip(BUDGETS, BUDGET_MARKERS):
             if r := values.get(b):
-                ax.scatter(r["seconds"]["median"], r["design_gap_db"]["median"], marker=marker, s=30,
+                ax.scatter(r["seconds"]["median"], r["design_gap_db"]["median"], marker=marker, s=17 if letter else 30,
                            facecolor=color if r["pareto"] else "white", edgecolor=color, zorder=3)
     ref = next(r for r in groups if r["method"] == "reference")
-    ax.scatter(ref["seconds"]["median"], 0., marker="*", color="black", s=65, label="Uncapped AO reference")
+    ax.scatter(ref["seconds"]["median"], 0., marker="*", color="black", s=30 if letter else 65,
+               label="AO reference" if letter else "Uncapped AO reference")
     ax.axhline(QUALITY_DB, lw=.85, linestyle=":", color=".35")
     ax.axhline(0, lw=.6, color=".5")
-    ax.set(xscale="log", xlabel="Median design wall time (s)", ylabel="Median paired design gap to AO (dB)")
+    ax.set(xscale="log", xlabel="Median design time (s)" if letter else "Median design wall time (s)",
+           ylabel="Paired design gap (dB)" if letter else "Median paired design gap to AO (dB)")
     ax.grid(alpha=.2)
-    legend = ax.legend(loc="upper right", fontsize=8)
+    legend_options = dict(ncol=2, columnspacing=.8, handlelength=1.4) if letter else {}
+    legend = ax.legend(loc="upper right", fontsize=6.8 if letter else 8, **legend_options)
     ax.add_artist(legend)
     handles = [plt.Line2D([], [], marker=m, color=".4", markersize=4, linestyle="none", label=f"{o}×{i}")
                for (o, i), m in zip(BUDGETS, BUDGET_MARKERS)]
-    ax.legend(handles=handles, loc="lower left", ncol=len(handles), fontsize=7.3)
+    if letter:
+        ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(.5, -.25),
+                  ncol=len(handles), fontsize=6.5, frameon=False, columnspacing=.6, handletextpad=.3)
+    else:
+        ax.legend(handles=handles, loc="lower left", ncol=len(handles), fontsize=7.3)
     fig.savefig(target)
     plt.close(fig)
 
 
-def plot_tracking(warm, sizes, target):
-    fig, (left, right) = plt.subplots(1, 2, figsize=(9.2, 3.6), layout="constrained")
+def plot_tracking(warm, sizes, target, letter=False):
+    size = (7.10, 2.30) if letter else (9.2, 3.6)
+    fig, (left, right) = plt.subplots(1, 2, figsize=size, layout="constrained")
     for mode, color in zip(("cold", "dictionary", "basis"), PALETTE):
         for rho, ls in ((.9, "--"), (.99, "-")):
             rows = [r for r in warm if r["rho"] == rho and r["method"] == mode]

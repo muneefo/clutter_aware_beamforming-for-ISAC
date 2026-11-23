@@ -190,3 +190,42 @@ gradient and permutation checks. Use `parte_oracle_check.py TUTORIAL OUT.json`
 to reproduce the dense-oracle checks. The evaluation script accepts the
 original MATLAB checkpoint with `--checkpoint` and records its hash and the
 Draw 111–114 atom-level diagnostics when available.
+
+## IEEE Letters Part F manuscript and appendix
+
+The revised sources are `first-isac-paper/manuscript/main.tex` and
+`first-isac-paper/manuscript/appendix.tex`. The archived manuscript PDF and
+historical Table I remain in their original locations. The release PDFs,
+Letter-size figures, table inputs and provenance manifest are in
+`results/partf-2026-11-23/`. The nine verified references, abstract and
+conclusion evidence mapping, and changes from the prior draft are in
+`REFERENCES.md`, `CLAIMS.md` and `CHANGELOG.md`.
+
+From the repository root, run the following with Python from the Part A lock
+and the tools recorded in `environment/manuscript.lock.toml`. This rebuilds
+both PDFs and all new table rows and figure variants in a fresh directory.
+It reads the recorded experiment results without rerunning optimization.
+
+```bash
+partf_out=$(mktemp -d)
+mkdir -p "$partf_out/pdf"
+MPLCONFIGDIR="$partf_out/matplotlib" PYTHONDONTWRITEBYTECODE=1 \
+  python scripts/partf_assets.py "$partf_out/assets"
+(
+  cd first-isac-paper/manuscript
+  for partf_source in main appendix; do
+    partf_name=$partf_source
+    if [ "$partf_source" = main ]; then partf_name=letters; fi
+    latexmk -pdf -interaction=nonstopmode -halt-on-error \
+      -usepretex="\\def\\LetterAssets{$partf_out/assets}" \
+      -jobname="$partf_name" -outdir="$partf_out/pdf" "$partf_source.tex"
+  done
+)
+```
+
+The asset command formats the reconciliation and CSI tables from Part A,
+the ladder and component table from Part B, the core table and Pareto and
+tracking/scaling plots from Part C, the certificate plot from Part D's
+terminal masters, and both learning tables from Part E. The supplement
+directly includes the archived Table I reconstruction, Part C empirical CDF
+and Part E ablation plot. The preceding sections give their generation commands.

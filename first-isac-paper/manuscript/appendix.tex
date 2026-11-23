@@ -1,0 +1,157 @@
+\documentclass[journal]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,graphicx,booktabs}
+\usepackage[hidelinks]{hyperref}
+\newcommand{\HH}{^{\mathsf H}}
+\DeclareMathOperator{\tr}{tr}
+\makeatletter
+\newcommand{\TabRows}[1]{\@@input{#1}}
+\makeatother
+\providecommand{\LetterAssets}{../../results/partf-2026-11-23/assets}
+\newcommand{\BenchResults}{../../results}
+\title{Supplement to Fast Clutter-Aware ISAC Beamforming by Beam-Direction Pricing and Power Allocation}
+\author{Muneef Mohammed}
+\begin{document}
+\maketitle
+
+\section{Inputs, Provenance and Historical Timing}
+The input is the tutorial of Liu \emph{et al.}~\cite{liu2026clutter}, code revision \texttt{0f864c4} and distributed \texttt{covMat\_BLP.mat}, with the full pin and SHA-256 in the run manifests. The static benchmark fixes the target at \(-10^\circ\) and 41.8 m, with \(G_t=G_r=100\) and \(\sigma_{\rm rcs}=10^{0.5}\). It uses \(\sigma_c^2=10^{-19}\Delta f\), uniform integer user distances of 50--400 m, and circular Gaussian channels of variance \(10^{[-30-27\log_{10}(d_k)]/10}\) at distance \(d_k\) in metres. Independent channel and initialization seeds permit matched replays.
+
+For calibration, the least-squares kernel maps vectorized probing transmit covariances to estimated receive covariances. In column-major indexing, the Choi rearrangement maps entry \((a+(b-1)N_r,i+(j-1)N_t)\) of \(V\) to entry \((a+(i-1)N_r,b+(j-1)N_r)\) of \(\mathcal J(V)\), with receive indices \(a,b\) and transmit indices \(i,j\). Clipping the Hermitian Choi spectrum and applying the calibration floor precede the inverse rearrangement. The ideal independent-scatterer map already has a PSD Choi matrix, as a sum of outer products of vectorized rank-one Kraus factors.
+
+\begin{table*}[t]
+\caption{Historical MATLAB aggregate reconstruction for the original Table I. Hits use the archived one-sided 0.1 dB true-SCNR criterion among feasible reference pairs. The last three columns concern the historical physics solver.}
+\label{tab:archive}
+\centering\footnotesize
+\begin{tabular}{@{}rrrrrrrrrr@{}}
+\toprule
+\(K\) & SINR (dB) & LPs & Valid AO & Physics hits & Fixed hits & Learned hits & Time (s) & Gap (dB) & Speedup\\
+\midrule
+\TabRows{\BenchResults/part0-replay-2026-11-22/table-i-from-archive.tex}
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Table~\ref{tab:archive} preserves the historical MATLAB aggregate reconstruction. The source time for the \(K=4\), 8 dB, 15-LP physics row is 1.3826 s, displayed as 1.383 s. The specified alternatives 1.39 s and 1.395 s are absent from the supplied draft and archive. Tracing them requires the historical draft or log. The main Letter uses matched Python timings at their own registered budgets. The historical raw MATLAB scenes and original SPSA weights are unavailable, so the reconstruction reads the stored aggregates.
+
+The independent Python replay on seeds 9001--9032 retained all 64 feasible designs and exactly reproduced the archived design and true SCNR, nominal achieved margin and power. The true medians are 13.437 and 13.463 dB at six and fifteen LPs. The paired median gain is 0.068 dB with interquartile endpoints 0.034 and 0.116 dB. Twenty-nine of 32 gains are positive. These results form a separate cohort from the expanded 10001--10032 study.
+
+\section{Reconciliation and Feasibility Controls}
+The digitizer uses Fig. 12(b) in arXiv:2602.10537v2, page 29, calibrated against the 14.0 and 15.5 dB grid lines. The dashed blue \(K=4\) curve uses estimated design and ideal-kernel scoring. The neighboring dashed \(K=8\) and \(K=12\) curves are distinct. Fig. 12(a) varies transmit power. The matched benchmark uses seeds 13001--13032 at each threshold and initialization seed \((17389+1664525\,\mathrm{seed})\bmod 2^{32}\). Covariance and recovered-stream scores agree at the 0.001 dB resolution on all 64 baseline designs. The tables include cap, tolerance, distance draw, distance range, path-loss exponent, and power changes with fixed target coefficient. Increasing just the target coefficient by a factor 1.995262 gives a 3.000 dB shift by normalization and overshoots the digitized ordinate. Setting the loaded field \(L\) to 64 or 512 with fixed matrices gives identical endpoints on seed 13001 at both thresholds. The distributed calibration metadata, driver and publication describe different snapshot settings. Exact figure-generation inputs are required to attribute the residual.
+
+Twenty Gaussian starts per scene yielded design spreads of \(0.566,0.342,0.434\) dB and true spreads of \(0.378,0.218,0.280\) dB on seeds 13001--13003. The medians determine the registered thresholds. For the \(5\times3\) priced method, the paired true gaps were 0.056 dB [\(-0.089,0.152\)] at 8 dB and 0.056 dB [\(-0.052,0.143\)] at 12 dB. The design-gap medians were 0.069 and 0.066 dB. LP acceptance recomputes physical SINR and estimated SCNR on recovered streams. AO updates and stops on covariance scores and reports physical metrics after recovery.
+
+For CSI controls, use \(\gamma'_{nk}=10^{\delta_{\rm margin}/10}\gamma_{nk}\) at \(\delta_{\rm margin}=0,0.25,0.5,1.0\) dB. The legacy \((1+2\times10^{-5})\gamma_{nk}\) is a separate control. Zero-mean circular Gaussian errors are scaled to the registered relative RMS level with matched standardized innovations across margins. Table~\ref{tab:csi} reports the mean across designs of the fraction of 100 perturbations satisfying every nominal SINR requirement. All 320 designs pass on the nominal channel. At each tested nonzero error level, every design has at least one violating realization among the 100 perturbations.
+
+\begin{table*}[t]
+\caption{SINR tightening and CSI perturbation audit. SCNR cost is the paired true-SCNR decrease relative to zero explicit tightening. Brackets give 95\% bootstrap intervals. Error columns give percentages of jointly feasible perturbations.}
+\label{tab:csi}
+\centering\footnotesize
+\begin{tabular}{@{}rcrlrrr@{}}
+\toprule
+SINR (dB) & Setting (dB) & Median margin (dB) & True cost (dB) & 1\% error & 3\% error & 5\% error\\
+\midrule
+\TabRows{\LetterAssets/csi.tex}
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Ablation Implementations and Timing Scope}
+The joint Python SDP enforces real symmetric sensing and complex Hermitian user cones by spectral separation. Dinkelbach iteration~\cite{dinkelbach} updates the fractional objective. A restricted LP supplies a feasible PSD representation and full-matrix separation bounds the SDP value. HiGHS solves the restricted LP. A native SCS 3.2.11 warm-up is a separate subproblem cross-check. The MATLAB driver and static parser checks are included. Measured MATLAB/CVX/MOSEK times, backend tolerance equivalence and parsing overhead require a licensed run.
+
+B4 uses one Charnes--Cooper matrix SDP per outer update~\cite{charnes}. Its persistent-master single-thread ratios are \(1.12\times\) [1.09, 1.17] and \(1.13\times\) [1.06, 1.17] at three and five steps. Rebuilding the B4 master each solve slowed the variant. The \(5\times3\) cap alone gives \(1.02\times\) [0.99, 1.08]. B5 decomposes the solve per tone with a bisected global price. When power jumps across the budget, convex interpolation between the bracket endpoints gives a feasible covariance. Two workers give \(1.15\times\) [1.12, 1.18] versus the serial variant. Both B5 timing blocks retained 28/32 draws. Two rejected masters reported HiGHS status 15 and two failed the primal--dual gap gate. An untimed cold-master diagnostic certified all four seeds. The original timed coverage is retained.
+
+B6 holds the initial bank fixed. B7 and B8 append matching counts by tone, owner and nonterminal iteration. B7 includes random direction generation and excludes precomputing the matched schedule. Table~\ref{tab:components} shows selected components. Worker stages overlap in the parallel case, and the archive gives exclusive wall time and separate summed worker times. Other wall time is retained in the logs. The complete ladder, two-thread figures, feasible counts and paired bootstrap intervals are in the Part B summary.
+
+\begin{table*}[t]
+\caption{Selected single-thread component times in seconds, reported as component medians over eligible draws. Component medians and medians of sums can differ.}
+\label{tab:components}
+\centering\footnotesize
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Arm & Build & Solve & Price & MVDR & Kernel & Recovery\\
+\midrule
+\TabRows{\LetterAssets/components.tex}
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Core Distributions, Tracking and Scaling}
+\begin{table*}[t]
+\caption{Expanded core cohort for priced LP versus Gaussian-start AO. Medians are shown with paired 95\% bootstrap intervals. Design and true hit thresholds are 0.867 and 0.561 dB. Exact hit intervals are percentages.}
+\label{tab:core}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}rrclllll@{}}
+\toprule
+\(K\) & SINR & Budget & Time (s) & Design gap (dB) & True gap (dB) & Design hits & True hits\\
+\midrule
+\TabRows{\LetterAssets/core.tex}
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Each core condition uses 32 pairs, resampling draws within a condition. Table~\ref{tab:core} gives signed gaps and exact Clopper--Pearson intervals. Fig.~\ref{fig:ecdfs} gives empirical CDFs. Quartiles and Pareto coordinates appear in the Part C tables. The wider sweep attempted all 1,088 endpoints. The physical gate excluded Gaussian \(2\times1\) on seed 10006 and per-tone \(5\times3\) and \(8\times3\) on seed 10008. The latter two share one traversal. Their affected plot points retain 31 pairs. Distinct AO trajectories can produce negative signed gaps relative to the Gaussian comparator.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{\BenchResults/partc-2026-11-22/summary/core-ecdf.pdf}
+\caption{Time, design gap and true-SCNR gap by condition and budget. Vertical marks on score plots give zero and the corresponding registered tolerance.}
+\label{fig:ecdfs}
+\end{figure*}
+
+For tracking, \(h_t=\rho h_{t-1}+\sqrt{1-\rho^2}\,w_t\) uses fixed path loss within a chain and matched Gaussian innovations. Each of 32 chains per correlation gives three scored transitions after initial preparation. A fresh offline reference per frame supplies the first-hit target. Both reuse arms carry the same previous basic columns and current feasible dictionary. The basis arm also maps the simplex basis to retained columns, scale and constraint rows. Time includes transport and reoptimization. All 96 frames reach the target for each arm and correlation. All 192 requested transfers were accepted. Bootstrap intervals resample whole chains. At \(\rho=0.99\), the dictionary-to-basis time ratio is 1.031 [1.007, 1.044] and cold-to-basis is 0.988 [0.962, 1.013]. At \(\rho=0.90\), cold-to-basis is 0.937 [0.925, 0.947]. The threshold is used as controlled evaluation instrumentation.
+
+Scaling takes sensor prefixes of one Gaussian draw per seed to form \(N_t=N_r=N_s\in\{8,16,32,64\}\). It preserves scatterer angles and powers, extends steering factors, and uses isotropic disturbance at the archived mean sensor power. The 16-element factorized map matched the archived ideal vectorized map in a numerical check. Each method-size pair uses seeds 22101--22132, 32 tones, four users, 8 dB and a common \(1\times1\) cap. Every design passed the gate with zero timeouts in the declared 30-second cap.
+
+\section{Numerical Certificate and Atom Activity}
+The reference continuation holds the last receiver, objective scale and constraints fixed, adding directions with excess above \(10^{-11}\). It stops at audited upper-to-feasible gap \(10^{-4}\) dB. All 288 references converge in 4--21 solves. The upper calculation uses the actual normalization dual \(\psi_D\), nonnegative multipliers, full-sphere excess and the scale-variable violation. A bound derived from the smallest scaled clutter eigenvalue limits the scale. Independent feasible witnesses mix with strict ZF powers when required. The audit uses floating-point padding.
+
+Two \(5\times3\) simplex allocations showed large decoded QoS shortfalls relative to normalized noise despite reported zero row residuals. They were seed 10005 at \(K=6\), 8 dB and seed 10020 at \(K=4\), 12 dB. Independent HiGHS interior-point re-solves bracketed all 288 restricted objectives within \(7.02\times10^{-10}\) dB. The largest discrepancy from the archived raw objective was \(2.43\times10^{-9}\) dB. All recovered streams passed the physical gate. The atom activity analysis uses the original decoded powers.
+
+At \(3\times2\), the per-condition median addition count was 649--968 and 84.0--85.8\% of priced atoms ever received power above \(10^{-8}P_s\). At \(5\times3\), those ranges were 1,680--2,506 and 89.0--89.8\%. A basic optimum has few positive variables, which limits the terminal active fraction. Initial atoms carry all decoded power at \(1\times1\), and priced atoms carry all decoded terminal power at the two larger budgets. The paired true gains over the fixed bank in the end-to-end control are 1.747 dB [1.682, 1.880] and 1.884 dB [1.813, 2.060] at \(3\times2\) and \(5\times3\). Count-matched random controls give the same medians to three decimals. The separate fixed-receiver controls and all 408,649 terminal atom records are in the Part D archive.
+
+\section{Learning Protocol and Results}
+Synthetic maps independently draw scatterer bearings in \([-90^\circ,90^\circ]\), resample the archived per-tone power profiles and apply independent mean-one lognormal factors of log standard deviation 0.35. The ideal PSD Choi factorization differs from the explicit pilot projection by \(1.93\times10^{-15}\) relative Frobenius norm. Synthetic scenes use 3--6 users and a uniform integer threshold of 6--14 dB. The original map uses the archived estimated/ideal pair at four users and 8 dB. Training IDs are 510000--514999, held-out map IDs 520000--520063, and original-map draw IDs 530000--530063. The protocol records separate PCG64 streams for maps, channels and optimization.
+
+The teacher alternates exact MVDR and tightened covariance column generation. Its terminal fixed-receiver gap and upper bound on remaining alternating gain both meet 0.01 dB. The stacked teacher and deployment filters have a median angle of 69.88 degrees over training scenes. The deployed features are the first physics master's dual quantities at the ZF-start MVDR filters. Local Rayleigh features and channel overlaps are combined with log noise and QoS and mean-pooled user features. A shared \(12\to8\to4\) tanh network produces real coefficients over four unit complex directions, with a fixed target coefficient bias of 1.25.
+
+The first loss minimizes the negative first-master reduced cost of the predicted unit vector with a fixed per-sample normalization. The second loss adds a normalized teacher Lagrangian quadratic on the same predicted direction, weighted by each user owner's total active scaled LP power. The envelope derivative of the objective with respect to the atom is its scaled power times the derivative of its Lagrangian coefficient at fixed dual variables. Teacher matrices and masses enter only the loss. Both policies use five epochs, minibatches of 32 scenes and Adam at learning rate 0.003 with \((\beta_1,\beta_2)=(0.9,0.999)\) and numerical stabilizer \(10^{-8}\)~\cite{adam}. The maximum scaled centered finite-difference error on three pilot scenes was \(4.66\times10^{-11}\).
+
+\begin{table*}[t]
+\caption{Matched directions on the 64 original-map draws. Effects are paired medians relative to analytic pricing, with 95\% bootstrap intervals for the SCNR scores in dB.}
+\label{tab:learning-extra}
+\centering\footnotesize
+\begin{tabular}{@{}llllr@{}}
+\toprule
+Budget & Direction source & Design SCNR change & True SCNR change & Time ratio\\
+\midrule
+\TabRows{\LetterAssets/learning-benchmark.tex}
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure*}[t]
+\centering\includegraphics[width=.92\textwidth]{\BenchResults/parte-2026-11-23/summary/proposal-ablation.pdf}
+\caption{Matched time ratios and design SCNR changes against analytic pricing. Horizontal and vertical whiskers are paired bootstrap intervals. Panels use separately scaled axes.}
+\label{fig:learning-extra}
+\end{figure*}
+
+Inference includes feature construction, forward evaluation and direction normalization. At deployable budgets its medians range from 0.69 to 0.79 ms. At \(3\times2\) on the original map, the paired median true changes are both \(-0.038\) dB with intervals containing zero. The original-map effects appear in Table~\ref{tab:learning-extra}. Fig.~\ref{fig:learning-extra} includes both cohorts. The envelope policy's zero above-threshold activity covers 34,176 first-user proposal placements across budgets and cohorts. In the direct paired comparison, adding envelope supervision changes median SCNR by less than \(0.000061\) dB in absolute value.
+
+The archived 58-parameter SPSA policy~\cite{spall} was trained with an anchor-repair rollout. Draw 112 displays 13.5516 dB for both fixed and learned proposals. The original checkpoint is required for the matched atom cosine and activity audit and frozen holdout run. The measured zero activity above concerns the new envelope policy.
+
+\section{Reproduction Map}
+The \href{https://github.com/muneefo/clutter_aware_beamforming-for-ISAC}{project repository} is the release destination for the reviewed source, Python hash locks, MATLAB dependency audit, protocol and run manifests. The numeric study uses CPython 3.12.14, SciPy 1.17.0, NumPy 2.3.5 and HiGHS 1.8.0 on Linux and Xeon Platinum 8573C hardware. The serial ladder uses one pinned CPU and one BLAS and solver thread. Two-worker cases use one numerical thread per worker. The recorded versions and actual worker settings are in each manifest.
+
+\begin{itemize}
+\item Part A uses seeds 13001--13032, includes the 20-start audit, and provides the digitized and CSI records used by the reconciliation and margin tables.
+\item Part B uses seeds 16001--16032 and warm-up 15999. Its summary provides the ladder, paired effects and component traces.
+\item Part C uses static seeds 10001--10032, tracking seeds 21101--21132 and scaling seeds 22101--22132. The Pareto and scale curves use its summary. The tracking CDF uses the archived frame records.
+\item Part D uses the same static IDs and frozen receivers. The archive stores the independent reference and terminal rechecks and per-atom powers.
+\item Part E archives all 5,000 training labels and two networks with checksums, as well as the 1,920 endpoint scores and times.
+\end{itemize}
+The README gives commands to regenerate each asset from archived records or by running the registered experiments. The Letter-size figures and tables have a separate input-hash ledger. Original Table I, aggregate plots and replay outputs are preserved.
+
+\bibliographystyle{IEEEtran}
+\bibliography{letters}
+\end{document}

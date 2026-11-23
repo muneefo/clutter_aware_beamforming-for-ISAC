@@ -1,0 +1,15 @@
+{
+  "documents": {
+    "letters.pdf": {
+      "pages": 5,
+      "sha256": "537499cf6f3f6a37e0548087f5c68ecd57a718ec9ef140d47938b1ec195016e6"
+    },
+    "appendix.pdf": {
+      "pages": 5,
+      "sha256": "055991be5a2dd913c398c70a6c33bb8c54de5bc7f4a773717cae059828f784fc"
+    }
+  },
+  "asset_input_hashes_verified": true,
+  "overfull_boxes": 0,
+  "undefined_citations_or_references": 0
+}
