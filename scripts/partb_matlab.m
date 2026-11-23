@@ -59,7 +59,14 @@ run_reference(15999, para, K, gamma, noise, A, B, target, data, opts);
 profile off
 prof = profile('info');
 functions = struct2table(prof.FunctionTable,'AsArray',true);
-writetable(functions(:,{'FunctionName','NumCalls','TotalTime'}), ...
+functions.SelfTime = functions.TotalTime;
+for k = 1:numel(prof.FunctionTable)
+    children = prof.FunctionTable(k).Children;
+    if ~isempty(children)
+        functions.SelfTime(k) = max(0,functions.TotalTime(k) - sum([children.TotalTime]));
+    end
+end
+writetable(functions(:,{'FunctionName','NumCalls','TotalTime','SelfTime'}), ...
     fullfile(destination,'warmup-profiler-inclusive.csv'));
 
 budget = [3 2; 5 3];
@@ -72,40 +79,59 @@ for seed = [15999,16001:16032]
     prep = zeros(1,2);
     for b = 1:2
         timer = tic;
-        prior = fast_tutorial_beams(tutorial,placeholder, ...
-            struct('outer',budget(b,1),'inner',budget(b,2),'ablation',"B8"));
+        try
+            prior = fast_tutorial_beams(tutorial,placeholder, ...
+                struct('outer',budget(b,1),'inner',budget(b,2),'ablation',"B8"));
+            schedules{b} = prior.pricingPlans{1};
+        catch err
+            fprintf(2,'Schedule preparation failed for seed %d: %s\n',seed,err.message);
+        end
         prep(b) = toc(timer);
-        schedules{b} = prior.pricingPlans{1};
     end
     order = randperm(RandStream('mt19937ar','Seed',400000+seed),numel(arms));
     rows = repmat(empty_row(),0,1);
     for i = order
-        if i == 1
-            row = run_reference(seed,para,K,gamma,noise,A,B,target,data,opts);
-        else
-            b = 1 + (i > 4);
-            setting = struct('outer',budget(b,1),'inner',budget(b,2), ...
-                'ablation',arms(i),'pricingSchedules',{{schedules{b}}});
-            out = fast_tutorial_beams(tutorial,placeholder,setting);
-            assert(out.backend == "linprog", 'Unexpected LP backend.');
-            if arms(i) ~= "B6"
-                assert(isequal(out.pricingPlans{1},schedules{b}), 'Mismatched atom schedule.');
+        b = 1 + (i > 4);
+        try
+            if i == 1
+                row = run_reference(seed,para,K,gamma,noise,A,B,target,data,opts);
+            else
+                assert(arms(i) ~= "B7" || ~isempty(schedules{b}), 'B7 requires a matched B8 schedule.');
+                setting = struct('outer',budget(b,1),'inner',budget(b,2), ...
+                    'ablation',arms(i),'pricingSchedules',{{schedules{b}}});
+                out = fast_tutorial_beams(tutorial,placeholder,setting);
+                assert(out.backend == "linprog", 'Unexpected LP backend.');
+                if arms(i) ~= "B6" && ~isempty(schedules{b})
+                    assert(isequal(out.pricingPlans{1},schedules{b}), 'Mismatched atom schedule.');
+                end
+                W = out.designs{1}.W; U = out.designs{1}.U;
+                Q = pagemtimes(W,'none',W,'ctranspose');
+                row = empty_row();
+                row.arm = arms(i);
+                row.outer = budget(b,1); row.inner = budget(b,2);
+                row.seconds = out.trials.seconds;
+                row.design_db = 10*log10(compute_SCNR(Q,U,data.Vcc_hat,data.R_eta,target,A,B));
+                row.true_db = out.trials.trueSCNRdB;
+                row.feasible = out.trials.feasible;
+                row.status = "returned";
+                row.solves = out.trials.lpSolves;
+                timing = out.timing{1};
+                for field = ["build","solve","price","mvdr","kernel","recovery"]
+                    row.(char(field+"_seconds")) = timing.(char(field));
+                end
+                row.schedule_prep_seconds = prep(b);
             end
-            W = out.designs{1}.W; U = out.designs{1}.U;
-            Q = pagemtimes(W,'none',W,'ctranspose');
+        catch err
             row = empty_row();
             row.arm = arms(i);
-            row.outer = budget(b,1); row.inner = budget(b,2);
-            row.seconds = out.trials.seconds;
-            row.design_db = 10*log10(compute_SCNR(Q,U,data.Vcc_hat,data.R_eta,target,A,B));
-            row.true_db = out.trials.trueSCNRdB;
-            row.feasible = out.trials.feasible;
-            row.solves = out.trials.lpSolves;
-            timing = out.timing{1};
-            for field = ["build","solve","price","mvdr","kernel","recovery"]
-                row.(char(field+"_seconds")) = timing.(char(field));
+            if i == 1
+                row.outer = 30; row.inner = 30;
+            else
+                row.outer = budget(b,1); row.inner = budget(b,2);
+                row.schedule_prep_seconds = prep(b);
             end
-            row.schedule_prep_seconds = prep(b);
+            row.status = "error";
+            row.error_message = string(err.message);
         end
         row.seed = seed;
         row.warmup = seed == 15999;
@@ -137,7 +163,7 @@ for n = 1:para.N
     margin = min(margin,min(10*log10(desired./((sum(y,2)+noise).*gamma(n,:).'))));
 end
 row = empty_row();
-row.arm = "B1"; row.outer = 30; row.inner = 30;
+row.arm = "B1"; row.outer = 30; row.inner = 30; row.status = "returned";
 row.seconds = seconds;
 row.design_db = 10*log10(compute_SCNR(physical,U,data.Vcc_hat,data.R_eta,target,A,B));
 row.true_db = 10*log10(compute_SCNR(physical,U,data.Vcc,data.R_eta,target,A,B));
@@ -149,7 +175,7 @@ end
 function row = empty_row()
 row = struct('arm',"",'outer',0,'inner',0,'seed',0,'warmup',false,'seconds',NaN, ...
     'design_db',NaN,'true_db',NaN,'feasible',false,'solves',NaN,'cov_design_db',NaN,'cov_true_db',NaN, ...
-    'build_seconds',NaN,'solve_seconds',NaN,'price_seconds',NaN,'mvdr_seconds',NaN, ...
+    'status',"",'error_message',"",'build_seconds',NaN,'solve_seconds',NaN,'price_seconds',NaN,'mvdr_seconds',NaN, ...
     'kernel_seconds',NaN,'recovery_seconds',NaN,'schedule_prep_seconds',NaN);
 end
 

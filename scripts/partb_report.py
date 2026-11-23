@@ -158,7 +158,7 @@ def render(computed, out):
             (name, *(median(g["timings"][k], 6) for k in STAGES)) for name, g in groups.items()
         ))
         print("\nIn the parallel B5 row the tone worker stages overlap and are represented by the "
-              "parallel tone wall time. The JSON includes their separate summed process-stage times. "
+              "parallel tone wall time. The JSON includes their separate summed worker-stage wall times. "
               "Stage medians summarize the draws individually.\n", file=out)
         print("### Paired effects\n", file=out)
         table(out, ("Contrast", "Feasible pairs", "Time ratio", "Design Δ dB", "True Δ dB",

@@ -1,0 +1,61 @@
+{
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "python": "3.12.14",
+  "numpy": "2.3.5",
+  "scipy": "1.17.0",
+  "highs": "1.8.0",
+  "scs": "3.2.11",
+  "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "threads": 1,
+  "cores": [
+    0
+  ],
+  "threadpools": [
+    {
+      "user_api": "blas",
+      "internal_api": "openblas",
+      "num_threads": 1,
+      "prefix": "libscipy_openblas",
+      "filepath": "/workspace/work/parta-venv/lib/python3.12/site-packages/numpy.libs/libscipy_openblas64_-fdde5778.so",
+      "version": "0.3.30",
+      "threading_layer": "pthreads",
+      "architecture": "SkylakeX"
+    },
+    {
+      "user_api": "blas",
+      "internal_api": "openblas",
+      "num_threads": 1,
+      "prefix": "libopenblas",
+      "filepath": "/workspace/work/parta-venv/lib/python3.12/site-packages/scs.libs/libopenblas-r0-11edc3fa.3.15.so",
+      "version": "0.3.15",
+      "threading_layer": "disabled",
+      "architecture": "Prescott"
+    },
+    {
+      "user_api": "blas",
+      "internal_api": "openblas",
+      "num_threads": 1,
+      "prefix": "libscipy_openblas",
+      "filepath": "/workspace/work/parta-venv/lib/python3.12/site-packages/scipy.libs/libscipy_openblas-6cdc3b4a.so",
+      "version": "0.3.30",
+      "threading_layer": "pthreads",
+      "architecture": "SkylakeX"
+    }
+  ],
+  "quota": "200000 100000",
+  "revision": "0f864c45b4775fbe01789b313d81f22bebf65177",
+  "b4_master": "persistent",
+  "tone_worker_blas_threads": 1,
+  "highs_master_threads": 1,
+  "matrices_sha256": "99744880b1a6fe5e5f8a0ef57c1738be79fb0ad28629e68db2bfe3a8df67472d",
+  "command": [
+    "scripts/partb_run.py",
+    "/workspace/work/Clutter-Aware-ISAC-Tutorial",
+    "results/partb-2026-11-22/b4-t1",
+    "--threads",
+    "1",
+    "--b4-persistent"
+  ],
+  "git": "02ca76ac6c556b919934066e13f988b43f522059",
+  "started_utc": "2026-11-23T02:34:44.654662+00:00"
+}
