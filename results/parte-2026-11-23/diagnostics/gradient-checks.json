@@ -1,0 +1,47 @@
+[
+  {
+    "scene_id": 509900,
+    "envelope": 0.0,
+    "max_scaled_gradient_error": 1.3484324767887301e-11,
+    "loss": 0.9210125363873926,
+    "teacher_deployment_u_angle_deg": 78.46077705882485
+  },
+  {
+    "scene_id": 509900,
+    "envelope": 1.0,
+    "max_scaled_gradient_error": 2.3552160222095608e-11,
+    "loss": 1.2945410545836928,
+    "teacher_deployment_u_angle_deg": 78.46077705882485,
+    "permutation_max_error": 1.2212453270876722e-14
+  },
+  {
+    "scene_id": 509901,
+    "envelope": 0.0,
+    "max_scaled_gradient_error": 2.512956509548303e-11,
+    "loss": 0.8205721411171101,
+    "teacher_deployment_u_angle_deg": 58.679114779739976
+  },
+  {
+    "scene_id": 509901,
+    "envelope": 1.0,
+    "max_scaled_gradient_error": 2.785422357317377e-11,
+    "loss": 1.0137807819527787,
+    "teacher_deployment_u_angle_deg": 58.679114779739976,
+    "permutation_max_error": 7.202571872255703e-15
+  },
+  {
+    "scene_id": 509902,
+    "envelope": 0.0,
+    "max_scaled_gradient_error": 4.284161914114293e-11,
+    "loss": 0.798676261085091,
+    "teacher_deployment_u_angle_deg": 63.958238241414385
+  },
+  {
+    "scene_id": 509902,
+    "envelope": 1.0,
+    "max_scaled_gradient_error": 4.662724710713381e-11,
+    "loss": 0.9397818766074926,
+    "teacher_deployment_u_angle_deg": 63.958238241414385,
+    "permutation_max_error": 1.9345636204093353e-14
+  }
+]

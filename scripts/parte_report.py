@@ -106,6 +106,8 @@ def compare(eval_rows):
                 for f in ("design_delta_db", "true_delta_db", "elapsed_delta_ms", "time_ratio", "seconds",
                           "policy_ms", "ever_active_share", "first_user_terminal_watts"):
                     s[f] = paired([r[f] for r in pairs if r[f] is not None], rng)
+                if all(r["design_delta_db"] == r["true_delta_db"] for r in pairs):
+                    s["true_delta_db"] = s["design_delta_db"]
                 results.append(s)
     direct = []
     for cohort, identifiers in (("held-out maps", HELD_OUT), ("original benchmark", ORIGINAL)):
@@ -113,11 +115,11 @@ def compare(eval_rows):
             pairs = [(grouped[seed, outer, inner]["envelope"], grouped[seed, outer, inner]["reduced-cost"])
                      for seed in identifiers]
             pairs = [(e, r) for e, r in pairs if e.get("feasible") and r.get("feasible")]
-            direct.append(dict(cohort=cohort, outer=outer, inner=inner,
-                               design_delta_db=paired([e["design_streams_db"] - r["design_streams_db"]
-                                                       for e, r in pairs], rng),
-                               true_delta_db=paired([e["true_streams_db"] - r["true_streams_db"]
-                                                     for e, r in pairs], rng)))
+            design = [e["design_streams_db"] - r["design_streams_db"] for e, r in pairs]
+            true = [e["true_streams_db"] - r["true_streams_db"] for e, r in pairs]
+            design_stats, true_stats = paired(design, rng), paired(true, rng)
+            direct.append(dict(cohort=cohort, outer=outer, inner=inner, design_delta_db=design_stats,
+                               true_delta_db=design_stats if design == true else true_stats))
     return results, deltas, direct
 
 
@@ -125,8 +127,9 @@ def table(rows, direct, path):
     def text(s, digits=3):
         if s is None:
             return "—"
-        lo, hi = s["ci95"]
-        return f"{s['median']:.{digits}f} [{lo:.{digits}f}, {hi:.{digits}f}]"
+        med, lo, hi = (f"{v:.2e}" if 0 < abs(v) < .5 * 10**-digits else f"{v:.{digits}f}"
+                       for v in (s["median"], *s["ci95"]))
+        return f"{med} [{lo}, {hi}]"
     lines = ["# Part E paired evaluation", "",
              "Effects are method minus physics, paired by scene. Brackets are 95% paired bootstrap intervals.", "",
              "| Cohort | Budget | Arm | Feasible | Design SCNR (dB) | True SCNR (dB) | Time ratio | Time (ms) |",

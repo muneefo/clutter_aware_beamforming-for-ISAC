@@ -1,0 +1,47 @@
+{
+  "source": "first-isac-paper/three-method-sinr/pilot_scnr.csv",
+  "sha256": "f137d97be5c000432bbaa906838716319f87631ebd9ce0ad38cd828644b07dff",
+  "rows": [
+    {
+      "scene": "111",
+      "AO": "13.5403448061164",
+      "Fixed_6": "13.5201",
+      "Learned_6": "13.5194",
+      "K": "4",
+      "gammaDB": "8",
+      "powerDBm": "50",
+      "designKernel": "estimated"
+    },
+    {
+      "scene": "112",
+      "AO": "13.5214305868786",
+      "Fixed_6": "13.5516",
+      "Learned_6": "13.5516",
+      "K": "4",
+      "gammaDB": "8",
+      "powerDBm": "50",
+      "designKernel": "estimated"
+    },
+    {
+      "scene": "113",
+      "AO": "13.5060181548993",
+      "Fixed_6": "13.4488",
+      "Learned_6": "13.4113",
+      "K": "4",
+      "gammaDB": "8",
+      "powerDBm": "50",
+      "designKernel": "estimated"
+    },
+    {
+      "scene": "114",
+      "AO": "13.4847988596888",
+      "Fixed_6": "13.3531",
+      "Learned_6": "13.3522",
+      "K": "4",
+      "gammaDB": "8",
+      "powerDBm": "50",
+      "designKernel": "estimated"
+    }
+  ],
+  "status": "original_checkpoint_missing"
+}

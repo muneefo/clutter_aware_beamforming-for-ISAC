@@ -1,0 +1,809 @@
+{
+  "numerical_agreement": {
+    "calls": 441,
+    "owners": 76608,
+    "dense_fallbacks": 16096,
+    "maximum_price_error": 1.861003018355234e-11,
+    "maximum_direction_objective_error": 1.4175466356292077e-13,
+    "maximum_negative_upper_error": 0.0,
+    "accelerated_seconds": 4.092446937014756,
+    "dense_seconds": 7.490394661002938
+  },
+  "pilot": [
+    {
+      "scene_id": 509900,
+      "map_id": 509900,
+      "users": 5,
+      "gamma_db": 6,
+      "distances_m": [
+        123,
+        72,
+        179,
+        102,
+        120
+      ],
+      "status": "converged",
+      "seconds": 1.5655424179967667,
+      "outer_steps": 4,
+      "lp_solves": 30,
+      "rows": [
+        {
+          "lp_solves": 10,
+          "gap_db": 0.007423310576220971,
+          "outer_upper_gain_db": 2.8185790255594103,
+          "lower_scnr_db": 9.489816527954298,
+          "max_witness_mix": 2.0863040709337282e-08,
+          "max_decoded_qos_shortfall": 1.0863040935973353e-08,
+          "dense_prices": 20,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 8,
+          "gap_db": 0.004404924407508782,
+          "outer_upper_gain_db": 0.4279797119968788,
+          "lower_scnr_db": 11.75858629122797,
+          "max_witness_mix": 1.1172009049867768e-08,
+          "max_decoded_qos_shortfall": 1.172009062961455e-09,
+          "dense_prices": 21,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.0054978385588332224,
+          "outer_upper_gain_db": 0.02791117913874904,
+          "lower_scnr_db": 11.88524283529655,
+          "max_witness_mix": 1.0476090793899427e-08,
+          "max_decoded_qos_shortfall": 4.760907988870041e-10,
+          "dense_prices": 12,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 5,
+          "gap_db": 0.006688524971126315,
+          "outer_upper_gain_db": 0.007310337610944656,
+          "lower_scnr_db": 11.888713478110882,
+          "max_witness_mix": 1.2739982855157953e-08,
+          "max_decoded_qos_shortfall": 2.7399828900652907e-09,
+          "dense_prices": 5,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 155,
+      "receiver_sha256": "2923eeb6696258af408c021b04a106cdafbdbab76ca55cc74a80b8c39c8c2c06"
+    },
+    {
+      "scene_id": 509901,
+      "map_id": 509901,
+      "users": 5,
+      "gamma_db": 13,
+      "distances_m": [
+        266,
+        286,
+        70,
+        379,
+        310
+      ],
+      "status": "converged",
+      "seconds": 2.2635289850004483,
+      "outer_steps": 4,
+      "lp_solves": 36,
+      "rows": [
+        {
+          "lp_solves": 12,
+          "gap_db": 0.0077718835679102885,
+          "outer_upper_gain_db": 0.9343164858482071,
+          "lower_scnr_db": 6.159772366553613,
+          "max_witness_mix": 1.2021300763025265e-08,
+          "max_decoded_qos_shortfall": 2.021300787323919e-09,
+          "dense_prices": 1576,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 10,
+          "gap_db": 0.0029290459288804685,
+          "outer_upper_gain_db": 0.08489983021187203,
+          "lower_scnr_db": 6.57885876324362,
+          "max_witness_mix": 1.840067912131994e-08,
+          "max_decoded_qos_shortfall": 8.400679275898128e-09,
+          "dense_prices": 1146,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.00819902335637813,
+          "outer_upper_gain_db": 0.022904499336218794,
+          "lower_scnr_db": 6.6568253402949376,
+          "max_witness_mix": 1.0034040942792178e-08,
+          "max_decoded_qos_shortfall": 3.404094313374651e-11,
+          "dense_prices": 691,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.004722148960917897,
+          "outer_upper_gain_db": 0.006548675371025612,
+          "lower_scnr_db": 6.662852937488914,
+          "max_witness_mix": 1.654697175841529e-08,
+          "max_decoded_qos_shortfall": 6.5469718667478365e-09,
+          "dense_prices": 638,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 161,
+      "receiver_sha256": "cbb5e517586e65a703636ef552723ed5328e65af91c8a965bb79bd2c9f4a9563"
+    },
+    {
+      "scene_id": 509902,
+      "map_id": 509902,
+      "users": 4,
+      "gamma_db": 8,
+      "distances_m": [
+        118,
+        388,
+        117,
+        391
+      ],
+      "status": "converged",
+      "seconds": 1.2435149019984237,
+      "outer_steps": 3,
+      "lp_solves": 30,
+      "rows": [
+        {
+          "lp_solves": 11,
+          "gap_db": 0.004352231909303019,
+          "outer_upper_gain_db": 0.4644911479134267,
+          "lower_scnr_db": -2.588522345694522,
+          "max_witness_mix": 1.0706280484422843e-08,
+          "max_decoded_qos_shortfall": 7.062804919844794e-10,
+          "dense_prices": 72,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 10,
+          "gap_db": 0.0037514352524481006,
+          "outer_upper_gain_db": 0.04182802091286534,
+          "lower_scnr_db": -2.4002030689124427,
+          "max_witness_mix": 1.0012111049692223e-08,
+          "max_decoded_qos_shortfall": 1.2111049813485736e-11,
+          "dense_prices": 47,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 9,
+          "gap_db": 0.002728172449867139,
+          "outer_upper_gain_db": 0.0047896811304711405,
+          "lower_scnr_db": -2.389870475548134,
+          "max_witness_mix": 1.0009964679463073e-08,
+          "max_decoded_qos_shortfall": 9.964679562815069e-12,
+          "dense_prices": 39,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 129,
+      "receiver_sha256": "f963bc72c47fd29df1db39a6ab027c815730b0eb0108896a1b5e3255e406007c"
+    },
+    {
+      "scene_id": 509903,
+      "map_id": 509903,
+      "users": 4,
+      "gamma_db": 10,
+      "distances_m": [
+        197,
+        352,
+        176,
+        343
+      ],
+      "status": "converged",
+      "seconds": 1.5225322679980309,
+      "outer_steps": 5,
+      "lp_solves": 36,
+      "rows": [
+        {
+          "lp_solves": 10,
+          "gap_db": 0.005297261221981054,
+          "outer_upper_gain_db": 1.0700165327622544,
+          "lower_scnr_db": 2.591251088332,
+          "max_witness_mix": 1.0102389165353704e-08,
+          "max_decoded_qos_shortfall": 1.023891663880848e-10,
+          "dense_prices": 266,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 8,
+          "gap_db": 0.0035348798015971683,
+          "outer_upper_gain_db": 0.07207428750499895,
+          "lower_scnr_db": 2.9901156804621642,
+          "max_witness_mix": 1.0076303933031474e-08,
+          "max_decoded_qos_shortfall": 7.630393380033281e-11,
+          "dense_prices": 187,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.0020378354830567326,
+          "outer_upper_gain_db": 0.07068608776941289,
+          "lower_scnr_db": 3.098010017536264,
+          "max_witness_mix": 1.0000007640568594e-08,
+          "max_decoded_qos_shortfall": 7.640568673478977e-15,
+          "dense_prices": 88,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.003961253809150404,
+          "outer_upper_gain_db": 0.0320105224837628,
+          "lower_scnr_db": 3.1777530587366525,
+          "max_witness_mix": 1.0055988373939743e-08,
+          "max_decoded_qos_shortfall": 5.598837450275853e-11,
+          "dense_prices": 30,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 4,
+          "gap_db": 0.0009996211490843712,
+          "outer_upper_gain_db": 0.0011590020433159662,
+          "lower_scnr_db": 3.1786522229861145,
+          "max_witness_mix": 1.0054091129788635e-08,
+          "max_decoded_qos_shortfall": 5.4091130332478575e-11,
+          "dense_prices": 16,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 129,
+      "receiver_sha256": "2d9ab3a046f657f466e1fabaa18e471488e9ce65c8a0dd56b967347e61873467"
+    },
+    {
+      "scene_id": 509904,
+      "map_id": 509904,
+      "users": 4,
+      "gamma_db": 7,
+      "distances_m": [
+        382,
+        284,
+        148,
+        225
+      ],
+      "status": "converged",
+      "seconds": 1.862218528000085,
+      "outer_steps": 5,
+      "lp_solves": 40,
+      "rows": [
+        {
+          "lp_solves": 11,
+          "gap_db": 0.008124822434157119,
+          "outer_upper_gain_db": 1.085858288001888,
+          "lower_scnr_db": -0.08490764079880647,
+          "max_witness_mix": 1.0589978197277544e-08,
+          "max_decoded_qos_shortfall": 5.899782035254027e-10,
+          "dense_prices": 47,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 8,
+          "gap_db": 0.007688240935270238,
+          "outer_upper_gain_db": 0.15183788467321496,
+          "lower_scnr_db": 0.9706541416853904,
+          "max_witness_mix": 1.0147652254101133e-08,
+          "max_decoded_qos_shortfall": 1.4765225559946096e-10,
+          "dense_prices": 40,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 10,
+          "gap_db": 0.004520438675944198,
+          "outer_upper_gain_db": 0.054317197004833326,
+          "lower_scnr_db": 1.0590313399136628,
+          "max_witness_mix": 1.000208753447812e-08,
+          "max_decoded_qos_shortfall": 2.0875344990025913e-12,
+          "dense_prices": 70,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 6,
+          "gap_db": 0.005085066868182142,
+          "outer_upper_gain_db": 0.013189873473141952,
+          "lower_scnr_db": 1.0962061103606837,
+          "max_witness_mix": 1.0054622821778956e-08,
+          "max_decoded_qos_shortfall": 5.4622822328167553e-11,
+          "dense_prices": 13,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 5,
+          "gap_db": 0.0024021729717758006,
+          "outer_upper_gain_db": 0.003041297340205849,
+          "lower_scnr_db": 1.0979968881586708,
+          "max_witness_mix": 1.0082512388254934e-08,
+          "max_decoded_qos_shortfall": 8.251238908686791e-11,
+          "dense_prices": 15,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 129,
+      "receiver_sha256": "ce206e4dc89539841b7d5b36ced11fb56b472ad84ad480bd8af5ad5b9e23a118"
+    },
+    {
+      "scene_id": 509905,
+      "map_id": 509905,
+      "users": 4,
+      "gamma_db": 12,
+      "distances_m": [
+        389,
+        60,
+        377,
+        80
+      ],
+      "status": "converged",
+      "seconds": 2.4002693069996894,
+      "outer_steps": 6,
+      "lp_solves": 48,
+      "rows": [
+        {
+          "lp_solves": 11,
+          "gap_db": 0.007909782483108262,
+          "outer_upper_gain_db": 0.8721941358802254,
+          "lower_scnr_db": -0.30980488506455894,
+          "max_witness_mix": 1.0788564406279502e-08,
+          "max_decoded_qos_shortfall": 7.885644147869913e-10,
+          "dense_prices": 719,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 8,
+          "gap_db": 0.006913935482811819,
+          "outer_upper_gain_db": 0.09131875672333799,
+          "lower_scnr_db": 0.4196262909821691,
+          "max_witness_mix": 1.0022376814400898e-08,
+          "max_decoded_qos_shortfall": 2.2376814625163103e-11,
+          "dense_prices": 714,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 6,
+          "gap_db": 0.008801079569045323,
+          "outer_upper_gain_db": 0.024041547643600544,
+          "lower_scnr_db": 0.46548627802824827,
+          "max_witness_mix": 1.0133258005137271e-08,
+          "max_decoded_qos_shortfall": 1.3325800648760486e-10,
+          "dense_prices": 498,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 9,
+          "gap_db": 0.0026590239778017653,
+          "outer_upper_gain_db": 0.028067971865527067,
+          "lower_scnr_db": 0.5056223035719966,
+          "max_witness_mix": 1.0358485423744828e-08,
+          "max_decoded_qos_shortfall": 3.584854274581897e-10,
+          "dense_prices": 565,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.00395535398137135,
+          "outer_upper_gain_db": 0.01125958809178247,
+          "lower_scnr_db": 0.5368629714879367,
+          "max_witness_mix": 1.0213686623069512e-08,
+          "max_decoded_qos_shortfall": 2.136866252520523e-10,
+          "dense_prices": 436,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.006257433939190729,
+          "outer_upper_gain_db": 0.006674383252588083,
+          "lower_scnr_db": 0.5384261500271553,
+          "max_witness_mix": 1.1327512327438571e-08,
+          "max_decoded_qos_shortfall": 1.3275123424759966e-09,
+          "dense_prices": 388,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 129,
+      "receiver_sha256": "12bfa3d85dc9ebd90fc0b8acf2d904eb1018311f9a63afca9c8437ce2df3b9db"
+    },
+    {
+      "scene_id": 509906,
+      "map_id": 509906,
+      "users": 4,
+      "gamma_db": 12,
+      "distances_m": [
+        363,
+        149,
+        101,
+        173
+      ],
+      "status": "converged",
+      "seconds": 1.787505668002268,
+      "outer_steps": 6,
+      "lp_solves": 39,
+      "rows": [
+        {
+          "lp_solves": 9,
+          "gap_db": 0.005777944319999878,
+          "outer_upper_gain_db": 0.846307677208597,
+          "lower_scnr_db": 7.599705112176414,
+          "max_witness_mix": 1.0086775854982261e-08,
+          "max_decoded_qos_shortfall": 8.677585585755352e-11,
+          "dense_prices": 840,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.008107644597483902,
+          "outer_upper_gain_db": 0.30523746745843894,
+          "lower_scnr_db": 8.498087477249047,
+          "max_witness_mix": 1.0101335619640717e-08,
+          "max_decoded_qos_shortfall": 1.0133562066433645e-10,
+          "dense_prices": 475,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.009454581930614516,
+          "outer_upper_gain_db": 0.06888880007685655,
+          "lower_scnr_db": 8.629431297101476,
+          "max_witness_mix": 1.0082547777980447e-08,
+          "max_decoded_qos_shortfall": 8.254777881273844e-11,
+          "dense_prices": 267,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.005130413171150889,
+          "outer_upper_gain_db": 0.02499756311275253,
+          "lower_scnr_db": 8.697420018416253,
+          "max_witness_mix": 1.0116704804377899e-08,
+          "max_decoded_qos_shortfall": 1.1670480555856712e-10,
+          "dense_prices": 178,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 5,
+          "gap_db": 0.00964240963935058,
+          "outer_upper_gain_db": 0.022625036556319925,
+          "lower_scnr_db": 8.723879191474763,
+          "max_witness_mix": 1.0089166239046752e-08,
+          "max_decoded_qos_shortfall": 8.91662399463591e-11,
+          "dense_prices": 98,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 4,
+          "gap_db": 0.0028388161601357294,
+          "outer_upper_gain_db": 0.00457385481197108,
+          "lower_scnr_db": 8.730007183119568,
+          "max_witness_mix": 1.0021268067367955e-08,
+          "max_decoded_qos_shortfall": 2.1268067581081785e-11,
+          "dense_prices": 68,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 129,
+      "receiver_sha256": "540c24561f90200d8581066f43d196595905ba155f79e3ca1ec79f01542242a4"
+    },
+    {
+      "scene_id": 509907,
+      "map_id": 509907,
+      "users": 4,
+      "gamma_db": 8,
+      "distances_m": [
+        339,
+        75,
+        395,
+        145
+      ],
+      "status": "converged",
+      "seconds": 1.3081117069996253,
+      "outer_steps": 3,
+      "lp_solves": 28,
+      "rows": [
+        {
+          "lp_solves": 12,
+          "gap_db": 0.004585277189218772,
+          "outer_upper_gain_db": 1.7003037874079405,
+          "lower_scnr_db": 2.3755468551424803,
+          "max_witness_mix": 1.0319281190286583e-08,
+          "max_decoded_qos_shortfall": 3.1928119358133226e-10,
+          "dense_prices": 133,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 9,
+          "gap_db": 0.006228188603975378,
+          "outer_upper_gain_db": 0.08567273980746579,
+          "lower_scnr_db": 2.841806743762287,
+          "max_witness_mix": 1.0215191460522354e-08,
+          "max_decoded_qos_shortfall": 2.1519146272057604e-10,
+          "dense_prices": 50,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.002836845540303371,
+          "outer_upper_gain_db": 0.0061027320808681885,
+          "lower_scnr_db": 2.8608702647040856,
+          "max_witness_mix": 1.0074672581965417e-08,
+          "max_decoded_qos_shortfall": 7.467258271771771e-11,
+          "dense_prices": 16,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 129,
+      "receiver_sha256": "06303e335d9bb3c61915c5aba6c5a3fd840d113171731fa74f0aaf70097b4ffa"
+    },
+    {
+      "scene_id": 509908,
+      "map_id": 509908,
+      "users": 6,
+      "gamma_db": 8,
+      "distances_m": [
+        93,
+        127,
+        233,
+        51,
+        345,
+        85
+      ],
+      "status": "converged",
+      "seconds": 2.025710039000842,
+      "outer_steps": 4,
+      "lp_solves": 34,
+      "rows": [
+        {
+          "lp_solves": 10,
+          "gap_db": 0.008823417920244239,
+          "outer_upper_gain_db": 0.5302912462730629,
+          "lower_scnr_db": 0.6924277968439021,
+          "max_witness_mix": 1.0188788803688307e-08,
+          "max_decoded_qos_shortfall": 1.887888056118296e-10,
+          "dense_prices": 113,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 9,
+          "gap_db": 0.002203745729700522,
+          "outer_upper_gain_db": 0.04661370389115952,
+          "lower_scnr_db": 0.8834145290324346,
+          "max_witness_mix": 1.3330205740791357e-08,
+          "max_decoded_qos_shortfall": 3.3302057851837015e-09,
+          "dense_prices": 48,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 8,
+          "gap_db": 0.003353999031912693,
+          "outer_upper_gain_db": 0.011792381336295807,
+          "lower_scnr_db": 0.9154599041842979,
+          "max_witness_mix": 1.6032568288035757e-08,
+          "max_decoded_qos_shortfall": 6.032568384753319e-09,
+          "dense_prices": 41,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.002790602134832378,
+          "outer_upper_gain_db": 0.004429461569370898,
+          "lower_scnr_db": 0.9202262468445654,
+          "max_witness_mix": 1.1924778442412026e-08,
+          "max_decoded_qos_shortfall": 1.9247784653645974e-09,
+          "dense_prices": 42,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 189,
+      "receiver_sha256": "6237a28be09648071f9ee09e3273233eac7db4b33fc65e3b61449a019e2d2874"
+    },
+    {
+      "scene_id": 509909,
+      "map_id": 509909,
+      "users": 5,
+      "gamma_db": 11,
+      "distances_m": [
+        194,
+        189,
+        107,
+        249,
+        224
+      ],
+      "status": "converged",
+      "seconds": 3.246684779998759,
+      "outer_steps": 6,
+      "lp_solves": 55,
+      "rows": [
+        {
+          "lp_solves": 11,
+          "gap_db": 0.009414310294728966,
+          "outer_upper_gain_db": 0.5169532340442585,
+          "lower_scnr_db": 2.4292643453165157,
+          "max_witness_mix": 1.0011824222875487e-08,
+          "max_decoded_qos_shortfall": 1.182422299387324e-11,
+          "dense_prices": 717,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 11,
+          "gap_db": 0.0034148360633331413,
+          "outer_upper_gain_db": 0.056982824661887546,
+          "lower_scnr_db": 2.6286456423947735,
+          "max_witness_mix": 1.00786766515318e-08,
+          "max_decoded_qos_shortfall": 7.867665232475725e-11,
+          "dense_prices": 470,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 6,
+          "gap_db": 0.008599993636921065,
+          "outer_upper_gain_db": 0.011388341684916658,
+          "lower_scnr_db": 2.638571076177769,
+          "max_witness_mix": 1.029034532682429e-08,
+          "max_decoded_qos_shortfall": 2.903453298120523e-10,
+          "dense_prices": 149,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 9,
+          "gap_db": 0.0030361698347834546,
+          "outer_upper_gain_db": 0.01934811131855455,
+          "lower_scnr_db": 2.660932702247223,
+          "max_witness_mix": 1.0071490316365077e-08,
+          "max_decoded_qos_shortfall": 7.149031708509366e-11,
+          "dense_prices": 203,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 11,
+          "gap_db": 0.002843240661358269,
+          "outer_upper_gain_db": 0.026753386646414103,
+          "lower_scnr_db": 2.715800625308181,
+          "max_witness_mix": 1.0090780287561947e-08,
+          "max_decoded_qos_shortfall": 9.078028847798277e-11,
+          "dense_prices": 247,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.00264341805747923,
+          "outer_upper_gain_db": 0.00459913368563941,
+          "lower_scnr_db": 2.727383526964186,
+          "max_witness_mix": 1.0073862431476766e-08,
+          "max_decoded_qos_shortfall": 7.386243222083778e-11,
+          "dense_prices": 157,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 161,
+      "receiver_sha256": "3ea9e6b521d59f06682e8a58690d8112ca2d733fdc73bf39247bc8fe3369d341"
+    },
+    {
+      "scene_id": 510036,
+      "map_id": 510036,
+      "users": 4,
+      "gamma_db": 13,
+      "distances_m": [
+        92,
+        190,
+        327,
+        54
+      ],
+      "status": "converged",
+      "seconds": 1.5653916369992658,
+      "outer_steps": 3,
+      "lp_solves": 29,
+      "rows": [
+        {
+          "lp_solves": 12,
+          "gap_db": 0.006288880607071681,
+          "outer_upper_gain_db": 0.15627507376722374,
+          "lower_scnr_db": 3.9606573822306075,
+          "max_witness_mix": 1.2776249887533197e-08,
+          "max_decoded_qos_shortfall": 2.7762499230032466e-09,
+          "dense_prices": 1254,
+          "ipm_retries": 1
+        },
+        {
+          "lp_solves": 10,
+          "gap_db": 0.005921923545043691,
+          "outer_upper_gain_db": 0.02393985495535147,
+          "lower_scnr_db": 4.022317450172853,
+          "max_witness_mix": 1.8423480961973637e-08,
+          "max_decoded_qos_shortfall": 8.423481117163476e-09,
+          "dense_prices": 815,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 7,
+          "gap_db": 0.0023744400308950975,
+          "outer_upper_gain_db": 0.00765925329097264,
+          "lower_scnr_db": 4.0331881195705455,
+          "max_witness_mix": 1.3530326792932166e-08,
+          "max_decoded_qos_shortfall": 3.530326840698627e-09,
+          "dense_prices": 405,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 129,
+      "receiver_sha256": "3452f3d1d7fc432333e79556208ec3e85cf0dcde86ab773ed6034c7a5a7e7edd"
+    },
+    {
+      "scene_id": 510144,
+      "map_id": 510144,
+      "users": 4,
+      "gamma_db": 10,
+      "distances_m": [
+        58,
+        282,
+        144,
+        61
+      ],
+      "status": "converged",
+      "seconds": 1.762697792997642,
+      "outer_steps": 6,
+      "lp_solves": 36,
+      "rows": [
+        {
+          "lp_solves": 11,
+          "gap_db": 0.0054239486664303515,
+          "outer_upper_gain_db": 1.5038090995136366,
+          "lower_scnr_db": 9.730082816802797,
+          "max_witness_mix": 1.0217888729725233e-08,
+          "max_decoded_qos_shortfall": 2.1788873195160608e-10,
+          "dense_prices": 531,
+          "ipm_retries": 1
+        },
+        {
+          "lp_solves": 6,
+          "gap_db": 0.009850651266594368,
+          "outer_upper_gain_db": 0.20124863343159338,
+          "lower_scnr_db": 10.610493213284506,
+          "max_witness_mix": 1.0194638423497781e-08,
+          "max_decoded_qos_shortfall": 1.9463842548205535e-10,
+          "dense_prices": 154,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 5,
+          "gap_db": 0.009793874133203598,
+          "outer_upper_gain_db": 0.031251478103605,
+          "lower_scnr_db": 10.686915431845899,
+          "max_witness_mix": 1.0086588618158584e-08,
+          "max_decoded_qos_shortfall": 8.658861903197425e-11,
+          "dense_prices": 77,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 6,
+          "gap_db": 0.0035626200005993156,
+          "outer_upper_gain_db": 0.018235992645524814,
+          "lower_scnr_db": 10.71922947188417,
+          "max_witness_mix": 1.0072297079902674e-08,
+          "max_decoded_qos_shortfall": 7.229708063087841e-11,
+          "dense_prices": 76,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 4,
+          "gap_db": 0.008737324069908344,
+          "outer_upper_gain_db": 0.010482944648935188,
+          "lower_scnr_db": 10.727400980952993,
+          "max_witness_mix": 1.0398274193787974e-08,
+          "max_decoded_qos_shortfall": 3.982741979293379e-10,
+          "dense_prices": 48,
+          "ipm_retries": 0
+        },
+        {
+          "lp_solves": 4,
+          "gap_db": 0.0005305445882117039,
+          "outer_upper_gain_db": 0.0008349557600747224,
+          "lower_scnr_db": 10.728312775816615,
+          "max_witness_mix": 1.0083745569905971e-08,
+          "max_decoded_qos_shortfall": 8.374557075043923e-11,
+          "dense_prices": 65,
+          "ipm_retries": 0
+        }
+      ],
+      "active_atoms": 129,
+      "receiver_sha256": "e14f2fb433755e85ecedb36e42ee735c06f7b2c83710e913bdd8bf77750e0351"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "epoch": 1,
+    "loss": 0.1780856328469003,
+    "reduced_cost_loss": 0.1780856328469003,
+    "envelope_loss": 0.38565203273285253,
+    "scenes": 5000,
+    "steps": 157
+  },
+  {
+    "epoch": 2,
+    "loss": 0.06058594938462438,
+    "reduced_cost_loss": 0.06058594938462438,
+    "envelope_loss": 0.43807936344853404,
+    "scenes": 5000,
+    "steps": 314
+  },
+  {
+    "epoch": 3,
+    "loss": 0.04978903293087011,
+    "reduced_cost_loss": 0.04978903293087011,
+    "envelope_loss": 0.5375343451020659,
+    "scenes": 5000,
+    "steps": 471
+  },
+  {
+    "epoch": 4,
+    "loss": 0.04023595341857511,
+    "reduced_cost_loss": 0.04023595341857511,
+    "envelope_loss": 0.6420322342419269,
+    "scenes": 5000,
+    "steps": 628
+  },
+  {
+    "epoch": 5,
+    "loss": 0.03615860100200231,
+    "reduced_cost_loss": 0.03615860100200231,
+    "envelope_loss": 0.5956014354442798,
+    "scenes": 5000,
+    "steps": 785
+  }
+]
