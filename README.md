@@ -158,3 +158,35 @@ The independent interior-point checks of the terminal restricted LPs are in `rec
 `summary/` contains the vector plot, flat endpoint results, paired ablation
 reanalysis and bootstrap tables. `PART_D.md` describes the certificate and
 its scope.
+
+## IEEE Letters Part E held-out clutter learning ablation
+
+Use the Part A Python lock and the pinned tutorial. Set `TUTORIAL` to that
+checkout, `TEACHER` to a writable working directory and `RUN` to a fresh
+results path. Select available CPU indices. Each shard uses one CPU.
+
+```bash
+export PYTHONDONTWRITEBYTECODE=1
+mkdir -p "$TEACHER"
+python scripts/parte_teacher.py "$TUTORIAL" "$TEACHER/parte-train-0" --split train --cpu 0 --shard 0 --shards 2
+python scripts/parte_teacher.py "$TUTORIAL" "$TEACHER/parte-train-1" --split train --cpu 1 --shard 1 --shards 2
+python scripts/parte_bundle.py "$TEACHER" "$RUN"
+python scripts/parte_policy.py "$TUTORIAL" "$TEACHER" "$RUN/training" --cpu 0
+python scripts/parte_evaluate.py "$TUTORIAL" "$RUN/training" "$RUN/evaluation-0" --cpu 0 --shard 0 --shards 2
+python scripts/parte_evaluate.py "$TUTORIAL" "$RUN/training" "$RUN/evaluation-1" --cpu 1 --shard 1 --shards 2
+python scripts/parte_report.py "$RUN" "$RUN/summary"
+```
+
+To train from the archived labels, extract every ZIP under `RUN/labels/`
+into `TEACHER` and run the policy step with a new destination. The archives
+preserve each scene's fixed receive filters, active atom indices, powers and
+directions, and its projected teacher dual matrices. The training arrays are
+derived locally from those labels and the first physics master. Per-scene
+hashes are recorded in the label manifest and the training input ledger.
+
+For a pilot, run the teacher with `--split pilot`, then pass that directory
+as the teacher source to `parte_policy.py --pilot`. The latter logs numerical
+gradient and permutation checks. Use `parte_oracle_check.py TUTORIAL OUT.json`
+to reproduce the dense-oracle checks. The evaluation script accepts the
+original MATLAB checkpoint with `--checkpoint` and records its hash and the
+Draw 111–114 atom-level diagnostics when available.

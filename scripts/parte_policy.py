@@ -4,10 +4,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 
 from parte_teacher import PILOT, TRAIN, Scenes, project, proposal_basis
 from partb_run import METRICS, covariance, master, receiver, seed_bank
+from partc_run import manifest
 
 import numpy as np
 
@@ -207,8 +209,12 @@ def train_arrays(dataset, envelope, epochs=5):
 
 
 def run(args):
+    os.sched_setaffinity(0, {args.cpu})
+    args.mode, args.shard, args.shards = "part-e-training", 0, 1
+    environment = manifest(args.tutorial, args)
     scenes = Scenes(args.tutorial)
     args.output.mkdir(parents=True, exist_ok=False)
+    (args.output / "environment.json").write_text(json.dumps(environment, indent=2) + "\n")
     if args.pilot:
         check = checks(scenes, args.teacher)
         (args.output / "gradient-checks.json").write_text(json.dumps(check, indent=2, allow_nan=False) + "\n")
@@ -225,4 +231,5 @@ if __name__ == "__main__":
     p.add_argument("teacher", type=Path)
     p.add_argument("output", type=Path)
     p.add_argument("--pilot", action="store_true")
+    p.add_argument("--cpu", type=int, default=0)
     run(p.parse_args())
