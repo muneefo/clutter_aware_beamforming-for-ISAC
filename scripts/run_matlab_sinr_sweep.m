@@ -24,21 +24,28 @@ if opts.IncludeAO
     assert(exist('cvx_begin','file') ~= 0 && exist('mosekopt','file') ~= 0, ...
         'AO-SDP requires configured CVX and MOSEK. For LPs only, set IncludeAO=false.');
 end
+root = string(fileparts(fileparts(mfilename('fullpath'))));
+experimentDir = fullfile(root,'first-isac-paper','experiments');
+checkpoint = fullfile(root,'results','matlab-sweep-2026-11-23','l2o-weights.mat');
+for required = [fullfile(experimentDir,'fast_tutorial_beams.m'), ...
+        fullfile(experimentDir,'parte_l2o_proposals.m'),checkpoint]
+    assert(isfile(required),'L2O:MissingSweepFile', ...
+        'Missing %s. Extract the full MATLAB bundle and keep its folder layout.',required);
+end
+[covPath,revision,covHash] = pinned_inputs(tutorial);
+
 oldPath = path;
 pathCleanup = onCleanup(@() path(oldPath)); %#ok<NASGU>
 oldRng = rng;
 rngCleanup = onCleanup(@() rng(oldRng)); %#ok<NASGU>
 oldThreads = maxNumCompThreads(opts.Threads);
 threadCleanup = onCleanup(@() maxNumCompThreads(oldThreads)); %#ok<NASGU>
-root = fileparts(fileparts(mfilename('fullpath')));
-addpath(fullfile(root,'first-isac-paper','experiments'));
+addpath(experimentDir);
 addpath(fullfile(tutorial,'function'));
 
-[covPath,revision,covHash] = pinned_inputs(tutorial);
 data = load(covPath,'para','Vcc_hat','Vcc','R_eta');
 if opts.DesignKernel == "perfect", data.Vcc_hat = data.Vcc; end
 assert(opts.Users < min(data.para.Nt,data.para.Ns),'The ZF start needs a spare dimension.');
-checkpoint = fullfile(root,'results','matlab-sweep-2026-11-23','l2o-weights.mat');
 weights = load(checkpoint);
 check_forward_pass(weights);
 methods = ["reducedCost","envelope"];
@@ -216,6 +223,10 @@ end
 end
 
 function [source,revision,digest] = pinned_inputs(tutorial)
+source = fullfile(tutorial,'data','covMat_BLP.mat');
+assert(isfile(source) && isfolder(fullfile(tutorial,'function')),'L2O:InvalidTutorialFolder', ...
+    ['Pass the Clutter-Aware-ISAC-Tutorial root folder containing data/covMat_BLP.mat ' ...
+     'and the function folder. Received %s.'],tutorial);
 if ispc
     assert(isempty(regexp(tutorial,'["%!?&|^<>\r\n]','once')),'Unsupported tutorial path.');
     quoted = """" + tutorial + """";
@@ -226,9 +237,12 @@ else
 end
 [code,revision] = system("git -C "+quoted+" rev-parse HEAD");
 revision = strtrim(revision);
-assert(code == 0 && strcmp(revision,'0f864c45b4775fbe01789b313d81f22bebf65177'), ...
-    'Check out the pinned tutorial revision.');
-source = fullfile(tutorial,'data','covMat_BLP.mat');
+assert(code == 0,'L2O:TutorialGitUnavailable', ...
+    ['Could not read the tutorial Git revision. Check that Git is on MATLAB''s PATH ' ...
+     'and that %s is a Git checkout. Git output: %s'],tutorial,revision);
+expectedRevision = '0f864c45b4775fbe01789b313d81f22bebf65177';
+assert(strcmp(revision,expectedRevision),'L2O:UnexpectedTutorialRevision', ...
+    'Check out tutorial revision %s in %s. Current revision is %s.',expectedRevision,tutorial,revision);
 digest = sha256(source);
 assert(strcmp(digest,'99744880b1a6fe5e5f8a0ef57c1738be79fb0ad28629e68db2bfe3a8df67472d'), ...
     'Unexpected tutorial covariance file.');

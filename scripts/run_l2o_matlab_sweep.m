@@ -19,6 +19,16 @@ assert(numel(unique(opts.Users)) == numel(opts.Users),'User counts must be uniqu
 assert(numel(unique(opts.DesignKernels)) == numel(opts.DesignKernels),'Design kernels must be unique.');
 assert(prod(opts.Budget) >= 2,'Use at least two LP solves so the learned directions can enter a master.');
 
+scriptsDir = fileparts(mfilename('fullpath'));
+for helper = ["run_matlab_sinr_sweep.m","plot_matlab_sinr_sweep.m"]
+    helperPath = fullfile(scriptsDir,helper);
+    assert(isfile(helperPath),'L2O:MissingSweepFile', ...
+        'Missing %s. Extract the full MATLAB bundle and add its scripts folder to the MATLAB path.',helperPath);
+end
+oldPath = path;
+pathCleanup = onCleanup(@() path(oldPath)); %#ok<NASGU>
+addpath(scriptsDir,'-begin');
+
 runs = cell(numel(opts.Users)*numel(opts.DesignKernels),1);
 idx = 0;
 for kernel = opts.DesignKernels
