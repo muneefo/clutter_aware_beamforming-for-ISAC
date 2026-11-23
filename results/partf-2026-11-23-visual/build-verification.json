@@ -1,0 +1,18 @@
+{
+  "documents": {
+    "letters": {
+      "pages": 6,
+      "sha256": "d00dbb21e95490ba1da2a75f32b687af72d42d2b474eacd6ad139e398ab72810"
+    },
+    "appendix": {
+      "pages": 5,
+      "sha256": "5c157dd7a56d1c19f28aec935440c55f857522ec2bbb6ac67423bbca00be6913"
+    },
+    "l2o-flowchart": {
+      "pages": 1,
+      "sha256": "7a04514fff99489f2d982075f03c49f1f9b28224651887e52d0a62cacfe7788b"
+    }
+  },
+  "overfull_boxes": 0,
+  "undefined_citations_or_references": 0
+}

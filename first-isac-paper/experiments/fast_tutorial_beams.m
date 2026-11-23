@@ -1,4 +1,4 @@
-function out = fast_tutorial_beams(repo, outWU, options)
+function out = fast_tutorial_beams(repo, outWU, options, data)
 % FAST_TUTORIAL_BEAMS   Fast transmit design for the tutorial's block precoder.
 %   out = fast_tutorial_beams(repo, outWU)
 %   out = fast_tutorial_beams(repo, outWU, struct('mode',"learnedProposal"))
@@ -13,20 +13,24 @@ options = settings(options);
 oldPath = path; cleanPath = onCleanup(@() path(oldPath)); %#ok<NASGU>
 oldRng = rng; cleanRng = onCleanup(@() rng(oldRng)); %#ok<NASGU>
 addpath(fullfile(repo, 'function'));
-data = load(fullfile(repo,'data','covMat_BLP.mat'), 'para','Vcc_hat','Vcc','R_eta');
+if nargin < 4
+    data = load(fullfile(repo,'data','covMat_BLP.mat'), 'para','Vcc_hat','Vcc','R_eta');
+end
 cfg = outWU.options;
 x = configure(data, cfg.K, cfg.gammaDB);
 ao = outWU.trials(outWU.trials.method == "AO_SDP", :);
 assert(~isempty(ao) && numel(unique(ao.scene)) == height(ao), 'Expected one AO row per scene.');
 backend = choose_backend();
-if options.ablation ~= ""
-    assert(backend == "linprog", 'Part B requires the explicit-tolerance linprog backend.');
+if options.ablation ~= "" || options.matchedPolicy ~= ""
+    assert(backend == "linprog", 'Matched experiments require explicit-tolerance linprog.');
 end
 model = [];
-if options.mode ~= "physics", model = outWU.model; end
+if options.mode ~= "physics" || any(options.matchedPolicy == ["reducedCost","envelope"])
+    model = outWU.model;
+end
 rows = cell(height(ao),1); designs = cell(height(ao),1);
 profiles = cell(height(ao),1); plans = cell(height(ao),1);
-fprintf('Mode %s, LP backend %s.\n', options.mode, backend);
+if ~options.quiet, fprintf('Mode %s, LP backend %s.\n', options.mode, backend); end
 for i = 1:height(ao)
     seed = ao.scene(i);
     rng(seed,'twister');
@@ -53,21 +57,27 @@ for i = 1:height(ao)
         'feasible',feasible,'hitQuality',gap<=cfg.qualityGapDB, ...
         'lpSolves',steps,'status',status);
     designs{i} = struct('W',W,'U',U);
-    fprintf('Scene %d: %.4f dB, AO gap %+.4f dB, %.3f s, %s\n', ...
-        seed,trueDB,gap,seconds,status);
+    if options.matchedPolicy ~= ""
+        rows{i}.matchedPolicy = options.matchedPolicy;
+        rows{i}.designSCNRdB = 10*log10(compute_SCNR(Q,U,x.V,x.R,x.sig,x.a,x.b));
+    end
+    if ~options.quiet
+        fprintf('Scene %d: %.4f dB, AO gap %+.4f dB, %.3f s, %s\n', ...
+            seed,trueDB,gap,seconds,status);
+    end
 end
 out = struct('trials',struct2table(vertcat(rows{:}),'AsArray',true), ...
         'designs',{designs},'options',options,'backend',backend);
-if options.ablation ~= ""
+if options.ablation ~= "" || options.matchedPolicy ~= ""
     out.timing = profiles;
     out.pricingPlans = plans;
 end
-disp(out.trials);
+if ~options.quiet, disp(out.trials); end
 end
 
 function o = settings(given)
 o = struct('outer',5,'inner',3,'toleranceDB',0.002,'mode',"physics", ...
-    'ablation',"",'pricingSchedules',{{}});
+    'ablation',"",'pricingSchedules',{{}},'matchedPolicy',"",'quiet',false);
 keys = fieldnames(given);
 assert(all(ismember(keys,fieldnames(o))),'Unknown option.');
 for j = 1:numel(keys), o.(keys{j}) = given.(keys{j}); end
@@ -81,6 +91,11 @@ assert(isscalar(o.mode) && any(o.mode == ["physics","learnedProposal","fixedProp
 o.ablation = string(o.ablation);
 assert(isscalar(o.ablation) && any(o.ablation == ["","B6","B7","B8"]), 'Invalid Part B arm.');
 assert(o.ablation == "" || o.mode == "physics", 'Part B uses the physics-only proposal.');
+o.matchedPolicy = string(o.matchedPolicy);
+assert(isscalar(o.matchedPolicy) && any(o.matchedPolicy == ["","analytic","reducedCost","envelope"]), ...
+    'Invalid matched policy.');
+assert(o.matchedPolicy == "" || (o.ablation == "" && o.mode == "physics"), ...
+    'Use the matched Part E schedule on its own.');
 end
 
 function x = configure(data,K,gammaDB)
@@ -121,12 +136,20 @@ end
 
 function [W,U,steps,status,timing,plan] = design_beams(x,o,backend,model,seed,matched)
 % Allocate across all tones. Part B enables exclusive stage clocks and matched budgets.
-track = o.ablation ~= "";
+partE = o.matchedPolicy ~= "";
+track = o.ablation ~= "" || partE;
 timing = struct('build',0,'solve',0,'price',0,'mvdr',0,'kernel',0,'recovery',0);
 plan = {};
 if track, watch = tic; end
 [bank,G,noiseRatio,W] = initial_bank(x);
 if track, timing.build = toc(watch); end
+if partE
+    timing.inference = 0;
+    timing.appendedAtoms = 0;
+    timing.firstUserProposals = 0;
+    firstWidth = size(bank{1}.V,2);
+    everActive = false(x.K,x.N);
+end
 if o.ablation == "B7", random = RandStream('mt19937ar','Seed',370000+seed); end
 [eta,A,C,hot,cold,U,timing] = receiver(x,W,track,timing);
 steps = 0; status = "budget reached";
@@ -139,6 +162,12 @@ for j = 1:o.outer
     for k = 1:o.inner
         [powers,dual,values,timing] = allocate_power(x,bank,G,noiseRatio,A,C,sum(hot),backend,track,timing);
         steps = steps+1;
+        if partE && timing.firstUserProposals > 0
+            for n = 1:x.N
+                firstPowers = powers{n}(firstWidth+(1:x.K));
+                everActive(:,n) = everActive(:,n) | (firstPowers(:) > 1e-8*x.P*(1-1e-8));
+            end
+        end
         if track, watch = tic; end
         Y = recover_streams(x,G,bank,powers);
         [margin,power] = audit_beams(x,Y);
@@ -151,7 +180,23 @@ for j = 1:o.outer
         end
         if track, timing.recovery = timing.recovery + toc(watch); end
         terminal = j == o.outer && k == o.inner;
-        if o.ablation == "B7" && ~terminal
+        if partE
+            if steps == 1 && ~terminal && o.matchedPolicy ~= "analytic"
+                [bank,inference,pricing] = append_l2o_directions(x,bank,G,noiseRatio,dual,values,model);
+                timing.inference = timing.inference + inference;
+                timing.price = timing.price + pricing;
+            else
+                watch = tic;
+                [bank,boundDB] = enrich_directions(x,bank,G,dual,values,~terminal,true);
+                timing.price = timing.price + toc(watch);
+            end
+            if ~terminal
+                timing.appendedAtoms = timing.appendedAtoms + x.N*(x.K+1);
+                if steps == 1, timing.firstUserProposals = x.N*x.K; end
+            else
+                timing.terminalBoundDB = boundDB;
+            end
+        elseif o.ablation == "B7" && ~terminal
             watch = tic;
             tags = matched{steps};
             for n = 1:x.N
@@ -178,6 +223,7 @@ for j = 1:o.outer
         status = "tolerance reached"; break;
     end
 end
+if partE, timing.firstUserEverActive = nnz(everActive); end
 end
 
 function [bank,G,noiseRatio,W] = initial_bank(x)
@@ -304,9 +350,10 @@ else
 end
 end
 
-function [bank,boundDB,added] = enrich_directions(x,bank,G,dual,v,append)
+function [bank,boundDB,added] = enrich_directions(x,bank,G,dual,v,append,forceAll)
 % Leading eigenvector maximizes reduced cost over all unit directions
 % for one tone and stream owner. Add it when the current LP can improve.
+if nargin < 7, forceAll = false; end
 excess = 0;
 added = cell(x.N,1);
 for n = 1:x.N
@@ -322,7 +369,7 @@ for n = 1:x.N
         [largest,idx] = max(real(ev));
         improvement = largest-dual.power;
         excess = max(excess,improvement);
-        if improvement>1e-7 && append
+        if append && (forceAll || improvement>1e-7)
             bank{n}.V(:,end+1) = modes(:,idx);
             bank{n}.owner(end+1) = owner;
             added{n}(end+1) = owner;
@@ -331,6 +378,33 @@ for n = 1:x.N
 end
 % Reduced-cost bound for the tightened, fixed-receiver allocation problem.
 boundDB = 10*log10(1+excess/max(v.ratio,eps));
+end
+
+function [bank,inference,pricing] = append_l2o_directions(x,bank,G,noiseRatio,dual,v,model)
+inference = 0;
+pricing = 0;
+for n = 1:x.N
+    watch = tic;
+    H = G{n};
+    mu = dual.user(:,n);
+    base = v.matrix(:,:,n) - (H.*mu.')*H';
+    [modes,spectrum] = eig((base+base')/2,'vector');
+    [~,idx] = max(real(spectrum));
+    pricing = pricing + toc(watch);
+
+    watch = tic;
+    B = zeros(x.nt,4,x.K,'like',H);
+    M = zeros(x.nt,x.nt,x.K,'like',H);
+    for k = 1:x.K
+        h = H(:,k);
+        B(:,:,k) = [bank{n}.V(:,k), h, x.a{n}, bank{n}.V(:,x.K+1)];
+        M(:,:,k) = base + (1+1/v.gamma)*mu(k)*(h*h');
+    end
+    users = parte_l2o_proposals(B,M,H,x.gamma,noiseRatio(:,n),model);
+    inference = inference + toc(watch);
+    bank{n}.V = [bank{n}.V, users, modes(:,idx)];
+    bank{n}.owner = [bank{n}.owner, 1:x.K, 0];
+end
 end
 
 function W = recover_streams(x,G,bank,power)

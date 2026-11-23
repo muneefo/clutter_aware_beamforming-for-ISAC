@@ -196,8 +196,8 @@ Draw 111–114 atom-level diagnostics when available.
 The revised sources are `first-isac-paper/manuscript/main.tex` and
 `first-isac-paper/manuscript/appendix.tex`. The archived manuscript PDF and
 historical Table I remain in their original locations. The latest PDFs,
-with the learning-to-optimize ablation identified explicitly, are in
-`results/partf-2026-11-23-l2o/`. The original release PDFs, Letter-size
+with the L2O architecture and pseudocode, are in
+`results/partf-2026-11-23-visual/`. The original release PDFs, Letter-size
 figures, table inputs and provenance manifest are in
 `results/partf-2026-11-23/`. The nine verified references, abstract and
 conclusion evidence mapping, and changes from the prior draft are in
@@ -231,3 +231,54 @@ tracking/scaling plots from Part C, the certificate plot from Part D's
 terminal masters, and both learning tables from Part E. The supplement
 directly includes the archived Table I reconstruction, Part C empirical CDF
 and Part E ablation plot. The preceding sections give their generation commands.
+
+### MATLAB timing and SCNR versus required SINR
+
+In MATLAB R2022a or later, add the scripts directory and pass the pinned
+tutorial checkout. The full sweep uses CVX/MOSEK for AO–SDP and Optimization
+Toolbox `linprog` for the three matched LP arms. Use a fresh MATLAB process
+per thread setting and a fresh output folder.
+
+```matlab
+addpath('scripts')
+tutorial = "../Clutter-Aware-ISAC-Tutorial";
+T = run_matlab_sinr_sweep(tutorial, "results/matlab-threshold-preview", ...
+    SINRdB=[6 8 10], Seeds=16001:16003, Repeats=1, IncludeAO=false);
+```
+
+For the full run, use a new destination and omit the overrides. Defaults
+are four users, thresholds 4:2:14 dB, 32 scenes, three repetitions, a
+3×2 LP budget and one MATLAB computation thread. Set `Threads=2` in a
+separate run for a second thread setting. The frozen reduced-cost and
+envelope policies in `results/matlab-sweep-2026-11-23/l2o-weights.mat`
+were exported from the Part E checkpoints. The harness checks the native
+forward pass against a packaged parity fixture before timing. The 4 dB
+point extends below the policies' 6–14 dB training thresholds.
+
+The runner logs `environment.json`, `warmup.csv` and an append-only
+`raw.csv`. The design clock includes initialization, solver work,
+pricing, inference, recovery and acceptance. Endpoint scoring and file
+writing fall outside that clock. The LP arms share the exact solve and
+column counts and use inference only after the first nonterminal master.
+The manifest records version information and requested thread caps.
+
+Under `plots/`, `scnr-vs-sinr.pdf` separates estimated- and ideal-kernel
+SCNR. `timing-vs-sinr.pdf` shows design time and feasible-scene coverage.
+Each point uses the common scenes for which all requested repetitions
+were feasible across methods. Times are paired per-scene medians and
+SCNRs are averaged in linear units across scenes. `summary.csv` stores
+confidence intervals, paired score changes and time ratios. `paired.csv`
+stores the eligible scene-level comparisons when at least one exists.
+Plot a partial or completed run again with
+`plot_matlab_sinr_sweep(runFolder, freshPlotFolder)`.
+
+Re-export the weights using the Part A Python lock and a new filename.
+
+```bash
+python scripts/export_l2o_matlab.py results/parte-2026-11-23/training /tmp/l2o-weights.mat
+```
+
+The manuscript's architecture and pseudocode describe the measured Part E
+algorithm. Build the standalone diagram from the manuscript source folder
+with `latexmk -pdf -outdir=FRESH_OUTPUT l2o-flowchart.tex`. The new MATLAB
+curves require a licensed run of the sweep.

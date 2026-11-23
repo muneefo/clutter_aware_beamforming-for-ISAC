@@ -1,6 +1,6 @@
 \documentclass[journal]{IEEEtran}
 \usepackage[T1]{fontenc}
-\usepackage{lmodern,amsmath,amssymb,graphicx,booktabs}
+\usepackage{lmodern,amsmath,amssymb,graphicx,booktabs,tikz}
 \usepackage[hidelinks]{hyperref}
 \DeclareMathOperator{\tr}{tr}
 \DeclareMathOperator{\vecop}{vec}
@@ -315,9 +315,27 @@ The linearity in~\eqref{eq:linear} concerns the block transmit covariance and th
 \end{table}
 
 \subsection{Learning to Optimize Beam Directions}
-In two-stage learning to optimize (L2O), the first physics LP at the ZF-start MVDR receiver supplies dual features. A permutation-equivariant network proposes a unit vector in the span of the user's ZF and channel vectors, the target and the target-null direction. The next LP allocates its power. One policy maximizes the first master's reduced cost \(v\HH M_{nk}v-\lambda\). The other adds an envelope loss using the teacher's final dual matrix and active scaled powers. An alternating teacher labeled 5,000 independent ideal-map scenes at the registered 0.01 dB gates. Training and deployment use the same first-LP features, and finite differences validate both gradients.
+Figure~\ref{fig:l2o-architecture} shows how the first LP's dual prices feed the L2O policy. Its output is a unit vector in the span of the user's ZF and channel vectors, the target and the target-null direction. The reduced-cost policy maximizes \(v\HH M_{nk}v-\lambda\). The envelope policy adds a loss weighted by active scaled powers from the converged teacher. Both use first-LP features at training and deployment. The teacher supplied 5,000 labels, and finite differences validated both gradients.
 
-On 64 unseen maps and a separate set of 64 original-map draws, each arm matched solve and atom counts. The first nonterminal pass substitutes one user proposal per tone and owner, keeping the sensing direction and later pricing analytic. At \(1\times1\), all arms return the same SCNR because proposals have no subsequent master. Table~\ref{tab:learning} shows the trade-off at \(2\times1\) and \(3\times2\). Both learners reduce measured time and deliver lower median design SCNR than analytic pricing. All 1,920 endpoints were physically feasible. Across these two budgets and cohorts, none of the envelope policy's first-pass user proposals exceeded the positive-power threshold at any later solve. Its direct paired median SCNR effects versus reduced cost alone were all smaller than 0.000061 dB in magnitude. The archived SPSA arm awaits its original checkpoint. The reported zero-deployment result concerns the new envelope policy.
+\begin{figure}[t]
+ \centering
+ \input{l2o-architecture}
+ \caption{Two-stage learning to optimize. Solid arrows show deployment. The dashed path contributes only to envelope training. The augmented LP allocates power over the expanded dictionary.}
+ \label{fig:l2o-architecture}
+\end{figure}
+
+\smallskip\noindent\begin{minipage}{\columnwidth}\footnotesize
+\textbf{Algorithm 1. Fixed-budget design with L2O}
+\begin{enumerate}
+ \setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}
+ \item Initialize feasible ZF streams, dictionary and MVDR filters.
+ \item At each inner step solve the power LP, recover streams, and accept the candidate only if it passes the physical and fixed-receiver SCNR gates.
+ \item At the first nonterminal pass append one learned direction per user and one analytic sensing direction per tone. At later nonterminal passes append one analytic direction for each owner and tone.
+ \item At the terminal pass compute the eigenvalue bound and append no atoms. Refresh MVDR from the accepted streams at every outer boundary and return the final accepted streams and filters.
+\end{enumerate}
+\end{minipage}\par\smallskip
+
+Table~\ref{tab:learning} uses 64 unseen maps. The supplement includes 64 original-map draws. All 1,920 endpoints passed the physical checks. At \(1\times1\) the shared master returns identical scores. On unseen maps at \(2\times1\), both learned arms reduce median paired design time by about 10--12\%, with design SCNR losses of 0.209--0.255 dB. At \(3\times2\) the losses shrink to about 0.012 dB. The matched random baseline has a comparable median gap at six solves. The envelope policy's first-pass user proposals never cross the positive-power threshold in either cohort. Its paired median SCNR changes from reduced cost alone are below 0.000061 dB in magnitude. The archived SPSA arm awaits its original checkpoint.
 
 \section{Reproducibility and Conclusion}
 The reproducibility package includes code, locks, raw records and regeneration commands on the \href{https://github.com/muneefo/clutter_aware_beamforming-for-ISAC/tree/letters-revision}{project revision branch}. The tutorial input revision is \texttt{0f864c4}. The Python measurements use CPython 3.12.14, SciPy 1.17.0 and HiGHS 1.8.0 on an Intel Xeon Platinum 8573C. The serial ladder uses one pinned CPU and one BLAS and solver thread. The parallel tone condition uses two one-thread workers. The appendix and manifests give all seed bands and environment details.
