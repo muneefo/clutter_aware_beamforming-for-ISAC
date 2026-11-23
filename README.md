@@ -111,3 +111,26 @@ partb_matlab("/path/to/Clutter-Aware-ISAC-Tutorial","results/partb-new/matlab-t1
 Use `matlab-t2` and thread cap `2` for the two-thread block. The warm-up
 profiler captures inclusive function times separately from measured wall time.
 The first Python report is archived under `results/partb-2026-11-22/`.
+
+## IEEE Letters Part C statistical evaluation
+
+Use the Part A Python lock, the pinned tutorial, and fresh paths. The two static
+shards used CPU 0 and CPU 1 as independent single-core timing lanes. The
+correlated-channel and scaling commands can run on the same separate lanes.
+Change the CPU indices to allowed distinct cores on a different machine.
+
+```bash
+export PYTHONDONTWRITEBYTECODE=1
+python scripts/partc_run.py static "$TUTORIAL" results/partc-new/static-0 --cpu 0 --shard 0 --shards 2
+python scripts/partc_run.py static "$TUTORIAL" results/partc-new/static-1 --cpu 1 --shard 1 --shards 2
+python scripts/partc_run.py warm "$TUTORIAL" results/partc-new/warm --cpu 0
+python scripts/partc_run.py scaling "$TUTORIAL" results/partc-new/scaling --cpu 1
+python scripts/partc_report.py results/partc-new results/partc-new/summary
+python scripts/partc_tables.py results/partc-new/summary/summary.json results/partc-new/summary/tables.md
+```
+
+Each execution mode accepts `--pilot` with a fresh output path. The summary
+command generates the empirical CDF, Pareto and warm-start/scaling PDFs and
+the flattened data. The manifests and raw traces retain coverage, timing lanes
+and solver metadata. The benchmark condition and the scaling-only physical
+model are specified in the Part C protocol.
