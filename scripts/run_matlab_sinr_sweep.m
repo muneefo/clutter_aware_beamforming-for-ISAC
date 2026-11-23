@@ -42,14 +42,16 @@ oldThreads = maxNumCompThreads(opts.Threads);
 threadCleanup = onCleanup(@() maxNumCompThreads(oldThreads)); %#ok<NASGU>
 addpath(experimentDir);
 addpath(fullfile(tutorial,'function'));
-linprogFile = prefer_optimization_toolbox_linprog();
+backends = available_power_backends();
 
 data = load(covPath,'para','Vcc_hat','Vcc','R_eta');
 if opts.DesignKernel == "perfect", data.Vcc_hat = data.Vcc; end
 assert(opts.Users < min(data.para.Nt,data.para.Ns),'The ZF start needs a spare dimension.');
 weights = load(checkpoint);
 check_forward_pass(weights);
-powerSolver = tutorial_power_solver(["linprog","linprog-default"]);
+powerSolver = tutorial_power_solver(backends,opts.Threads);
+solverFile = which('linprog');
+if powerSolver.backend == "mosekopt", solverFile = which('mosekopt'); end
 fprintf('Power LP: %s (%s, %s)\n',powerSolver.backend,powerSolver.algorithm,powerSolver.tolerances);
 methods = ["reducedCost","envelope"];
 if opts.IncludeAnalytic, methods = ["analytic",methods]; end
@@ -62,7 +64,7 @@ end
 mkdir(destination);
 manifest = struct('options',opts,'methods',methods,'matlab',version,'platform',computer, ...
     'blas',version('-blas'),'toolboxes',ver,'matlabThreads',maxNumCompThreads, ...
-    'linprog',rmfield(powerSolver,'solve'),'linprogFile',linprogFile, ...
+    'linprog',rmfield(powerSolver,'solve'),'powerSolverFile',solverFile,'linprogFile',which('linprog'), ...
     'harnessSHA256',sha256(which('run_matlab_sinr_sweep')), ...
     'solverSHA256',sha256(which('fast_tutorial_beams')), ...
     'powerSolverSHA256',sha256(which('tutorial_power_solver')), ...
@@ -119,22 +121,21 @@ end
 summary = plot_matlab_sinr_sweep(destination);
 end
 
-function file = prefer_optimization_toolbox_linprog()
+function backends = available_power_backends()
 toolboxRoot = fullfile(matlabroot,'toolbox','optim');
-toolboxPrefix = [toolboxRoot filesep];
-file = which('linprog');
-if startsWith(file,toolboxPrefix,'IgnoreCase',ispc)
-    return;
-end
+prefix = [toolboxRoot filesep];
 solverDir = fullfile(toolboxRoot,'optim');
-assert(isfile(fullfile(solverDir,'linprog.m')) || isfile(fullfile(solverDir,'linprog.p')), ...
-    'ISAC:OptimizationToolboxMissing', ...
-    'Install MATLAB Optimization Toolbox. Its linprog was not found under %s. Current resolution: %s',solverDir,file);
-addpath(solverDir,'-begin');
-file = which('linprog');
-assert(startsWith(file,toolboxPrefix,'IgnoreCase',ispc),'ISAC:LinprogShadowed', ...
-    ['MATLAB still resolves linprog to %s. Run the sweep with the bundle scripts folder ' ...
-     'as your current folder.'],file);
+if ~startsWith(which('linprog'),prefix,'IgnoreCase',ispc) && ...
+        (isfile(fullfile(solverDir,'linprog.m')) || isfile(fullfile(solverDir,'linprog.p')))
+    addpath(solverDir,'-begin');
+end
+backends = strings(1,0);
+if startsWith(which('linprog'),prefix,'IgnoreCase',ispc)
+    backends = ["linprog","linprog-default"];
+end
+if exist('mosekopt','file') ~= 0, backends(end+1) = "mosekopt"; end
+assert(~isempty(backends),'ISAC:NoPowerSolver', ...
+    'Add MOSEK toolbox for MATLAB (mosekopt) or install MATLAB Optimization Toolbox.');
 end
 
 function report_attempts(label,rows)

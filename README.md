@@ -235,8 +235,8 @@ and Part E ablation plot. The preceding sections give their generation commands.
 ### MATLAB timing and SCNR versus required SINR
 
 In MATLAB R2022a or later, add the scripts directory and pass the pinned
-tutorial folder. The full sweep uses CVX/MOSEK for AO–SDP and Optimization
-Toolbox `linprog` for the three matched LP arms. Use a fresh MATLAB process
+tutorial folder. The full sweep uses CVX/MOSEK for AO–SDP and either Optimization
+Toolbox `linprog` or licensed MOSEK `mosekopt` for the three matched LP arms. Use a fresh MATLAB process
 per thread setting and a fresh output folder.
 
 ```matlab
@@ -265,7 +265,9 @@ share the exact solve and column counts and use inference only after the
 first nonterminal master. The sweep checks the power LP solution and its
 inequality multiplier before timing. It tries explicit `1e-9` tolerances
 first, then the MATLAB release defaults. All LP arms in the run use the
-same passing configuration. The sweep prioritizes the Optimization Toolbox
+same passing configuration. When native MATLAB linprog is unavailable or
+fails the probe, the sweep tries MOSEK dual simplex through mosekopt with
+explicit primal and dual tolerances of 1e-9. The sweep prioritizes the Optimization Toolbox
 copy of `linprog` on its temporary MATLAB path. The manifest records the
 solver file, selected algorithm, tolerance mode, startup failures, version
 information and requested thread caps.
@@ -295,7 +297,8 @@ curves require a licensed run of the sweep.
 
 Use the `letters-revision` checkout or extract the [MATLAB L2O bundle](https://github.com/muneefo/clutter_aware_beamforming-for-ISAC/raw/refs/heads/letters-revision/results/matlab-sweep-2026-11-23/isac-l2o-matlab.zip).
 
-The sweep uses Optimization Toolbox `linprog` and a separate tutorial
+The sweep uses either licensed MOSEK `mosekopt` or Optimization Toolbox
+`linprog`, plus a separate tutorial
 folder. An extracted ZIP or a Git checkout works. MATLAB verifies the
 covariance and the tutorial functions used by the sweep against the pinned
 revision and records their hashes in `environment.json`. If you need the
@@ -320,10 +323,9 @@ T = run_l2o_matlab_sweep(tutorial,preview,Users=4,SINRdB=8,Seeds=11001:11002,Rep
 
 If the preview reports errors, the console prints the first error for each
 seed. The `K4/estimated/raw.csv` file lists every trial and its status.
-The console and `K4/estimated/environment.json` identify the `linprog`
+The console and `K4/estimated/environment.json` identify the LP solver
 configuration used for both policies. The manifest also records the
-resolved `linprog` path, which is useful when MOSEK is installed alongside
-Optimization Toolbox.
+selected solver path in `powerSolverFile`.
 
 Once the preview succeeds, launch the full sweep into a fresh folder.
 
