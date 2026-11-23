@@ -104,7 +104,8 @@ def native_scs_check(problem, cut_solver, a, c, eta, sensing, users):
     return result["info"]
 
 
-def timed_ao(x, seed, arm, outer, inner, workers, check_native=False, cold_retry=False, persistent=False):
+def timed_ao(x, seed, arm, outer, inner, workers, check_native=False, cold_retry=False, persistent=False,
+             checkpoints=None, native_cone=True):
     profile = dict.fromkeys(METRICS, 0.)
     start = perf_counter()
     build_at = perf_counter()
@@ -114,7 +115,7 @@ def timed_ao(x, seed, arm, outer, inner, workers, check_native=False, cold_retry
     else:
         *_, w0 = seed_bank(x)
     q = covariance(w0)
-    problem = JointTransmitSDP(x)
+    problem = JointTransmitSDP(x, native_cone=native_cone)
     if arm == "B4":
         optimizer = CooperSDP(problem, persistent=persistent)
     elif arm == "B5":
@@ -126,6 +127,7 @@ def timed_ao(x, seed, arm, outer, inner, workers, check_native=False, cold_retry
     eta = old
     trace = []
     diagnostic = None
+    excluded = 0.
     status = "solved"
     w = None
     try:
@@ -152,6 +154,15 @@ def timed_ao(x, seed, arm, outer, inner, workers, check_native=False, cold_retry
             q = qp * problem.power_unit
             if abs(10 * np.log10(eta / old)) < .01 or j == outer:
                 break
+            if checkpoints is not None and j in checkpoints:
+                endpoint_at = perf_counter()
+                _, endpoint_w, _, _ = recover_streams(x, q, users * problem.power_unit)
+                endpoint = dict(status="solved", seconds=perf_counter() - start - excluded,
+                                outer_steps=j, lp_solves=0, sdp_solves=len(trace),
+                                price_evals=sum(r.get("price_evals", 0) for r in trace))
+                score(x, q, endpoint_w, u, endpoint)
+                checkpoints[j] = endpoint
+                excluded += perf_counter() - endpoint_at
             old = eta
             _, a, c, d0, u = receiver(x, q, profile)
         if status == "solved":
@@ -161,7 +172,7 @@ def timed_ao(x, seed, arm, outer, inner, workers, check_native=False, cold_retry
     finally:
         if arm == "B5":
             optimizer.close()
-    seconds = perf_counter() - start
+    seconds = perf_counter() - start - excluded
     for key, value in optimizer.profile.items():
         profile[key] += value
     row = dict(seconds=seconds, status=status, outer_steps=j, sdp_solves=len(trace),

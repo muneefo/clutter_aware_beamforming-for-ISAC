@@ -51,10 +51,8 @@ class ConeCoordinates:
 class JointTransmitSDP:
     """Conic dual with global power price and per-tone user prices."""
 
-    def __init__(self, x):
+    def __init__(self, x, native_cone=True):
         self.n, self.k, self.t = x.N, x.K, x.T
-        self.real = ConeCoordinates(x.T, False)
-        self.complex = ConeCoordinates(x.T, True)
         self.power_unit = x.P / x.N
         lengths = np.linalg.norm(x.H, axis=1)
         normalized = (x.H / lengths[:, None, :]).transpose(0, 2, 1)
@@ -64,7 +62,13 @@ class JointTransmitSDP:
         self.grams = channel_grams
         self.gamma = x.g
         self.noise = noise
-        self.cost = np.r_[x.N, -noise.ravel()]
+        if native_cone:
+            self.build_native_cone(x, channel_grams)
+
+    def build_native_cone(self, x, channel_grams):
+        self.real = ConeCoordinates(x.T, False)
+        self.complex = ConeCoordinates(x.T, True)
+        self.cost = np.r_[x.N, -self.noise.ravel()]
         coeff = np.broadcast_to(-np.ones((x.N, x.K, x.K)), (x.N, x.K, x.K)).copy()
         idx = np.arange(x.K)
         coeff[:, idx, idx] = 1 / x.g
