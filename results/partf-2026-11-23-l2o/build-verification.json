@@ -1,0 +1,16 @@
+{
+  "documents": {
+    "letters": {
+      "pages": 5,
+      "sha256": "75d9086595b3b52ac8cfc61a4b5111838a7374790ae3f02072769e6932aaaa23"
+    },
+    "appendix": {
+      "pages": 5,
+      "sha256": "51870c1d6b831abfa86572ef0eeb0431e7fdd2429b31a509f23e3a8eee683251"
+    }
+  },
+  "asset_input_hashes_verified": true,
+  "overfull_boxes": 0,
+  "undefined_citations_or_references": 0,
+  "learning_to_optimize_section_page": 4
+}

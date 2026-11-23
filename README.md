@@ -195,8 +195,10 @@ Draw 111–114 atom-level diagnostics when available.
 
 The revised sources are `first-isac-paper/manuscript/main.tex` and
 `first-isac-paper/manuscript/appendix.tex`. The archived manuscript PDF and
-historical Table I remain in their original locations. The release PDFs,
-Letter-size figures, table inputs and provenance manifest are in
+historical Table I remain in their original locations. The latest PDFs,
+with the learning-to-optimize ablation identified explicitly, are in
+`results/partf-2026-11-23-l2o/`. The original release PDFs, Letter-size
+figures, table inputs and provenance manifest are in
 `results/partf-2026-11-23/`. The nine verified references, abstract and
 conclusion evidence mapping, and changes from the prior draft are in
 `REFERENCES.md`, `CLAIMS.md` and `CHANGELOG.md`.

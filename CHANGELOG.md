@@ -9,6 +9,7 @@ The comparison is against the supplied manuscript and repository revision `90121
 - Replaced the main historical headline with matched Python results. The main text carries the benchmark reconciliation, timing ladder, measured Pareto frontier, same-receiver certificate comparison, correlated tracking and array scaling, and the count-matched learning ablation. The supplement retains the historical Table I and audit limitations.
 - Described design time as slow-timescale block design. The paper gives the measured gap to a 125 µs NR slot at 120 kHz and states the quadratic waveform dependence in symbol-level STAP/SLP.
 - Added asset regeneration commands, input checksums, verified bibliographic identifiers and an abstract/conclusion claim audit.
+- Identified learning to optimize explicitly in the abstract, keywords, ablation and supplement. The main text distinguishes the two training objectives and specifies where the network enters the LP workflow.
 
 ## Negative and unexpected findings
 

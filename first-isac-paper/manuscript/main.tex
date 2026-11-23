@@ -25,11 +25,11 @@
 \setlength{\jot}{2pt}
 
 \begin{abstract}
-We develop a block-level beamforming method for wideband integrated sensing and communication with transmit-dependent clutter. At fixed receive filters, clutter-kernel linearity and the Charnes--Cooper transformation yield a power-allocation linear program. A Hermitian eigenvalue oracle selects beam directions from its dual prices and bounds the fixed-receiver covariance gap before stream recovery. On 32 matched single-thread Python draws, six and fifteen allocations gave median paired speedups of \(6.87\times\) and \(2.48\times\) over the alternating semidefinite baseline, with median true sensing losses of \(0.219\) and \(0.052\) dB. A separate 96-pair study found median true losses of \(0.012\)--\(0.142\) dB at fifteen allocations across three operating conditions. All 288 terminal certificates exceeded the gaps to converged fixed-receiver references and were often loose. On unseen clutter maps, learned directions shortened measured runtime and reduced design SCNR at matched budgets. These results support slow-timescale covariance design.
+We develop block-level beamforming for wideband integrated sensing and communication with transmit-dependent clutter. At fixed receive filters, clutter-kernel linearity and Charnes--Cooper yield a power-allocation linear program (LP). A Hermitian eigenvalue oracle prices directions and bounds the covariance gap before stream recovery. On 32 matched single-thread Python draws, six and fifteen allocations gave median paired speedups of \(6.87\times\) and \(2.48\times\) over alternating semidefinite optimization, with median true sensing losses of \(0.219\) and \(0.052\) dB. A separate 96-pair study found median true losses of \(0.012\)--\(0.142\) dB at fifteen allocations across three conditions. All 288 terminal certificates covered the gaps to converged fixed-receiver references and were often loose. A two-stage learning-to-optimize (L2O) policy proposes directions from the first LP's dual prices. On unseen clutter maps, L2O shortened runtime and reduced design SCNR at matched budgets. These results support slow-timescale covariance design.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Integrated sensing and communication, clutter covariance, fractional programming, column generation, beamforming.
+Integrated sensing and communication, clutter covariance, fractional programming, column generation, learning to optimize.
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -301,7 +301,7 @@ At 120 kHz with normal cyclic prefix, the NR slot duration is \(125\,\mu\mathrm{
 The linearity in~\eqref{eq:linear} concerns the block transmit covariance and the averaged cold-clutter model of~\cite[Sec.~VI-A]{liu2026clutter}. In the symbol-level STAP/SLP formulation, the disturbance covariance has the form \(R_{\mathrm{cc},n}=X_n V_{\mathrm{cc},n}^{\mathrm{st}}X_n\HH\), where \(X_n\) depends on the actual waveform samples~\cite[Sec.~VI-B]{liu2026clutter}. Its quadratic dependence on those samples lies outside the block power-master derivation.
 
 \begin{table}[t]
- \caption{Matched learned and control proposals on 64 held-out clutter maps. SCNR changes are paired design medians in dB with 95\% intervals. Time is the paired median ratio to analytic pricing.}
+ \caption{Learning-to-optimize ablation on 64 held-out clutter maps. SCNR changes are paired design medians in dB with 95\% intervals. Time is the paired median ratio to analytic pricing.}
  \label{tab:learning}
  \centering\footnotesize
  \setlength{\tabcolsep}{2.5pt}
@@ -314,15 +314,15 @@ The linearity in~\eqref{eq:linear} concerns the block transmit covariance and th
  \end{tabular}
 \end{table}
 
-\subsection{Learning at matched atom counts}
-An alternating teacher labeled 5,000 scenes on independent ideal clutter maps. Each label met both registered 0.01 dB block convergence gates. The compact permutation-equivariant policy predicts a normalized direction in the span of the user's ZF and channel vectors, the target and the target-null direction. Its inputs come from the \emph{first} physics LP at the MVDR receiver of the ZF start in both training and deployment. The teacher's converged receiver and active powers are used only in the envelope-supervised loss. Both policies use the same training schedule, and finite differences validate their gradients.
+\subsection{Learning to Optimize Beam Directions}
+In two-stage learning to optimize (L2O), the first physics LP at the ZF-start MVDR receiver supplies dual features. A permutation-equivariant network proposes a unit vector in the span of the user's ZF and channel vectors, the target and the target-null direction. The next LP allocates its power. One policy maximizes the first master's reduced cost \(v\HH M_{nk}v-\lambda\). The other adds an envelope loss using the teacher's final dual matrix and active scaled powers. An alternating teacher labeled 5,000 independent ideal-map scenes at the registered 0.01 dB gates. Training and deployment use the same first-LP features, and finite differences validate both gradients.
 
 On 64 unseen maps and a separate set of 64 original-map draws, each arm matched solve and atom counts. The first nonterminal pass substitutes one user proposal per tone and owner, keeping the sensing direction and later pricing analytic. At \(1\times1\), all arms return the same SCNR because proposals have no subsequent master. Table~\ref{tab:learning} shows the trade-off at \(2\times1\) and \(3\times2\). Both learners reduce measured time and deliver lower median design SCNR than analytic pricing. All 1,920 endpoints were physically feasible. Across these two budgets and cohorts, none of the envelope policy's first-pass user proposals exceeded the positive-power threshold at any later solve. Its direct paired median SCNR effects versus reduced cost alone were all smaller than 0.000061 dB in magnitude. The archived SPSA arm awaits its original checkpoint. The reported zero-deployment result concerns the new envelope policy.
 
 \section{Reproducibility and Conclusion}
 The reproducibility package includes code, locks, raw records and regeneration commands on the \href{https://github.com/muneefo/clutter_aware_beamforming-for-ISAC/tree/letters-revision}{project revision branch}. The tutorial input revision is \texttt{0f864c4}. The Python measurements use CPython 3.12.14, SciPy 1.17.0 and HiGHS 1.8.0 on an Intel Xeon Platinum 8573C. The serial ladder uses one pinned CPU and one BLAS and solver thread. The parallel tone condition uses two one-thread workers. The appendix and manifests give all seed bands and environment details.
 
-Clutter-kernel linearity supports a power LP with analytic direction pricing and a fixed-receiver covariance certificate. The matched Python ladder shows speedups over the joint AO--SDP reference, and the expanded cohort reports small median gaps at fifteen allocations under both scoring kernels. Basis reuse reduces initial simplex work on highly correlated channels, with no demonstrated wall-time advantage over a fresh start there. Learned substitutions yield a speed--SCNR trade-off at the measured budgets. The absolute times support slow-timescale block updates.
+Clutter-kernel linearity supports a power LP with analytic direction pricing and a fixed-receiver covariance certificate. The matched Python ladder shows speedups over the joint AO--SDP reference, and the expanded cohort reports small median gaps at fifteen allocations under both scoring kernels. Basis reuse reduces initial simplex work on highly correlated channels, with no demonstrated wall-time advantage over a fresh start there. The L2O direction policies yield a speed--SCNR trade-off at the measured budgets. The absolute times support slow-timescale block updates.
 
 \bibliographystyle{IEEEtran}
 \bibliography{letters}
