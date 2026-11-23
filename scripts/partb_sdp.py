@@ -33,6 +33,35 @@ def principal_modes(matrix):
 class CooperSDP(IncrementalCutSDP):
     """One fractional SDP, solved with cuts in the full PSD cones."""
 
+    def __init__(self, problem, persistent=False):
+        super().__init__(problem, fractional=persistent)
+
+    def restricted_cooper(self, target, penalty):
+        if self.fractional:
+            return self.restricted(target, penalty)
+        start = perf_counter()
+        widths = list(map(len, self.bank))
+        constraints, rewards, penalties = [], [], []
+        for n, (bank, owners) in enumerate(zip(self.bank, self.owners)):
+            v = np.column_stack(bank)
+            gains = np.abs(self.channels[n].conj() @ v) ** 2
+            constraints.append(-gains * self.signs[n, owners].T)
+            rewards.append(np.sum((v.conj() * (target[n] @ v)).real, axis=0))
+            penalties.append(np.sum((v.conj() * (penalty[n] @ v)).real, axis=0))
+        a, c = np.concatenate(rewards), np.concatenate(penalties)
+        qos = sparse.hstack([sparse.block_diag(tuple(constraints)),
+                             sparse.csc_matrix(self.problem.noise.reshape(-1, 1))])
+        a_ub = sparse.vstack([qos, sparse.csc_matrix(np.r_[np.ones(a.size), -self.power_cap][None])],
+                             format="csc")
+        self.profile["build"] += perf_counter() - start
+        start = perf_counter()
+        result = linprog(-np.r_[a, 0.], A_ub=a_ub, b_ub=np.zeros(self.n * self.k + 1),
+                         A_eq=np.r_[c, 1.][None], b_eq=[1.], bounds=(0, None), method="highs",
+                         options={"primal_feasibility_tolerance": 1e-9,
+                                  "dual_feasibility_tolerance": 1e-9, "threads": 1})
+        self.profile["solve"] += perf_counter() - start
+        return result, widths
+
     def solve(self, reward, penalty, _eta):
         scale = float(np.max(np.abs(reward)))
         target = reward / scale
@@ -41,27 +70,7 @@ class CooperSDP(IncrementalCutSDP):
         lower = upper = violation = gap = np.nan
         status = "cut_limit"
         for step in range(1, 151):
-            start = perf_counter()
-            widths = list(map(len, self.bank))
-            constraints, rewards, penalties = [], [], []
-            for n, (bank, owners) in enumerate(zip(self.bank, self.owners)):
-                v = np.column_stack(bank)
-                gains = np.abs(self.channels[n].conj() @ v) ** 2
-                constraints.append(-gains * self.signs[n, owners].T)
-                rewards.append(np.sum((v.conj() * (target[n] @ v)).real, axis=0))
-                penalties.append(np.sum((v.conj() * (penalty[n] @ v)).real, axis=0))
-            a, c = np.concatenate(rewards), np.concatenate(penalties)
-            qos = sparse.hstack([sparse.block_diag(tuple(constraints)),
-                                 sparse.csc_matrix(self.problem.noise.reshape(-1, 1))])
-            a_ub = sparse.vstack([qos, sparse.csc_matrix(np.r_[np.ones(a.size), -self.power_cap][None])],
-                                 format="csc")
-            self.profile["build"] += perf_counter() - start
-            start = perf_counter()
-            result = linprog(-np.r_[a, 0.], A_ub=a_ub, b_ub=np.zeros(self.n * self.k + 1),
-                             A_eq=np.r_[c, 1.][None], b_eq=[1.], bounds=(0, None), method="highs",
-                             options={"primal_feasibility_tolerance": 1e-9,
-                                      "dual_feasibility_tolerance": 1e-9, "threads": 1})
-            self.profile["solve"] += perf_counter() - start
+            result, widths = self.restricted_cooper(target, penalty)
             if not result.success:
                 status = f"restricted_{result.status}"
                 break

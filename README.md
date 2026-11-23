@@ -72,3 +72,42 @@ contain all attempted designs and each SDP's numerical audit.
 `PART_A.md` summarizes the completed Part A findings.
 The startup diagnostics and earlier solver cohorts are retained separately
 from the paired experiment. See the Part A amendments in `PROTOCOL.md`.
+
+## IEEE Letters Part B attribution
+
+Use the Part A lockfile for the Python ladder. Set `TUTORIAL` to the pinned
+tutorial checkout and use fresh output paths. Run the two timing commands
+sequentially on an idle machine.
+
+```bash
+export PYTHONDONTWRITEBYTECODE=1
+python scripts/partb_run.py "$TUTORIAL" results/partb-new/t1 --threads 1
+python scripts/partb_run.py "$TUTORIAL" results/partb-new/t2 --threads 2
+python scripts/partb_run.py "$TUTORIAL" results/partb-new/b4-t1 --threads 1 --b4-persistent
+python scripts/partb_run.py "$TUTORIAL" results/partb-new/b4-t2 --threads 2 --b4-persistent
+python scripts/partb_report.py results/partb-new results/partb-new/summary
+```
+
+Add `--pilot` to run only the warm-up draw and its native SCS check. The
+preregistered recovery diagnostic accepts the first run's design file.
+
+```bash
+python scripts/partb_run.py "$TUTORIAL" results/partb-new/diagnostic-t1 --threads 1 \
+  --recover-b5-from results/partb-new/t1/designs.jsonl
+python scripts/partb_run.py "$TUTORIAL" results/partb-new/diagnostic-t2 --threads 2 \
+  --recover-b5-from results/partb-new/t2/designs.jsonl
+```
+
+The MATLAB entry point uses the original tutorial B1 and the existing
+`fast_tutorial_beams` LP with explicit B6, B7 or B8 selection. It requires
+MATLAB with Optimization Toolbox, CVX and MOSEK on the path. Run each
+thread setting in a fresh MATLAB process.
+
+```matlab
+addpath('scripts')
+partb_matlab("/path/to/Clutter-Aware-ISAC-Tutorial","results/partb-new/matlab-t1",1)
+```
+
+Use `matlab-t2` and thread cap `2` for the two-thread block. The warm-up
+profiler captures inclusive function times separately from measured wall time.
+The first Python report is archived under `results/partb-2026-11-22/`.

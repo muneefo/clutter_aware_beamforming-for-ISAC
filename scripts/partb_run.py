@@ -17,6 +17,7 @@ ARGS.add_argument("output", type=Path)
 ARGS.add_argument("--threads", type=int, choices=(1, 2), default=1)
 ARGS.add_argument("--pilot", action="store_true")
 ARGS.add_argument("--recover-b5-from", type=Path)
+ARGS.add_argument("--b4-persistent", action="store_true", help="Run the matched persistent-master B4 only")
 if __name__ == "__main__":
     options = ARGS.parse_args()
     cores = sorted(os.sched_getaffinity(0))[:options.threads]
@@ -103,7 +104,7 @@ def native_scs_check(problem, cut_solver, a, c, eta, sensing, users):
     return result["info"]
 
 
-def timed_ao(x, seed, arm, outer, inner, workers, check_native=False, cold_retry=False):
+def timed_ao(x, seed, arm, outer, inner, workers, check_native=False, cold_retry=False, persistent=False):
     profile = dict.fromkeys(METRICS, 0.)
     start = perf_counter()
     build_at = perf_counter()
@@ -115,7 +116,7 @@ def timed_ao(x, seed, arm, outer, inner, workers, check_native=False, cold_retry
     q = covariance(w0)
     problem = JointTransmitSDP(x)
     if arm == "B4":
-        optimizer = CooperSDP(problem)
+        optimizer = CooperSDP(problem, persistent=persistent)
     elif arm == "B5":
         optimizer = TonePriceSDP(problem, workers, cold_retry)
     else:
@@ -247,6 +248,7 @@ def run(options):
                              if l.startswith("model name")),
                     threads=options.threads, cores=sorted(os.sched_getaffinity(0)), threadpools=threadpool_info(),
                     quota=Path("/sys/fs/cgroup/cpu.max").read_text().strip(), revision=revision,
+                    b4_master="persistent" if options.b4_persistent else "rebuilt",
                     tone_worker_blas_threads=1, highs_master_threads=1,
                     matrices_sha256=digest, command=sys.argv, git=subprocess.check_output(
                         ["git", "rev-parse", "HEAD"], text=True).strip(), started_utc=datetime.now(timezone.utc).isoformat())
@@ -258,12 +260,12 @@ def run(options):
         jobs = [("B5", 3, 2)]
     else:
         seeds = [WARMUP] if options.pilot else [WARMUP, *SEEDS]
-        jobs = ARMS
+        jobs = [("B4", 5, 1), ("B4", 3, 1)] if options.b4_persistent else ARMS
     with (options.output / "designs.jsonl").open("x") as out, (options.output / "schedules.jsonl").open("x") as plans:
         for seed in seeds:
             scene(x, seed)
             schedules = {}
-            budgets = ((3, 2), (5, 3)) if not options.recover_b5_from else ()
+            budgets = ((3, 2), (5, 3)) if not options.recover_b5_from and not options.b4_persistent else ()
             for outer, inner in budgets:
                 t0 = perf_counter()
                 _, schedule = timed_lp(x, seed, "B8", outer, inner)
@@ -288,7 +290,7 @@ def run(options):
                     else:
                         row, trace, info = timed_ao(
                             x, seed, arm, outer, inner, options.threads,
-                            check_native=options.pilot and arm == "B1")
+                            check_native=options.pilot and arm == "B1", persistent=options.b4_persistent)
                 except (ValueError, RuntimeError, np.linalg.LinAlgError) as e:
                     row = dict(status="error", exception=str(e))
                 row.update(arm=arm, seed=seed, outer=outer, inner=inner, threads=options.threads,

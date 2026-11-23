@@ -88,7 +88,18 @@ def collect(source):
     blocks, flat = {}, []
     for thread in (1, 2):
         run = source / f"t{thread}"
-        rows = [json.loads(line)["design"] for line in (run / "designs.jsonl").read_text().splitlines()]
+        rows = [{**json.loads(line)["design"], "source_block": run.name}
+                for line in (run / "designs.jsonl").read_text().splitlines()]
+        if (source / "b4-t1").is_dir() != (source / "b4-t2").is_dir():
+            raise ValueError("Both or neither of the persistent B4 blocks are required")
+        if (source / "b4-t1").is_dir():
+            rows = [r for r in rows if r["arm"] != "B4"]
+            persistent = source / f"b4-t{thread}"
+            entries = [{**json.loads(line)["design"], "source_block": persistent.name}
+                       for line in (persistent / "designs.jsonl").read_text().splitlines()]
+            if any(r["arm"] != "B4" or r["threads"] != thread for r in entries):
+                raise ValueError("Invalid persistent B4 block")
+            rows.extend(entries)
         data = {}
         for row in rows:
             if row["warmup"]:
@@ -180,6 +191,7 @@ def main():
                                         for label, a, b in COMPARISONS] for t, d in blocks.items()},
                     thread_comparison={k: paired(blocks[1][k], blocks[2][k], rng) for k in names},
                     quality_tolerances=dict(design=DESIGN_TOLERANCE, true=TRUE_TOLERANCE))
+    computed["sources"] = sorted({r["source_block"] for r in flat})
     with (args.destination / "designs.csv").open("x", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(dict.fromkeys(k for r in flat for k in r)),
                                 lineterminator="\n")
