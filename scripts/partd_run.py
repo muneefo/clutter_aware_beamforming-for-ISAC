@@ -54,10 +54,18 @@ def feasible_witness(x, h, bank, gamma, lp):
         anchor_slack = -(inequalities @ np.r_[anchor, 1.])
         if np.min(anchor_slack) <= FLOOR:
             raise ValueError("Strict ZF witness does not satisfy the tightened constraints")
-        mix = float(np.max((FLOOR - slack[defects]) / (anchor_slack[defects] - slack[defects])))
-        powers = (1 - mix) * powers + mix * anchor
-        if np.min(-(inequalities @ np.r_[powers, 1.])) < -FLOOR:
-            raise ValueError("Numerical power witness fails the assembled constraints")
+        checked = slack
+        for _ in range(8):
+            defects = checked < FLOOR
+            if not np.any(defects):
+                break
+            step = float(np.max((FLOOR - checked[defects]) /
+                                (anchor_slack[defects] - checked[defects])))
+            powers = (1 - step) * powers + step * anchor
+            mix += (1 - mix) * step
+            checked = -(inequalities @ np.r_[powers, 1.])
+        if np.min(checked) < -FLOOR:
+            raise ValueError(f"Numerical power witness fails with minimum scaled slack {checked.min():.3e}")
     lower = float(lp["target"] @ powers / (1 + lp["clutter"] @ powers))
     relative = -slack[:-1].reshape(lp["normalized_noise"].shape) / np.sqrt(lp["normalized_noise"])
     return lower, mix, float(max(0., relative.max())), float(max(0., -slack[-1]))
