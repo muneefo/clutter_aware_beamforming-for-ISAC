@@ -28,7 +28,8 @@ root = string(fileparts(fileparts(mfilename('fullpath'))));
 experimentDir = fullfile(root,'first-isac-paper','experiments');
 checkpoint = fullfile(root,'results','matlab-sweep-2026-11-23','l2o-weights.mat');
 for required = [fullfile(experimentDir,'fast_tutorial_beams.m'), ...
-        fullfile(experimentDir,'parte_l2o_proposals.m'),checkpoint]
+        fullfile(experimentDir,'parte_l2o_proposals.m'), ...
+        fullfile(experimentDir,'tutorial_power_solver.m'),checkpoint]
     assert(isfile(required),'L2O:MissingSweepFile', ...
         'Missing %s. Extract the full MATLAB bundle and keep its folder layout.',required);
 end
@@ -48,6 +49,8 @@ if opts.DesignKernel == "perfect", data.Vcc_hat = data.Vcc; end
 assert(opts.Users < min(data.para.Nt,data.para.Ns),'The ZF start needs a spare dimension.');
 weights = load(checkpoint);
 check_forward_pass(weights);
+powerSolver = tutorial_power_solver(["linprog","linprog-default"]);
+fprintf('Power LP: %s (%s, %s)\n',powerSolver.backend,powerSolver.algorithm,powerSolver.tolerances);
 methods = ["reducedCost","envelope"];
 if opts.IncludeAnalytic, methods = ["analytic",methods]; end
 if opts.IncludeAO
@@ -59,9 +62,10 @@ end
 mkdir(destination);
 manifest = struct('options',opts,'methods',methods,'matlab',version,'platform',computer, ...
     'blas',version('-blas'),'toolboxes',ver,'matlabThreads',maxNumCompThreads, ...
-    'linprog','explicit primal/dual tolerances 1e-9', ...
+    'linprog',rmfield(powerSolver,'solve'), ...
     'harnessSHA256',sha256(which('run_matlab_sinr_sweep')), ...
     'solverSHA256',sha256(which('fast_tutorial_beams')), ...
+    'powerSolverSHA256',sha256(which('tutorial_power_solver')), ...
     'forwardSHA256',sha256(which('parte_l2o_proposals')), ...
     'tutorialRevision',revision,'covarianceSHA256',covHash, ...
     'tutorialFunctionSHA256',tutorialFunctionHashes, ...
@@ -88,7 +92,8 @@ orderStream = RandStream('mt19937ar','Seed',manifest.orderSeed);
 rawPath = fullfile(destination,'raw.csv');
 warmup = repmat(empty_row(),numel(methods),1);
 for i = 1:numel(methods)
-    warmup(i) = attempt(tutorial,data,weights,opts,methods(i),manifest.warmupSeed,opts.SINRdB(1),0);
+    warmup(i) = attempt(tutorial,data,weights,opts,powerSolver,methods(i), ...
+        manifest.warmupSeed,opts.SINRdB(1),0);
 end
 writetable(struct2table(warmup),fullfile(destination,'warmup.csv'));
 report_attempts('Warmup',warmup);
@@ -100,7 +105,7 @@ for gammaDB = opts.SINRdB
             order = randperm(orderStream,numel(methods));
             for j = order
                 ix = ix+1;
-                rows(ix) = attempt(tutorial,data,weights,opts,methods(j),seed,gammaDB,rep);
+                rows(ix) = attempt(tutorial,data,weights,opts,powerSolver,methods(j),seed,gammaDB,rep);
             end
         end
         if ~isfile(rawPath)
@@ -126,7 +131,7 @@ if ~isempty(firstError)
 end
 end
 
-function row = attempt(tutorial,data,weights,opts,method,seed,gammaDB,rep)
+function row = attempt(tutorial,data,weights,opts,powerSolver,method,seed,gammaDB,rep)
 row = empty_row();
 row.method = method;
 row.seed = seed;
@@ -143,7 +148,7 @@ try
             'trials',trial);
         if method ~= "analytic", request.model = weights.(char(method)); end
         out = fast_tutorial_beams(tutorial,request,struct('outer',opts.Budget(1), ...
-            'inner',opts.Budget(2),'matchedPolicy',method,'quiet',true),data);
+            'inner',opts.Budget(2),'matchedPolicy',method,'quiet',true),data,powerSolver);
         r = out.trials;
         t = out.timing{1};
         row.designSeconds = r.seconds;

@@ -259,10 +259,15 @@ The runner logs `environment.json`, `warmup.csv` and an append-only
 `raw.csv`. The console reports feasible runs, rejected designs and runtime
 errors separately. Inspect `status`, `message`, `minMarginDB` and `powerW`
 in `raw.csv` to trace individual failures. The design clock includes
-initialization, solver work, pricing, inference, recovery and acceptance. Endpoint scoring and file
-writing fall outside that clock. The LP arms share the exact solve and
-column counts and use inference only after the first nonterminal master.
-The manifest records version information and requested thread caps.
+initialization, solver work, pricing, inference, recovery and acceptance.
+Endpoint scoring and file writing fall outside that clock. The LP arms
+share the exact solve and column counts and use inference only after the
+first nonterminal master. The sweep checks the power LP solution and its
+inequality multiplier before timing. It tries explicit `1e-9` tolerances
+first, then the MATLAB release defaults. All LP arms in the run use the
+same passing configuration. The manifest records the selected algorithm,
+tolerance mode, startup failures, version information and requested
+thread caps.
 
 Under `plots/`, `scnr-vs-sinr.pdf` separates estimated- and ideal-kernel
 SCNR. `timing-vs-sinr.pdf` shows design time and feasible-scene coverage.
@@ -314,6 +319,8 @@ T = run_l2o_matlab_sweep(tutorial,preview,Users=4,SINRdB=8,Seeds=11001:11002,Rep
 
 If the preview reports errors, the console prints the first error for each
 seed. The `K4/estimated/raw.csv` file lists every trial and its status.
+The console and `K4/estimated/environment.json` identify the `linprog`
+configuration used for both policies.
 
 Once the preview succeeds, launch the full sweep into a fresh folder.
 

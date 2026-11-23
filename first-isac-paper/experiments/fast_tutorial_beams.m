@@ -1,4 +1,4 @@
-function out = fast_tutorial_beams(repo, outWU, options, data)
+function out = fast_tutorial_beams(repo, outWU, options, data, powerSolver)
 % FAST_TUTORIAL_BEAMS   Fast transmit design for the tutorial's block precoder.
 %   out = fast_tutorial_beams(repo, outWU)
 %   out = fast_tutorial_beams(repo, outWU, struct('mode',"learnedProposal"))
@@ -20,17 +20,24 @@ cfg = outWU.options;
 x = configure(data, cfg.K, cfg.gammaDB);
 ao = outWU.trials(outWU.trials.method == "AO_SDP", :);
 assert(~isempty(ao) && numel(unique(ao.scene)) == height(ao), 'Expected one AO row per scene.');
-backend = choose_backend();
-if options.ablation ~= "" || options.matchedPolicy ~= ""
-    assert(backend == "linprog", 'Matched experiments require explicit-tolerance linprog.');
+if nargin < 5
+    if options.ablation ~= ""
+        backends = "linprog";
+    elseif options.matchedPolicy ~= ""
+        backends = ["linprog","linprog-default"];
+    else
+        backends = ["linprog","linprog-default","CVX"];
+    end
+    powerSolver = tutorial_power_solver(backends);
 end
+solvePower = powerSolver.solve;
 model = [];
 if options.mode ~= "physics" || any(options.matchedPolicy == ["reducedCost","envelope"])
     model = outWU.model;
 end
 rows = cell(height(ao),1); designs = cell(height(ao),1);
 profiles = cell(height(ao),1); plans = cell(height(ao),1);
-if ~options.quiet, fprintf('Mode %s, LP backend %s.\n', options.mode, backend); end
+if ~options.quiet, fprintf('Mode %s, LP backend %s.\n', options.mode, powerSolver.backend); end
 for i = 1:height(ao)
     seed = ao.scene(i);
     rng(seed,'twister');
@@ -43,7 +50,7 @@ for i = 1:height(ao)
         plan = {};
     end
     timer = tic;
-    [W,U,steps,status,profiles{i},plans{i}] = design_beams(x,options,backend,model,seed,plan);
+    [W,U,steps,status,profiles{i},plans{i}] = design_beams(x,options,solvePower,model,seed,plan);
     seconds = toc(timer);
     [margin,power] = audit_beams(x,W);
     feasible = margin >= -1e-4 && power <= x.P*(1+1e-7);
@@ -67,7 +74,7 @@ for i = 1:height(ao)
     end
 end
 out = struct('trials',struct2table(vertcat(rows{:}),'AsArray',true), ...
-        'designs',{designs},'options',options,'backend',backend);
+        'designs',{designs},'options',options,'backend',powerSolver.backend);
 if options.ablation ~= "" || options.matchedPolicy ~= ""
     out.timing = profiles;
     out.pricingPlans = plans;
@@ -115,26 +122,7 @@ for n = 1:x.N
 end
 end
 
-function name = choose_backend()
-% Probe the actual calling convention and inequality-price sign. Some
-% installations expose linprog on the path but reject its options or omit
-% dual outputs. This probe runs once, outside the reported design time.
-reasons = strings(0,1);
-for name = ["linprog","linprog-default","CVX"]
-    try
-        [z,cost,price] = solve_lp(name,[-1;0],sparse([1,-1]),sparse([1,1]));
-        assert(norm(z-[0.5;0.5],inf)<1e-5 && abs(cost+0.5)<1e-5 ...
-            && isscalar(price) && abs(price-0.5)<1e-5, ...
-            'Unexpected primal solution or inequality multiplier.');
-        return;
-    catch err
-        reasons(end+1,1) = name + ": " + string(err.message); %#ok<AGROW>
-    end
-end
-error('No LP backend passed the startup test.\n%s',char(join(reasons,newline)));
-end
-
-function [W,U,steps,status,timing,plan] = design_beams(x,o,backend,model,seed,matched)
+function [W,U,steps,status,timing,plan] = design_beams(x,o,solvePower,model,seed,matched)
 % Allocate across all tones. Part B enables exclusive stage clocks and matched budgets.
 partE = o.matchedPolicy ~= "";
 track = o.ablation ~= "" || partE;
@@ -160,7 +148,7 @@ for j = 1:o.outer
         bank = add_policy_beams(bank,x,W,A,C,eta,hot,cold,j,o.outer,model,o.mode);
     end
     for k = 1:o.inner
-        [powers,dual,values,timing] = allocate_power(x,bank,G,noiseRatio,A,C,sum(hot),backend,track,timing);
+        [powers,dual,values,timing] = allocate_power(x,bank,G,noiseRatio,A,C,sum(hot),solvePower,track,timing);
         steps = steps+1;
         if partE && timing.firstUserProposals > 0
             for n = 1:x.N
@@ -285,7 +273,7 @@ den = hot + real(sum(conj(W).*pagemtimes(C,W),'all'));
 eta = num/den;
 end
 
-function [power,dual,v,timing] = allocate_power(x,bank,G,noiseRatio,A,C,hot,backend,track,timing)
+function [power,dual,v,timing] = allocate_power(x,bank,G,noiseRatio,A,C,hot,solvePower,track,timing)
 % For each candidate (unit) direction, power contributes linearly to
 % target return, clutter, and user signals. Change variables z=t*p/Psafe
 % and normalize t+clutter'*z=1 to solve the fractional objective as one LP.
@@ -312,7 +300,7 @@ scaledNoise = noiseRatio.*rowScale;
 ineq = [B, sparse(scaledNoise(:)); sparse(ones(1,sum(width))), -1];
 eq = sparse([c,1]); objective = -[a/scale,0].';
 if track, timing.build = timing.build + toc(watch); watch = tic; end
-[solution,cost,mult] = solve_lp(backend,objective,ineq,eq);
+[solution,cost,mult] = solvePower(objective,ineq,eq);
 if track, timing.solve = timing.solve + toc(watch); end
 t = solution(end);
 assert(isfinite(t) && t>0,'Invalid fractional power normalization.');
@@ -321,33 +309,6 @@ dual.user = reshape(mult(1:end-1),x.K,x.N).*rowScale;
 dual.power = mult(end);
 v.ratio = -cost; v.gamma = gamma;
 v.matrix = (safePower/hot).*(A./scale - v.ratio.*C);
-end
-
-function [z,cost,mult] = solve_lp(backend,f,ineq,eq)
-rhs = zeros(size(ineq,1),1);
-if backend ~= "CVX"
-    if backend == "linprog"
-        opts = optimoptions('linprog','Display','none','ConstraintTolerance',1e-9, ...
-            'OptimalityTolerance',1e-9);
-        [z,cost,flag,msg,lambda] = linprog(f,ineq,rhs,eq,1,zeros(size(f)),[],opts);
-    else
-        [z,cost,flag,msg,lambda] = linprog(f,ineq,rhs,eq,1,zeros(size(f)),[]);
-    end
-    assert(flag>0,'Power LP failed: %s',msg.message);
-    mult = lambda.ineqlin;
-else
-    m = numel(f);
-    cvx_begin quiet
-        variable z(m) nonnegative
-        dual variable price
-        minimize(f.'*z)
-        subject to
-            price: ineq*z <= rhs;
-            eq*z == 1;
-    cvx_end
-    assert(contains(cvx_status,'Solved'),'CVX power LP failed: %s',cvx_status);
-    cost = cvx_optval; mult = price;
-end
 end
 
 function [bank,boundDB,added] = enrich_directions(x,bank,G,dual,v,append,forceAll)
