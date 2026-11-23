@@ -16,6 +16,8 @@ for key in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
 
 import numpy as np
 from scipy.io import loadmat
+from scipy.optimize import linprog
+from scipy.sparse import csc_matrix
 
 from parta_incremental import IncrementalCutSDP
 from partb_run import METRICS, covariance, load_case, receiver, seed_bank
@@ -219,6 +221,20 @@ class Teacher:
             q[n] = (v.T * p) @ v.conj()
         return q, audited_weights, mix, float(max(0., (-slack / self.noise).max()))
 
+    def retry_ipm(self, model):
+        """Solve the same restricted rows from scratch, discarding the failed basis."""
+        lp = model.model.getLp()
+        cols = lp.a_matrix_
+        matrix = csc_matrix((cols.value_, cols.index_, cols.start_),
+                            shape=(len(lp.row_upper_), len(lp.col_cost_)))
+        solved = linprog(lp.col_cost_, A_ub=matrix[:-1], b_ub=np.zeros(matrix.shape[0] - 1),
+                         A_eq=matrix[-1:], b_eq=[1.], method="highs-ipm",
+                         options=dict(threads=1, primal_feasibility_tolerance=1e-10,
+                                      dual_feasibility_tolerance=1e-10, small_matrix_value=1e-12))
+        if solved.success:
+            solved.x = solved.x[sum(model.indices, []) + [0]]
+        return solved
+
     def solve_block(self, a_raw, c_raw, d0, carried, cap):
         factor = self.safe_power / d0
         normalizer = float(np.max(self.x.sig) * factor)
@@ -233,11 +249,7 @@ class Teacher:
             result, widths = model.restricted(a, c)
             retry = bool(not result.success or result.x[-1] <= 0)
             if retry:
-                model.model.setOptionValue("solver", "ipm")
-                model.model.setOptionValue("presolve", "on")
-                result, widths = model.restricted(a, c)
-                model.model.setOptionValue("solver", "simplex")
-                model.model.setOptionValue("presolve", "off")
+                result = self.retry_ipm(model)
             if not result.success or result.x[-1] <= 0:
                 raise RuntimeError(f"Teacher LP failed with HiGHS status {result.status}")
             dual = -float(result.eqlin.marginals[0])
