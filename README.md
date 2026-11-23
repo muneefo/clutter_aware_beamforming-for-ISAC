@@ -282,3 +282,31 @@ The manuscript's architecture and pseudocode describe the measured Part E
 algorithm. Build the standalone diagram from the manuscript source folder
 with `latexmk -pdf -outdir=FRESH_OUTPUT l2o-flowchart.tex`. The new MATLAB
 curves require a licensed run of the sweep.
+
+### Run just the two new L2O policies
+
+```matlab
+addpath('scripts')
+T = run_l2o_matlab_sweep("../Clutter-Aware-ISAC-Tutorial", "results/l2o-thresholds");
+```
+
+This uses the archived MATLAB sweep grid (4, 8 and 12 users, 0:4:20 dB,
+seeds 11001–11008), the estimated design kernel, and six LP solves
+(`Budget=[3 2]`). It times the two frozen Part E policies, reduced cost
+and reduced cost plus envelope supervision. Both use the first physics
+LP's dual features to propose atoms through a shared MLP. The following
+LP assigns power. The archived SPSA checkpoint is unnecessary for these
+runs. Optimization Toolbox `linprog` is required.
+
+Use `IncludeAnalytic=true` for an analytic-pricing reference using the
+same counts. Use `DesignKernels=["estimated","perfect"]` to run both
+archived design-kernel panels. Both settings report the true SCNR under
+the ideal kernel. For a quick check, set `Users=4`, `SINRdB=[8 12]`,
+`Seeds=11001:11003` and `Repeats=1`.
+
+Each `K<users>/<design-kernel>/` folder contains the raw timings and
+plots described above. The root `summary.csv` combines all settings.
+The `referenceMethod` column identifies the baseline for paired changes
+and time ratios. In the two-policy sweep that baseline is the reduced-cost
+policy. The policy training domain was 3–6 users and 6–14 dB. The
+additional loads and thresholds in the archived grid are transfer tests.

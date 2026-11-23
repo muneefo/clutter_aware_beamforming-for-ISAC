@@ -26,6 +26,9 @@ nm = numel(methods);
 ns = numel(seeds);
 analytic = find(methods == "analytic",1);
 ao = find(methods == "ao",1);
+reference = analytic;
+if isempty(reference), reference = find(methods == "reducedCost",1); end
+assert(~isempty(reference),'Expected an analytic or reduced-cost comparison arm.');
 rows = repmat(stats_row(),numel(gammas)*nm,1);
 pairs = cell(numel(gammas)*nm,1);
 for g = 1:numel(gammas)
@@ -51,6 +54,7 @@ for g = 1:numel(gammas)
         row = stats_row();
         row.gammaDB = gammas(g);
         row.method = methods(m);
+        row.referenceMethod = methods(reference);
         row.attemptedScenes = ns;
         row.completeFeasibleScenes = nnz(isfinite(values(:,m,3)));
         row.commonScenes = n;
@@ -59,9 +63,9 @@ for g = 1:numel(gammas)
             trueScore = values(common,m,2);
             elapsed = values(common,m,3);
             inference = values(common,m,4);
-            referenceTime = values(common,analytic,3);
-            designChange = score-values(common,analytic,1);
-            trueChange = trueScore-values(common,analytic,2);
+            referenceTime = values(common,reference,3);
+            designChange = score-values(common,reference,1);
+            trueChange = trueScore-values(common,reference,2);
             timeRatio = elapsed./referenceTime;
             design = 10.^(score/10);
             ideal = 10.^(trueScore/10);
@@ -77,15 +81,24 @@ for g = 1:numel(gammas)
             bounds = percentiles(elapsed,[.25 .75]);
             row.timeQ1 = bounds(1); row.timeQ3 = bounds(2);
             row.medianInferenceSeconds = median(inference);
-            row.medianDesignDeltaVersusAnalyticDB = median(designChange);
+            row.medianDesignDeltaDB = median(designChange);
             bounds = percentiles(median(resample(designChange,index),1),[.025 .975]);
             row.designDeltaLow = bounds(1); row.designDeltaHigh = bounds(2);
-            row.medianTrueDeltaVersusAnalyticDB = median(trueChange);
+            row.medianTrueDeltaDB = median(trueChange);
             bounds = percentiles(median(resample(trueChange,index),1),[.025 .975]);
             row.trueDeltaLow = bounds(1); row.trueDeltaHigh = bounds(2);
-            row.medianTimeRatioVersusAnalytic = median(timeRatio);
+            row.medianTimeRatio = median(timeRatio);
             bounds = percentiles(median(resample(timeRatio,index),1),[.025 .975]);
-            row.analyticTimeRatioLow = bounds(1); row.analyticTimeRatioHigh = bounds(2);
+            row.timeRatioLow = bounds(1); row.timeRatioHigh = bounds(2);
+            analyticTimeRatio = nan(n,1);
+            if ~isempty(analytic)
+                analyticTimeRatio = timeRatio;
+                row.medianDesignDeltaVersusAnalyticDB = row.medianDesignDeltaDB;
+                row.medianTrueDeltaVersusAnalyticDB = row.medianTrueDeltaDB;
+                row.medianTimeRatioVersusAnalytic = row.medianTimeRatio;
+                row.analyticTimeRatioLow = row.timeRatioLow;
+                row.analyticTimeRatioHigh = row.timeRatioHigh;
+            end
             aoSpeedup = nan(n,1);
             if ~isempty(ao)
                 aoSpeedup = values(common,ao,3)./elapsed;
@@ -94,9 +107,11 @@ for g = 1:numel(gammas)
                 row.speedupLow = bounds(1); row.speedupHigh = bounds(2);
             end
             pairs{k} = table(repmat(gammas(g),n,1),seeds(common),repmat(methods(m),n,1), ...
-                designChange,trueChange,timeRatio,aoSpeedup, ...
+                designChange,trueChange,analyticTimeRatio,aoSpeedup, ...
+                repmat(methods(reference),n,1),timeRatio,score,trueScore,elapsed,inference, ...
                 'VariableNames',{'gammaDB','seed','method','designDeltaDB','trueDeltaDB', ...
-                'timeRatioVersusAnalytic','speedupVersusAO'});
+                'timeRatioVersusAnalytic','speedupVersusAO','referenceMethod','timeRatio', ...
+                'designSCNRdB','trueSCNRdB','designSeconds','inferenceSeconds'});
         end
         rows(k) = row;
     end
@@ -118,7 +133,9 @@ row = struct('gammaDB',NaN,'method',"",'attemptedScenes',0,'completeFeasibleScen
     'medianInferenceSeconds',NaN,'medianAOSpeedup',NaN,'speedupLow',NaN,'speedupHigh',NaN, ...
     'medianDesignDeltaVersusAnalyticDB',NaN,'designDeltaLow',NaN,'designDeltaHigh',NaN, ...
     'medianTrueDeltaVersusAnalyticDB',NaN,'trueDeltaLow',NaN,'trueDeltaHigh',NaN, ...
-    'medianTimeRatioVersusAnalytic',NaN,'analyticTimeRatioLow',NaN,'analyticTimeRatioHigh',NaN);
+    'medianTimeRatioVersusAnalytic',NaN,'analyticTimeRatioLow',NaN,'analyticTimeRatioHigh',NaN, ...
+    'referenceMethod',"",'medianDesignDeltaDB',NaN,'medianTrueDeltaDB',NaN, ...
+    'medianTimeRatio',NaN,'timeRatioLow',NaN,'timeRatioHigh',NaN);
 end
 
 function draws = resample(x,index)
@@ -161,7 +178,7 @@ for kind = ["scnr","timing"]
         end
     end
     if kind == "scnr"
-        ylabel(left,'SCNR under estimated kernel (dB)');
+        ylabel(left,'SCNR under design kernel (dB)');
         ylabel(right,'SCNR under ideal kernel (dB)');
         title(layout,'Common feasible scenes · linear-domain means and 95% intervals');
         filename = 'scnr-vs-sinr.pdf';

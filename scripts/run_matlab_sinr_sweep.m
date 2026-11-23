@@ -1,6 +1,7 @@
 function summary = run_matlab_sinr_sweep(tutorial,destination,opts)
 %RUN_MATLAB_SINR_SWEEP Paired MATLAB design timing and SCNR threshold sweep.
-% Use a fresh MATLAB process and output folder. Use IncludeAO=false for LPs only.
+% Use a fresh MATLAB process and output folder. Disable both optional
+% references for the two frozen L2O policies alone.
 arguments
     tutorial (1,1) string
     destination (1,1) string
@@ -11,6 +12,8 @@ arguments
     opts.Repeats (1,1) double {mustBeInteger,mustBePositive} = 3
     opts.Threads (1,1) double {mustBeInteger,mustBePositive} = 1
     opts.IncludeAO (1,1) logical = true
+    opts.IncludeAnalytic (1,1) logical = true
+    opts.DesignKernel (1,1) string {mustBeMember(opts.DesignKernel,["estimated","perfect"])} = "estimated"
 end
 assert(~isfolder(destination) && ~isfile(destination),'Use a fresh destination.');
 assert(numel(unique(opts.SINRdB)) == numel(opts.SINRdB),'Thresholds must be unique.');
@@ -33,11 +36,13 @@ addpath(fullfile(tutorial,'function'));
 
 [covPath,revision,covHash] = pinned_inputs(tutorial);
 data = load(covPath,'para','Vcc_hat','Vcc','R_eta');
+if opts.DesignKernel == "perfect", data.Vcc_hat = data.Vcc; end
 assert(opts.Users < min(data.para.Nt,data.para.Ns),'The ZF start needs a spare dimension.');
 checkpoint = fullfile(root,'results','matlab-sweep-2026-11-23','l2o-weights.mat');
 weights = load(checkpoint);
 check_forward_pass(weights);
-methods = ["analytic","reducedCost","envelope"];
+methods = ["reducedCost","envelope"];
+if opts.IncludeAnalytic, methods = ["analytic",methods]; end
 if opts.IncludeAO
     cvx_solver mosek
     cvx_solver_settings('MSK_IPAR_NUM_THREADS',opts.Threads);
