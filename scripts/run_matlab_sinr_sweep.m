@@ -19,7 +19,6 @@ assert(~isfolder(destination) && ~isfile(destination),'Use a fresh destination.'
 assert(numel(unique(opts.SINRdB)) == numel(opts.SINRdB),'Thresholds must be unique.');
 assert(numel(unique(opts.Seeds)) == numel(opts.Seeds) && all(opts.Seeds < 2^32), ...
     'Seeds must be distinct and fit in 32 bits.');
-assert(exist('linprog','file') ~= 0,'Optimization Toolbox linprog is required.');
 if opts.IncludeAO
     assert(exist('cvx_begin','file') ~= 0 && exist('mosekopt','file') ~= 0, ...
         'AO-SDP requires configured CVX and MOSEK. For LPs only, set IncludeAO=false.');
@@ -43,6 +42,7 @@ oldThreads = maxNumCompThreads(opts.Threads);
 threadCleanup = onCleanup(@() maxNumCompThreads(oldThreads)); %#ok<NASGU>
 addpath(experimentDir);
 addpath(fullfile(tutorial,'function'));
+linprogFile = prefer_optimization_toolbox_linprog();
 
 data = load(covPath,'para','Vcc_hat','Vcc','R_eta');
 if opts.DesignKernel == "perfect", data.Vcc_hat = data.Vcc; end
@@ -62,7 +62,7 @@ end
 mkdir(destination);
 manifest = struct('options',opts,'methods',methods,'matlab',version,'platform',computer, ...
     'blas',version('-blas'),'toolboxes',ver,'matlabThreads',maxNumCompThreads, ...
-    'linprog',rmfield(powerSolver,'solve'), ...
+    'linprog',rmfield(powerSolver,'solve'),'linprogFile',linprogFile, ...
     'harnessSHA256',sha256(which('run_matlab_sinr_sweep')), ...
     'solverSHA256',sha256(which('fast_tutorial_beams')), ...
     'powerSolverSHA256',sha256(which('tutorial_power_solver')), ...
@@ -117,6 +117,24 @@ for gammaDB = opts.SINRdB
     end
 end
 summary = plot_matlab_sinr_sweep(destination);
+end
+
+function file = prefer_optimization_toolbox_linprog()
+toolboxRoot = fullfile(matlabroot,'toolbox','optim');
+toolboxPrefix = [toolboxRoot filesep];
+file = which('linprog');
+if startsWith(file,toolboxPrefix,'IgnoreCase',ispc)
+    return;
+end
+solverDir = fullfile(toolboxRoot,'optim');
+assert(isfile(fullfile(solverDir,'linprog.m')) || isfile(fullfile(solverDir,'linprog.p')), ...
+    'ISAC:OptimizationToolboxMissing', ...
+    'Install MATLAB Optimization Toolbox. Its linprog was not found under %s. Current resolution: %s',solverDir,file);
+addpath(solverDir,'-begin');
+file = which('linprog');
+assert(startsWith(file,toolboxPrefix,'IgnoreCase',ispc),'ISAC:LinprogShadowed', ...
+    ['MATLAB still resolves linprog to %s. Run the sweep with the bundle scripts folder ' ...
+     'as your current folder.'],file);
 end
 
 function report_attempts(label,rows)
