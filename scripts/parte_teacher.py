@@ -195,23 +195,28 @@ class Teacher:
         anchor_budget = 1 - float(self.anchor.sum())
         if min(anchor_budget, float(anchor_slack.min())) <= 0:
             raise ValueError("Strict teacher ZF witness is infeasible")
-        # The slack floor in each row is relative to its own noise.
-        floor = FLOOR * np.r_[self.noise.ravel(), 1.]
+        # Leave a margin for cancellation in the independently reevaluated QoS sums.
+        floor = np.r_[1e-8 * self.noise.ravel(), FLOOR]
         s = np.r_[slack.ravel(), budget]
         z = np.r_[anchor_slack.ravel(), anchor_budget]
-        bad = s < floor
-        mix = float(np.max((floor[bad] - s[bad]) / (z[bad] - s[bad]))) if np.any(bad) else 0.
+        mix = 0.
+        for _ in range(8):
+            bad = s < floor
+            if np.any(bad):
+                step = float(np.max((floor[bad] - s[bad]) / (z[bad] - s[bad])))
+                mix += (1 - mix) * step
+            audited_weights = [(1 - mix) * p for p in weights]
+            for p, anchors in zip(audited_weights, self.anchor):
+                p[:self.x.K] += mix * anchors
+            checked_qos = np.stack([g @ p for g, p in zip(gains, audited_weights)]) - self.noise
+            s = np.r_[checked_qos.ravel(), 1 - sum(p.sum() for p in audited_weights)]
+            if np.all(s >= 0):
+                break
+        else:
+            raise ValueError("Teacher witness fails the independent feasibility check")
         q = np.empty((self.x.N, self.x.T, self.x.T), complex)
-        audited_weights = []
-        for n, (v, p) in enumerate(zip(vectors, weights)):
-            new_p = (1 - mix) * p
-            new_p[:self.x.K] += mix * self.anchor[n]
-            if np.any(gains[n] @ new_p < (1 - 1e-10) * self.noise[n]):
-                raise ValueError("Teacher witness fails the independent QoS check")
-            audited_weights.append(new_p)
-            q[n] = (v.T * new_p) @ v.conj()
-        if sum(p.sum() for p in audited_weights) > 1 + FLOOR:
-            raise ValueError("Teacher witness fails the independent power check")
+        for n, (v, p) in enumerate(zip(vectors, audited_weights)):
+            q[n] = (v.T * p) @ v.conj()
         return q, audited_weights, mix, float(max(0., (-slack / self.noise).max()))
 
     def solve_block(self, a_raw, c_raw, d0, carried, cap):
@@ -226,7 +231,7 @@ class Teacher:
         trace = []
         for j in range(cap):
             result, widths = model.restricted(a, c)
-            retry = not result.success or result.x[-1] <= 0
+            retry = bool(not result.success or result.x[-1] <= 0)
             if retry:
                 model.model.setOptionValue("solver", "ipm")
                 model.model.setOptionValue("presolve", "on")
