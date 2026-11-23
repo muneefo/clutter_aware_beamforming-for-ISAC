@@ -19,9 +19,13 @@ x = configure(data, cfg.K, cfg.gammaDB);
 ao = outWU.trials(outWU.trials.method == "AO_SDP", :);
 assert(~isempty(ao) && numel(unique(ao.scene)) == height(ao), 'Expected one AO row per scene.');
 backend = choose_backend();
+if options.ablation ~= ""
+    assert(backend == "linprog", 'Part B requires the explicit-tolerance linprog backend.');
+end
 model = [];
 if options.mode ~= "physics", model = outWU.model; end
 rows = cell(height(ao),1); designs = cell(height(ao),1);
+profiles = cell(height(ao),1); plans = cell(height(ao),1);
 fprintf('Mode %s, LP backend %s.\n', options.mode, backend);
 for i = 1:height(ao)
     seed = ao.scene(i);
@@ -29,8 +33,13 @@ for i = 1:height(ao)
     H = (randn(x.nt,x.N,x.K) + 1i*randn(x.nt,x.N,x.K))/sqrt(2);
     distance = randi([50,400],1,1,x.K);
     x.H = H .* 10.^((-30-27*log10(distance))/20);
+    if options.ablation == "B7"
+        plan = options.pricingSchedules{i};
+    else
+        plan = {};
+    end
     timer = tic;
-    [W,U,steps,status] = design_beams(x,options,backend,model);
+    [W,U,steps,status,profiles{i},plans{i}] = design_beams(x,options,backend,model,seed,plan);
     seconds = toc(timer);
     [margin,power] = audit_beams(x,W);
     feasible = margin >= -1e-4 && power <= x.P*(1+1e-7);
@@ -48,12 +57,17 @@ for i = 1:height(ao)
         seed,trueDB,gap,seconds,status);
 end
 out = struct('trials',struct2table(vertcat(rows{:}),'AsArray',true), ...
-    'designs',{designs},'options',options,'backend',backend);
+        'designs',{designs},'options',options,'backend',backend);
+if options.ablation ~= ""
+    out.timing = profiles;
+    out.pricingPlans = plans;
+end
 disp(out.trials);
 end
 
 function o = settings(given)
-o = struct('outer',5,'inner',3,'toleranceDB',0.002,'mode',"physics");
+o = struct('outer',5,'inner',3,'toleranceDB',0.002,'mode',"physics", ...
+    'ablation',"",'pricingSchedules',{{}});
 keys = fieldnames(given);
 assert(all(ismember(keys,fieldnames(o))),'Unknown option.');
 for j = 1:numel(keys), o.(keys{j}) = given.(keys{j}); end
@@ -64,6 +78,9 @@ validateattributes(o.toleranceDB,{'numeric'},{'real','scalar','nonnegative','fin
 o.mode = string(o.mode);
 assert(isscalar(o.mode) && any(o.mode == ["physics","learnedProposal","fixedProposal"]), ...
     'Invalid proposal mode.');
+o.ablation = string(o.ablation);
+assert(isscalar(o.ablation) && any(o.ablation == ["","B6","B7","B8"]), 'Invalid Part B arm.');
+assert(o.ablation == "" || o.mode == "physics", 'Part B uses the physics-only proposal.');
 end
 
 function x = configure(data,K,gammaDB)
@@ -102,11 +119,16 @@ end
 error('No LP backend passed the startup test.\n%s',char(join(reasons,newline)));
 end
 
-function [W,U,steps,status] = design_beams(x,o,backend,model)
-% Alternate receive filtering and transmit design. Each LP allocates power
-% jointly over ALL tones. Dual multipliers identify new useful directions.
+function [W,U,steps,status,timing,plan] = design_beams(x,o,backend,model,seed,matched)
+% Allocate across all tones. Part B enables exclusive stage clocks and matched budgets.
+track = o.ablation ~= "";
+timing = struct('build',0,'solve',0,'price',0,'mvdr',0,'kernel',0,'recovery',0);
+plan = {};
+if track, watch = tic; end
 [bank,G,noiseRatio,W] = initial_bank(x);
-[eta,A,C,hot,cold,U] = receiver(x,W);
+if track, timing.build = toc(watch); end
+if o.ablation == "B7", random = RandStream('mt19937ar','Seed',370000+seed); end
+[eta,A,C,hot,cold,U,timing] = receiver(x,W,track,timing);
 steps = 0; status = "budget reached";
 for j = 1:o.outer
     entryScore = eta;
@@ -115,8 +137,9 @@ for j = 1:o.outer
         bank = add_policy_beams(bank,x,W,A,C,eta,hot,cold,j,o.outer,model,o.mode);
     end
     for k = 1:o.inner
-        [powers,dual,values] = allocate_power(x,bank,G,noiseRatio,A,C,sum(hot),backend);
+        [powers,dual,values,timing] = allocate_power(x,bank,G,noiseRatio,A,C,sum(hot),backend,track,timing);
         steps = steps+1;
+        if track, watch = tic; end
         Y = recover_streams(x,G,bank,powers);
         [margin,power] = audit_beams(x,Y);
         if margin >= -1e-4 && power <= x.P*(1+1e-7)
@@ -126,11 +149,32 @@ for j = 1:o.outer
                 bestFixed = fixedScore;
             end
         end
-        [bank,boundDB] = enrich_directions(x,bank,G,dual,values);
-        if boundDB <= o.toleranceDB, break; end
+        if track, timing.recovery = timing.recovery + toc(watch); end
+        terminal = j == o.outer && k == o.inner;
+        if o.ablation == "B7" && ~terminal
+            watch = tic;
+            tags = matched{steps};
+            for n = 1:x.N
+                count = numel(tags{n});
+                if count == 0, continue; end
+                V = randn(random,x.nt,count) + 1i*randn(random,x.nt,count);
+                bank{n}.V = [bank{n}.V, V./vecnorm(V)];
+                bank{n}.owner = [bank{n}.owner, tags{n}];
+            end
+            timing.build = timing.build + toc(watch);
+            plan{steps} = tags; %#ok<AGROW>
+        elseif o.ablation == "B8" || ~track
+            if track, watch = tic; end
+            [bank,boundDB,tags] = enrich_directions(x,bank,G,dual,values,~track || ~terminal);
+            if track
+                timing.price = timing.price + toc(watch);
+                if ~terminal, plan{steps} = tags; end %#ok<AGROW>
+            end
+            if ~track && boundDB <= o.toleranceDB, break; end
+        end
     end
-    [eta,A,C,hot,cold,U] = receiver(x,W);
-    if 10*log10(eta/entryScore) < o.toleranceDB && boundDB <= o.toleranceDB
+    [eta,A,C,hot,cold,U,timing] = receiver(x,W,track,timing);
+    if ~track && 10*log10(eta/entryScore) < o.toleranceDB && boundDB <= o.toleranceDB
         status = "tolerance reached"; break;
     end
 end
@@ -168,16 +212,21 @@ assert(used<x.P,'The zero-forcing initialization exceeds the power budget.');
 W(:,x.K+1,:) = W(:,x.K+1,:).*sqrt((x.P-used)/x.N);
 end
 
-function [eta,A,C,hot,cold,U] = receiver(x,W)
+function [eta,A,C,hot,cold,U,timing] = receiver(x,W,track,timing)
 Q = pagemtimes(W,'none',W,'ctranspose');
 U = zeros(x.nr,x.N); A = zeros(x.nt,x.nt,x.N); C = A;
 hot = zeros(1,x.N); cold = hot;
 for n = 1:x.N
+    if track, watch = tic; end
     clutter = kernel_apply(x.V{n},Q(:,:,n),x.nr);
+    if track, timing.kernel = timing.kernel + toc(watch); watch = tic; end
     u = mvdr_beamformer(clutter+x.R(:,:,n),x.b{n},0);
+    if track, timing.mvdr = timing.mvdr + toc(watch); end
     U(:,n) = u;
     A(:,:,n) = x.sig(n)*abs(u'*x.b{n})^2*(x.a{n}*x.a{n}');
+    if track, watch = tic; end
     C(:,:,n) = build_Ac(x.V{n},u,x.nt);
+    if track, timing.kernel = timing.kernel + toc(watch); end
     hot(n) = real(u'*x.R(:,:,n)*u);
     cold(n) = real(u'*clutter*u);
 end
@@ -190,10 +239,11 @@ den = hot + real(sum(conj(W).*pagemtimes(C,W),'all'));
 eta = num/den;
 end
 
-function [power,dual,v] = allocate_power(x,bank,G,noiseRatio,A,C,hot,backend)
+function [power,dual,v,timing] = allocate_power(x,bank,G,noiseRatio,A,C,hot,backend,track,timing)
 % For each candidate (unit) direction, power contributes linearly to
 % target return, clutter, and user signals. Change variables z=t*p/Psafe
 % and normalize t+clutter'*z=1 to solve the fractional objective as one LP.
+if track, watch = tic; end
 safePower = x.P*(1-1e-8);
 gamma = x.gamma*(1+2e-5);
 noiseRatio = noiseRatio*x.P/safePower;
@@ -215,7 +265,9 @@ B = blkdiag(blocks{:});
 scaledNoise = noiseRatio.*rowScale;
 ineq = [B, sparse(scaledNoise(:)); sparse(ones(1,sum(width))), -1];
 eq = sparse([c,1]); objective = -[a/scale,0].';
+if track, timing.build = timing.build + toc(watch); watch = tic; end
 [solution,cost,mult] = solve_lp(backend,objective,ineq,eq);
+if track, timing.solve = timing.solve + toc(watch); end
 t = solution(end);
 assert(isfinite(t) && t>0,'Invalid fractional power normalization.');
 power = mat2cell(max(0,solution(1:end-1))*safePower/t,width,1);
@@ -252,10 +304,11 @@ else
 end
 end
 
-function [bank,boundDB] = enrich_directions(x,bank,G,dual,v)
+function [bank,boundDB,added] = enrich_directions(x,bank,G,dual,v,append)
 % Leading eigenvector maximizes reduced cost over all unit directions
 % for one tone and stream owner. Add it when the current LP can improve.
 excess = 0;
+added = cell(x.N,1);
 for n = 1:x.N
     H = G{n}; mu = dual.user(:,n);
     base = v.matrix(:,:,n) - (H.*mu.')*H';
@@ -269,9 +322,10 @@ for n = 1:x.N
         [largest,idx] = max(real(ev));
         improvement = largest-dual.power;
         excess = max(excess,improvement);
-        if improvement>1e-7
+        if improvement>1e-7 && append
             bank{n}.V(:,end+1) = modes(:,idx);
             bank{n}.owner(end+1) = owner;
+            added{n}(end+1) = owner;
         end
     end
 end

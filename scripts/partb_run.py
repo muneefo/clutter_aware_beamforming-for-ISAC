@@ -16,6 +16,7 @@ ARGS.add_argument("tutorial", type=Path)
 ARGS.add_argument("output", type=Path)
 ARGS.add_argument("--threads", type=int, choices=(1, 2), default=1)
 ARGS.add_argument("--pilot", action="store_true")
+ARGS.add_argument("--recover-b5-from", type=Path)
 if __name__ == "__main__":
     options = ARGS.parse_args()
     cores = sorted(os.sched_getaffinity(0))[:options.threads]
@@ -31,7 +32,7 @@ import numpy as np
 import scs
 import scipy
 from scipy.optimize import OptimizeWarning
-from threadpoolctl import threadpool_info
+from threadpoolctl import threadpool_info, threadpool_limits
 
 from parta_ao import JointTransmitSDP, beam_seed, covariance, pair_sum, recover_streams
 from parta_incremental import IncrementalCutSDP
@@ -102,7 +103,7 @@ def native_scs_check(problem, cut_solver, a, c, eta, sensing, users):
     return result["info"]
 
 
-def timed_ao(x, seed, arm, outer, inner, workers, check_native=False):
+def timed_ao(x, seed, arm, outer, inner, workers, check_native=False, cold_retry=False):
     profile = dict.fromkeys(METRICS, 0.)
     start = perf_counter()
     build_at = perf_counter()
@@ -116,7 +117,7 @@ def timed_ao(x, seed, arm, outer, inner, workers, check_native=False):
     if arm == "B4":
         optimizer = CooperSDP(problem)
     elif arm == "B5":
-        optimizer = TonePriceSDP(problem, workers)
+        optimizer = TonePriceSDP(problem, workers, cold_retry)
     else:
         optimizer = IncrementalCutSDP(problem)
     profile["build"] += perf_counter() - build_at
@@ -170,6 +171,7 @@ def timed_ao(x, seed, arm, outer, inner, workers, check_native=False):
                timings={**profile, "other": max(0., seconds - sum(profile.values()))})
     if arm == "B5":
         row["tone_workers"] = workers
+        row["cold_retries"] = optimizer.cold_retries
         row["tone_worker_seconds"] = optimizer.worker_profile
     if w is not None:
         score(x, q, w, u, row)
@@ -245,30 +247,44 @@ def run(options):
                              if l.startswith("model name")),
                     threads=options.threads, cores=sorted(os.sched_getaffinity(0)), threadpools=threadpool_info(),
                     quota=Path("/sys/fs/cgroup/cpu.max").read_text().strip(), revision=revision,
+                    tone_worker_blas_threads=1, highs_master_threads=1,
                     matrices_sha256=digest, command=sys.argv, git=subprocess.check_output(
                         ["git", "rev-parse", "HEAD"], text=True).strip(), started_utc=datetime.now(timezone.utc).isoformat())
     (options.output / "environment.json").write_text(json.dumps(manifest, indent=2) + "\n")
     x = load_case(root)
-    seeds = [WARMUP] if options.pilot else [WARMUP, *SEEDS]
+    if options.recover_b5_from:
+        entries = [json.loads(line)["design"] for line in options.recover_b5_from.read_text().splitlines()]
+        seeds = [r["seed"] for r in entries if r["arm"] == "B5" and r["status"] != "solved" and not r["warmup"]]
+        jobs = [("B5", 3, 2)]
+    else:
+        seeds = [WARMUP] if options.pilot else [WARMUP, *SEEDS]
+        jobs = ARMS
     with (options.output / "designs.jsonl").open("x") as out, (options.output / "schedules.jsonl").open("x") as plans:
         for seed in seeds:
             scene(x, seed)
             schedules = {}
-            for outer, inner in ((3, 2), (5, 3)):
+            budgets = ((3, 2), (5, 3)) if not options.recover_b5_from else ()
+            for outer, inner in budgets:
                 t0 = perf_counter()
                 _, schedule = timed_lp(x, seed, "B8", outer, inner)
                 schedules[outer, inner] = schedule
                 print(json.dumps(dict(seed=seed, outer=outer, inner=inner, labels=schedule,
                                       prep_seconds=perf_counter() - t0)), file=plans, flush=True)
-            order = np.random.default_rng(400000 + seed).permutation(len(ARMS))
+            order = np.random.default_rng(400000 + seed).permutation(len(jobs))
             for index in order:
-                arm, outer, inner = ARMS[index]
+                arm, outer, inner = jobs[index]
                 info, trace = None, []
                 try:
                     if arm in ("B6", "B7", "B8"):
                         row, plan = timed_lp(x, seed, arm, outer, inner, schedules[outer, inner])
                         if arm in ("B7", "B8") and plan != schedules[outer, inner]:
                             raise RuntimeError("B7/B8 matched atom schedule differs")
+                    elif arm == "B5":
+                        with threadpool_limits(limits=1, user_api="blas"):
+                            row, trace, info = timed_ao(
+                                x, seed, arm, outer, inner, options.threads,
+                                cold_retry=options.recover_b5_from is not None)
+                        row["tone_worker_blas_threads"] = 1
                     else:
                         row, trace, info = timed_ao(
                             x, seed, arm, outer, inner, options.threads,

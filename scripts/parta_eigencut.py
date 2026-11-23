@@ -36,10 +36,13 @@ class EigenCutSDP:
             -sparse.block_diag(tuple(gains)),
             sparse.csr_matrix(np.ones((1, reward.size))),
         ], format="csc")
+        options = {"primal_feasibility_tolerance": 1e-9, "dual_feasibility_tolerance": 1e-9}
+        if hasattr(self, "master_threads"):
+            options["threads"] = self.master_threads
         result = linprog(
             -reward, A_ub=constraints, b_ub=np.r_[-self.problem.noise.ravel(), self.power_cap],
             bounds=(0, None), method="highs",
-            options={"primal_feasibility_tolerance": 1e-9, "dual_feasibility_tolerance": 1e-9},
+            options=options,
         )
         return result, widths
 

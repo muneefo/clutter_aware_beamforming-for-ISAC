@@ -8,6 +8,7 @@ from scipy import sparse
 from scipy.optimize import linprog
 
 from parta_ao import pair_sum
+from parta_eigencut import EigenCutSDP
 from parta_incremental import IncrementalCutSDP
 
 
@@ -99,7 +100,7 @@ class CooperSDP(IncrementalCutSDP):
 class TonePriceSDP:
     """Solve a Dinkelbach SDP by bisection on the global power multiplier."""
 
-    def __init__(self, problem, workers):
+    def __init__(self, problem, workers, cold_retry=False):
         self.problem = problem
         self.bounds = [IncrementalCutSDP(SimpleNamespace(
             n=1, k=problem.k, t=problem.t, power_cap=problem.n,
@@ -108,6 +109,8 @@ class TonePriceSDP:
         )) for i in range(problem.n)]
         self.pool = ThreadPoolExecutor(max_workers=workers) if workers > 1 else None
         self.workers = workers
+        self.cold_retry = cold_retry
+        self.cold_retries = 0
         self.profile = dict(build=0., solve=0., price=0., parallel_tone_wall=0.)
         self.worker_profile = dict(build=0., solve=0., price=0.)
         self.identity = np.eye(problem.t)
@@ -118,8 +121,18 @@ class TonePriceSDP:
 
     def at_price(self, matrix, price):
         def solve_tone(i):
-            return self.bounds[i].solve_matrix(
-                matrix[i:i + 1] - price * self.identity, absolute_gate=1e-7)
+            model = self.bounds[i]
+            local = matrix[i:i + 1] - price * self.identity
+            sensing, users, info = model.solve_matrix(local, absolute_gate=1e-7)
+            if self.cold_retry and info["status"] != "solved":
+                retry = EigenCutSDP(model.problem)
+                retry.master_threads = 1
+                retry.bank, retry.owners = model.bank, model.owners
+                sense, use, new = retry.solve_matrix(local, absolute_gate=1e-7)
+                new["cold_retry_from"] = info["status"]
+                new["iter"] += info["iter"]
+                return sense, use, new
+            return sensing, users, info
 
         started = perf_counter()
         if self.pool is None:
@@ -134,6 +147,7 @@ class TonePriceSDP:
                 self.profile[key] = subtotal
         metadata = [row[2] for row in rows]
         masters = sum(row["iter"] for row in metadata)
+        self.cold_retries += sum("cold_retry_from" in row for row in metadata)
         failure = next((row["status"] for row in metadata if row["status"] != "solved"), None)
         if failure is not None:
             return None, None, None, masters, failure
