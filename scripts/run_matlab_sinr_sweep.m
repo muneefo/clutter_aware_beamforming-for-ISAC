@@ -91,6 +91,7 @@ for i = 1:numel(methods)
     warmup(i) = attempt(tutorial,data,weights,opts,methods(i),manifest.warmupSeed,opts.SINRdB(1),0);
 end
 writetable(struct2table(warmup),fullfile(destination,'warmup.csv'));
+report_attempts('Warmup',warmup);
 for gammaDB = opts.SINRdB
     for seed = opts.Seeds
         rows = repmat(empty_row(),opts.Repeats*numel(methods),1);
@@ -107,11 +108,22 @@ for gammaDB = opts.SINRdB
         else
             writetable(struct2table(rows),rawPath,'WriteMode','append','WriteVariableNames',false);
         end
-        fprintf('SINR %g dB, seed %d: %d/%d feasible runs\n', ...
-            gammaDB,seed,nnz([rows.feasible]),numel(rows));
+        report_attempts(sprintf('SINR %g dB, seed %d',gammaDB,seed),rows);
     end
 end
 summary = plot_matlab_sinr_sweep(destination);
+end
+
+function report_attempts(label,rows)
+failed = [rows.status] == "error";
+feasible = [rows.feasible];
+fprintf('%s: %d/%d feasible, %d rejected, %d errors\n', ...
+    label,nnz(feasible),numel(rows),nnz(~feasible & ~failed),nnz(failed));
+firstError = find(failed,1);
+if ~isempty(firstError)
+    row = rows(firstError);
+    fprintf('  %s, repetition %d: %s\n',row.method,row.rep,row.message);
+end
 end
 
 function row = attempt(tutorial,data,weights,opts,method,seed,gammaDB,rep)

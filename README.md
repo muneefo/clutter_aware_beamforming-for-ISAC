@@ -256,8 +256,10 @@ forward pass against a packaged parity fixture before timing. The 4 dB
 point extends below the policies' 6–14 dB training thresholds.
 
 The runner logs `environment.json`, `warmup.csv` and an append-only
-`raw.csv`. The design clock includes initialization, solver work,
-pricing, inference, recovery and acceptance. Endpoint scoring and file
+`raw.csv`. The console reports feasible runs, rejected designs and runtime
+errors separately. Inspect `status`, `message`, `minMarginDB` and `powerW`
+in `raw.csv` to trace individual failures. The design clock includes
+initialization, solver work, pricing, inference, recovery and acceptance. Endpoint scoring and file
 writing fall outside that clock. The LP arms share the exact solve and
 column counts and use inference only after the first nonterminal master.
 The manifest records version information and requested thread caps.
@@ -309,6 +311,9 @@ clear run_l2o_matlab_sweep run_matlab_sinr_sweep plot_matlab_sinr_sweep
 preview = fullfile(bundle,"l2o-preview-"+string(datetime("now","Format","yyyyMMdd-HHmmss")));
 T = run_l2o_matlab_sweep(tutorial,preview,Users=4,SINRdB=8,Seeds=11001:11002,Repeats=1);
 ```
+
+If the preview reports errors, the console prints the first error for each
+seed. The `K4/estimated/raw.csv` file lists every trial and its status.
 
 Once the preview succeeds, launch the full sweep into a fresh folder.
 
