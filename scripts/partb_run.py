@@ -190,7 +190,7 @@ def timed_ao(x, seed, arm, outer, inner, workers, check_native=False, cold_retry
     return row, trace, diagnostic
 
 
-def timed_lp(x, seed, arm, outer, inner, schedule=None):
+def timed_lp(x, seed, arm, outer, inner, schedule=None, observer=None):
     profile = dict.fromkeys(METRICS, 0.)
     start = perf_counter()
     build_at = perf_counter()
@@ -204,7 +204,9 @@ def timed_lp(x, seed, arm, outer, inner, schedule=None):
     for j in range(outer):
         best = eta
         for k in range(inner):
-            power, base, mu, price, psi, gamma = master(x, h, d, bank, owners, a, c, d0, profile=profile)
+            lp_audit = {} if observer is not None else None
+            power, base, mu, price, psi, gamma = master(
+                x, h, d, bank, owners, a, c, d0, profile=profile, lp_audit=lp_audit)
             recover_at = perf_counter()
             candidate = recover(x, h, bank, owners, power)
             margin, p = audit(x, candidate)
@@ -219,6 +221,9 @@ def timed_lp(x, seed, arm, outer, inner, schedule=None):
                 price_at = perf_counter()
                 new, tags, residual = price_beams(x, h, mu, base, price, gamma)
                 profile["price"] += perf_counter() - price_at
+                if observer is not None:
+                    observer(j + 1, k + 1, last, u, a, c, d0, h, d, bank, owners, power,
+                             mu, price, psi, gamma, residual, tags, lp_audit)
                 if last:
                     continue
                 plan.append([tags_n.tolist() for tags_n in tags])

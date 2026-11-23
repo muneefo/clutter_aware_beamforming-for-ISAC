@@ -134,14 +134,14 @@ def seed_bank(x):
     W[:,:,x.K]*=np.sqrt((x.P-used)/x.N)
     return H,d,bank,tags,W
 
-def master(x,H,d,V,owner,A,C,hot,profile=None):
+def master(x,H,d,V,owner,A,C,hot,profile=None,lp_audit=None,objective_scale=None):
     if profile is not None:
         started=perf_counter()
     # Unit transmit power and unit fixed receive-noise offset.
     P=x.P*(1-1e-8); d=d*x.P/P
     reward=[np.real((v.conj()*(a@v)).sum(0))*P/hot for a,v in zip(A,V)]
     penalty=[np.maximum(0,np.real((v.conj()*(c@v)).sum(0)))*P/hot for c,v in zip(C,V)]
-    scale=max(np.max(z) for z in reward)
+    scale=objective_scale if objective_scale is not None else max(np.max(z) for z in reward)
     ar=np.concatenate(reward)/scale; cr=np.concatenate(penalty)
     g=x.g*(1+2e-5); rowScale=1/np.sqrt(d)
     blocks=[]
@@ -165,11 +165,19 @@ def master(x,H,d,V,owner,A,C,hot,profile=None):
     power=np.split(res.x[:-1]/res.x[-1]*P,np.cumsum([v.shape[1] for v in V])[:-1])
     mu=-res.ineqlin.marginals[:-1].reshape(x.N,x.K)*rowScale
     price=-res.ineqlin.marginals[-1]; eta=-res.fun
+    if lp_audit is not None:
+        lp_audit.update(scale=scale, safe_power=P, normalized_noise=d, y_t=res.x,
+                        target=ar, clutter=cr, inequalities=I,
+                        psi_dual=float(-res.eqlin.marginals[0]),
+                        eq_violation=float(np.max(np.abs(res.eqlin.residual))),
+                        inequality_violation=float(max(0., -np.min(res.ineqlin.residual))),
+                        variable_violation=float(max(0., -np.min(res.x))),
+                        dual_column_violation=float(max(0., -np.min(res.lower.marginals))))
     gram=A*(P/hot/scale)-eta*C*(P/hot)
     base=gram-(H*mu[:,None,:])@H.conj().transpose(0,2,1)
     return power,base,mu,price,eta,g
 
-def price_beams(x,H,mu,base,price,g):
+def price_beams(x,H,mu,base,price,g,threshold=1e-7):
     all_dirs=[]; all_tag=[]; residual=0.
     for n in range(x.N):
         vlist=[]; ids=[]
@@ -179,7 +187,7 @@ def price_beams(x,H,mu,base,price,g):
             val,V=eigh(herm(Z),subset_by_index=[x.T-1,x.T-1],check_finite=False)
             excess=val[0]-price
             residual=max(residual,excess)
-            if excess>1e-7:
+            if excess>threshold:
                 vlist.append(V[:,0]); ids.append(j)
         all_dirs.append(np.array(vlist,complex).reshape(-1,x.T).T)
         all_tag.append(np.array(ids,int))
