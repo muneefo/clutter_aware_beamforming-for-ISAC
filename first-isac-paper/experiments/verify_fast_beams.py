@@ -134,7 +134,9 @@ def seed_bank(x):
     W[:,:,x.K]*=np.sqrt((x.P-used)/x.N)
     return H,d,bank,tags,W
 
-def master(x,H,d,V,owner,A,C,hot):
+def master(x,H,d,V,owner,A,C,hot,profile=None):
+    if profile is not None:
+        started=perf_counter()
     # Unit transmit power and unit fixed receive-noise offset.
     P=x.P*(1-1e-8); d=d*x.P/P
     reward=[np.real((v.conj()*(a@v)).sum(0))*P/hot for a,v in zip(A,V)]
@@ -149,8 +151,16 @@ def master(x,H,d,V,owner,A,C,hot):
         blocks.append(-gains*coeff*rowScale[n,:,None])
     B=sparse.block_diag(blocks,format='csc')
     I=sparse.vstack([sparse.hstack([B,(d*rowScale).reshape(-1,1)]),np.r_[np.ones(len(ar)),-1][None,:]])
-    res=linprog(-np.r_[ar,0],A_ub=I,b_ub=np.zeros(x.N*x.K+1),A_eq=np.r_[cr,1][None,:],b_eq=[1],
-                bounds=(0,None),method='highs',options={'primal_feasibility_tolerance':1e-9,'dual_feasibility_tolerance':1e-9})
+    objective=-np.r_[ar,0]; ub=np.zeros(x.N*x.K+1); eq=np.r_[cr,1][None,:]
+    options={'primal_feasibility_tolerance':1e-9,'dual_feasibility_tolerance':1e-9}
+    if profile is not None:
+        options['threads']=1
+        profile['build']+=perf_counter()-started
+        started=perf_counter()
+    res=linprog(objective,A_ub=I,b_ub=ub,A_eq=eq,b_eq=[1],
+                bounds=(0,None),method='highs',options=options)
+    if profile is not None:
+        profile['solve']+=perf_counter()-started
     if not res.success: raise RuntimeError(res.message)
     power=np.split(res.x[:-1]/res.x[-1]*P,np.cumsum([v.shape[1] for v in V])[:-1])
     mu=-res.ineqlin.marginals[:-1].reshape(x.N,x.K)*rowScale

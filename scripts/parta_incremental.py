@@ -1,4 +1,5 @@
 """Persistent HiGHS master for the certified SDP eigencut solver."""
+import time
 from types import SimpleNamespace
 
 import highspy
@@ -20,13 +21,14 @@ class IncrementalCutSDP(EigenCutSDP):
             ("dual_feasibility_tolerance", 1e-9),
         ):
             self.model.setOptionValue(option, value)
-        self.limit = np.r_[-self.problem.noise.ravel(), self.n]
+        self.limit = np.r_[-self.problem.noise.ravel(), self.power_cap]
         self.model.addRows(self.limit.size, np.full(self.limit.size, -np.inf), self.limit,
                            0, np.zeros(1, np.int32), np.empty(0, np.int32), np.empty(0))
         self.indices = [[] for _ in range(self.n)]
         self.previous_matrix = None
 
     def restricted(self, matrix):
+        build_at = time.perf_counter()
         changing_objective = matrix is not self.previous_matrix
         self.previous_matrix = matrix
         costs, rows, values = [], [], []
@@ -59,7 +61,10 @@ class IncrementalCutSDP(EigenCutSDP):
             )
             if state == highspy.HighsStatus.kError:
                 raise RuntimeError("HiGHS rejected the new master columns")
+        self.profile["build"] += time.perf_counter() - build_at
+        solve_at = time.perf_counter()
         self.model.run()
+        self.profile["solve"] += time.perf_counter() - solve_at
         state = self.model.getModelStatus()
         result = SimpleNamespace(success=state == highspy.HighsModelStatus.kOptimal, status=int(state))
         if result.success:
