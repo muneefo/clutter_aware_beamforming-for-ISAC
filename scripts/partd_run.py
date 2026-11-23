@@ -11,6 +11,7 @@ for name in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
     os.environ[name] = "1"
 
 import numpy as np
+from scipy.optimize import linprog
 
 from partb_run import METRICS, load_case, master, price_beams, scene, seed_bank, timed_lp
 from partc_run import CONDITIONS, CORE, SEEDS, manifest
@@ -243,6 +244,46 @@ def paired_audit(x, seed, outer, inner, archived, atoms, scene_key):
     return row, observer.steps, ref_history
 
 
+def recheck_restricted(x, seed, outer, inner, original):
+    """Bracket the terminal restricted LP with a separate IPM solve."""
+    observer = Observer(x)
+    timed_lp(x, seed, "B8", outer, inner, observer=observer)
+    t = observer.terminal
+    primary = original["result"]
+    receiver_hash = hashlib.sha256(np.ascontiguousarray(t["u"]).tobytes()).hexdigest()
+    if receiver_hash != primary["receiver_sha256"] or t["psi"] != primary["psi"]:
+        raise ValueError("The original terminal receiver or LP value did not replay")
+    lp = t["lp"]
+    reward = np.r_[lp["target"], 0.]
+    equality = np.r_[lp["clutter"], 1.]
+    inequalities = lp["inequalities"]
+    result = linprog(-reward, A_ub=inequalities, b_ub=np.zeros(inequalities.shape[0]),
+                     A_eq=equality[None, :], b_eq=[1.], method="highs-ipm",
+                     options=dict(threads=1, primal_feasibility_tolerance=1e-10,
+                                  dual_feasibility_tolerance=1e-10, small_matrix_value=1e-12))
+    if not result.success:
+        raise RuntimeError(result.message)
+    lower, mix, qos, power = feasible_witness(x, t["h"], t["bank"], t["gamma"],
+                                              {**lp, "y_t": result.x})
+    dual = float(-result.eqlin.marginals[0])
+    multipliers = np.maximum(0., -result.ineqlin.marginals)
+    residual = reward - dual * equality - inequalities.T @ multipliers
+    upper = dual + max(0., residual[:-1].max()) + max(0., residual[-1]) + FLOOR * (1 + abs(dual))
+    width = db_ratio(upper, lower)
+    if not -DBCHECK <= width <= DBCHECK:
+        raise ValueError(f"IPM restricted LP bracket is {width:.3g} dB wide")
+    ref = original["reference"][-1]
+    gap_lower = db_ratio(ref["witness_psi"], upper)
+    gap_upper = db_ratio(ref["audited_upper"], lower)
+    nominal_upper = primary["psi"] + primary["epsilon"]
+    return dict(status="rechecked", receiver_sha256=receiver_hash, psi_ipm=float(-result.fun),
+                witness_psi=lower, restricted_upper=float(upper), bracket_db=width,
+                decoded_relative_qos_shortfall=qos, decoded_power_violation=power, witness_mix=mix,
+                raw_minus_ipm_db=db_ratio(primary["psi"], lower), gap_lower_db=gap_lower,
+                gap_upper_db=gap_upper, nominal_against_ipm_db=db_ratio(nominal_upper, lower),
+                nominal_violation=ref["witness_psi"] > nominal_upper * 10 ** (DBCHECK / 10))
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("tutorial", type=Path)
@@ -252,19 +293,35 @@ def main():
     p.add_argument("--shard", type=int, default=0)
     p.add_argument("--shards", type=int, default=1)
     p.add_argument("--pilot", action="store_true")
+    p.add_argument("--recheck", type=Path, help="Completed bounds.jsonl for this shard")
     args = p.parse_args()
-    args.mode = "certify"
+    args.mode = "recheck" if args.recheck else "certify"
     os.sched_setaffinity(0, {args.cpu})
     data = manifest(args.tutorial, args)
     args.destination.mkdir(parents=True, exist_ok=False)
     (args.destination / "environment.json").write_text(json.dumps(data, indent=2) + "\n")
+    x = load_case(args.tutorial)
+    if args.recheck:
+        data["original_bounds_sha256"] = hashlib.sha256(args.recheck.read_bytes()).hexdigest()
+        (args.destination / "environment.json").write_text(json.dumps(data, indent=2) + "\n")
+        with args.recheck.open() as original, (args.destination / "restricted.jsonl").open("x") as out:
+            for line in original:
+                entry = json.loads(line)
+                seed, users, gamma, outer, inner = (entry["result"][k] for k in ATOM_FIELDS[:5])
+                x.K = users
+                x.g = np.full((x.N, users), 10 ** (gamma / 10))
+                scene(x, seed)
+                check = recheck_restricted(x, seed, outer, inner, entry)
+                keys = dict(zip(ATOM_FIELDS[:5], (seed, users, gamma, outer, inner)))
+                out.write(json.dumps({**keys, **check}, allow_nan=False) + "\n")
+                out.flush()
+        return
     historical = {}
     for file in args.part_c.glob("static-*/designs.jsonl"):
         for line in file.read_text().splitlines():
             row = json.loads(line)["design"]
             if row["method"] == "lp":
                 historical[row["seed"], row["users"], row["gamma"], row["outer"], row["inner"]] = row
-    x = load_case(args.tutorial)
     tasks = [(seed, users, gamma) for seed in ([9999] if args.pilot else SEEDS)
              for users, gamma in CONDITIONS]
     with (args.destination / "bounds.jsonl").open("x") as log, gzip.open(
