@@ -8,6 +8,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import NullFormatter, NullLocator
 import numpy as np
 from scipy.stats import binomtest
 
@@ -245,6 +246,8 @@ def plot_tracking(warm, sizes, target):
                        marker="o", linewidth=1.3, capsize=2.5, label=label)
     right.set(xscale="log", yscale="log", xlabel="Antennas per array", ylabel="Design time (s)",
               xticks=[8, 16, 32, 64], xticklabels=["8", "16", "32", "64"], title="Array scaling, 1×1 cap")
+    right.xaxis.set_minor_locator(NullLocator())
+    right.xaxis.set_minor_formatter(NullFormatter())
     right.legend(fontsize=8)
     for ax in (left, right):
         ax.grid(alpha=.23)
