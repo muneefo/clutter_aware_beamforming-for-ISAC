@@ -134,3 +134,27 @@ command generates the empirical CDF, Pareto and warm-start/scaling PDFs and
 the flattened data. The manifests and raw traces retain coverage, timing lanes
 and solver metadata. The benchmark condition and the scaling-only physical
 model are specified in the Part C protocol.
+
+## IEEE Letters Part D fixed-receiver certification
+
+Use the Part A Python lock, the pinned tutorial checkout, and the Part C
+records. Set `TUTORIAL` to the tutorial path. Use fresh output paths and
+select allowed CPU indices when running the shards concurrently.
+
+```bash
+export PYTHONDONTWRITEBYTECODE=1
+python scripts/partd_run.py "$TUTORIAL" results/partd-new/cert-0 --cpu 0 --shard 0 --shards 2
+python scripts/partd_run.py "$TUTORIAL" results/partd-new/cert-1 --cpu 1 --shard 1 --shards 2
+python scripts/partd_run.py "$TUTORIAL" results/partd-new/recheck-0 --cpu 0 --recheck results/partd-new/cert-0/bounds.jsonl
+python scripts/partd_run.py "$TUTORIAL" results/partd-new/recheck-1 --cpu 1 --recheck results/partd-new/cert-1/bounds.jsonl
+python scripts/partd_report.py results/partd-new results/partd-new/summary
+```
+
+Use `--pilot` with a separate destination for the nine-combination
+startup check. The terminal atom data are in the gzip-compressed CSVs.
+`bounds.jsonl` holds the original restricted solves and separate same-receiver
+continuations. The archived first-pass audits are in `audit-v1-*`.
+The independent interior-point checks of the terminal restricted LPs are in `recheck-*`.
+`summary/` contains the vector plot, flat endpoint results, paired ablation
+reanalysis and bootstrap tables. `PART_D.md` describes the certificate and
+its scope.

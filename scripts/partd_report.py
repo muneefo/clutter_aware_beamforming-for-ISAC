@@ -74,6 +74,9 @@ def cohort(rows, rng):
                          nominal_below_reference_upper=sum(r["nominal_bound_db"] + 1e-7 < r["reference_gap_upper_db"]
                                                            for r in converged),
                          reference_solves=stats([r["reference_solves"] for r in converged], rng),
+                         passes=stats([r["pricing_rounds"] for r in converged], rng),
+                         terminal_candidates=stats([r["terminal_candidates"] for r in converged], rng),
+                         initial_power_share=stats([r["initial_power_w"] / r["total_power_w"] for r in converged], rng),
                          bound_ratio=stats(ratio, rng),
                          slack_db=stats([r["nominal_bound_db"] - r["observed_gap_db"] for r in converged], rng),
                          terminal_active_fraction=stats([r["priced_active"] / r["added_atoms"] for r in active], rng),
@@ -131,9 +134,9 @@ def draw_plot(rows, destination):
     maximum = max(p["observed_gap_db"] for p in r)
     grid = np.geomspace(1e-5, 1.15 * maximum, 180)
     ax.plot(grid, grid, linestyle="--", color=".4", linewidth=.9, label="Bound = observed gap")
-    ax.set(xscale="symlog", yscale="log", xlabel="Observed fixed-receiver covariance gap (dB)",
-           ylabel="Certified bound (dB)")
+    ax.set(xlabel="Observed fixed-receiver covariance gap (dB)", ylabel="Certified bound (dB)")
     ax.set_xscale("symlog", linthresh=1e-4)
+    ax.set_yscale("symlog", linthresh=1e-4)
     ax.set_xlim(min(-1e-5, min(p["observed_gap_db"] for p in r)), 1.2 * maximum)
     ax.grid(alpha=.22)
     ax.legend(loc="upper left", fontsize=8)
@@ -174,11 +177,13 @@ def tables(out, summary, ablation):
         for r in summary
     ])
     print("\n## Atom use and fixed-receiver controls\n", file=out)
-    table(out, ("Users", "SINR", "Budget", "Added atoms", "Terminal active (%)", "Ever active (%)",
-                "Priced power share (%)", "Gain over fixed (dB)", "Gain over random (dB)"), [
-        (r["users"], r["gamma"], f"{r['outer']}×{r['inner']}", interval(r["added_atoms"], 0),
-         interval(r["terminal_active_fraction"], 1, 100), interval(r["ever_active_fraction"], 1, 100),
-         interval(r["priced_power_share"], 3, 100), interval(r["fixed_to_priced_db"], 3),
+    table(out, ("Users", "SINR", "Budget", "Pricing passes", "Added atoms", "Terminal active (%)",
+                "Ever active (%)", "Priced power share (%)", "Initial power share (%)",
+                "Gain over fixed (dB)", "Gain over random (dB)"), [
+        (r["users"], r["gamma"], f"{r['outer']}×{r['inner']}", int(r["passes"]["median"]),
+         interval(r["added_atoms"], 0), interval(r["terminal_active_fraction"], 1, 100),
+         interval(r["ever_active_fraction"], 1, 100), interval(r["priced_power_share"], 3, 100),
+         interval(r["initial_power_share"], 3, 100), interval(r["fixed_to_priced_db"], 3),
          interval(r["random_to_priced_db"], 3))
         for r in summary
     ])
@@ -200,6 +205,9 @@ def main():
     if len({key(r) for r in rows}) != len(rows) or len(rows) != len(SEEDS) * len(CONDITIONS) * len(CORE):
         raise ValueError("The registered Part D set is incomplete or has duplicates")
     verify_atoms(args.source, rows)
+    rechecked = [r for s in sorted(args.source.glob("recheck-*/restricted.jsonl")) for r in read_jsonl(s)]
+    if len(rechecked) != len(rows) or {key(r) for r in rechecked} != {key(r) for r in rows}:
+        raise ValueError("The independent terminal LP cross-check is incomplete")
     rng = np.random.default_rng(596001)
     summary = cohort(rows, rng)
     ablation, pairs = historical(args.part_b, rng)
@@ -215,11 +223,18 @@ def main():
                      "eq_violation", "inequality_violation", "variable_violation", "dual_column_violation",
                      "decoded_relative_qos_shortfall", "decoded_power_violation", "witness_mix",
                      "scale_rc_violation", "multiplier_clip")})
+    cross_check = dict(rechecked=len(rechecked), nominal_violations=sum(r["nominal_violation"] for r in rechecked),
+                       max_restricted_bracket_db=max(r["bracket_db"] for r in rechecked),
+                       max_raw_objective_disagreement_db=max(abs(r["raw_minus_ipm_db"]) for r in rechecked),
+                       max_decoded_relative_qos_shortfall=max(r["decoded_relative_qos_shortfall"] for r in rechecked),
+                       max_gap_interval_width_db=max(r["gap_upper_db"] - r["gap_lower_db"] for r in rechecked))
     args.destination.mkdir(parents=True, exist_ok=False)
     write_csv(args.destination / "terminal.csv", rows)
     write_csv(args.destination / "partb-paired.csv", pairs)
+    write_csv(args.destination / "restricted-recheck.csv", rechecked)
     with (args.destination / "summary.json").open("x") as out:
-        json.dump(dict(audit=audit, cohorts=summary, archived_ablation=ablation), out, indent=2, allow_nan=False)
+        json.dump(dict(audit=audit, cross_check=cross_check, cohorts=summary, archived_ablation=ablation),
+                  out, indent=2, allow_nan=False)
         out.write("\n")
     with (args.destination / "tables.md").open("x") as out:
         tables(out, summary, ablation)

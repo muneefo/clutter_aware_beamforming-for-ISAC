@@ -95,3 +95,7 @@ The fresh replay used Debian 13, Linux 6.18.57, Intel Xeon Platinum 8573C, three
 - `results/part0-replay-2026-11-22/` contains the raw replay CSV, the reconstructed Table I rows, the regenerated Fig. 1 and Fig. 3 PDFs, archive and replay comparisons, and the run environment manifest. The root README gives the regeneration commands.
 
 Part A awaits author review.
+
+## Part D terminal LP feasibility discrepancy
+
+The Part D replay found two terminal 5×3 B8 allocations with decoded QoS row shortfalls relative to normalized noise of 1.93 and 1.11 despite zero solver-reported inequality residuals. The seed and operating conditions are 10005 (six users, 8 dB) and 10020 (four users, 12 dB). The originally returned stream designs passed the physical gate. The independent HiGHS interior-point re-solves verified both restricted objective values on the exact same receive filters and dictionaries to within the registered numerical tolerance. The reported LP atom-use statistics describe the original solver allocations. See `PART_D.md` and `results/partd-2026-11-22/` for the feasibility witness, rechecks and the distinction between the LP objective and decoded allocation. Any production solver change and associated retiming requires a separate comparison.
