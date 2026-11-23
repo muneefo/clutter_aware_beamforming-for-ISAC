@@ -154,7 +154,7 @@ def archived_diagnostic(x, checkpoint):
     h, noise, bank, owners, w = seed_bank(x)
     q = covariance(w)
     eta, a, c, d0, u = receiver(x, q, dict.fromkeys(METRICS, 0.))
-    rows, proposals = [], []
+    rows = []
     for outer in range(1, 4):
         entry_score = best = eta
         insert = gradient_proposals(x, w, a, c, u, eta, 3, checkpoint, outer)

@@ -107,10 +107,21 @@ def compare(eval_rows):
                           "policy_ms", "ever_active_share", "first_user_terminal_watts"):
                     s[f] = paired([r[f] for r in pairs if r[f] is not None], rng)
                 results.append(s)
-    return results, deltas
+    direct = []
+    for cohort, identifiers in (("held-out maps", HELD_OUT), ("original benchmark", ORIGINAL)):
+        for outer, inner in BUDGETS:
+            pairs = [(grouped[seed, outer, inner]["envelope"], grouped[seed, outer, inner]["reduced-cost"])
+                     for seed in identifiers]
+            pairs = [(e, r) for e, r in pairs if e.get("feasible") and r.get("feasible")]
+            direct.append(dict(cohort=cohort, outer=outer, inner=inner,
+                               design_delta_db=paired([e["design_streams_db"] - r["design_streams_db"]
+                                                       for e, r in pairs], rng),
+                               true_delta_db=paired([e["true_streams_db"] - r["true_streams_db"]
+                                                     for e, r in pairs], rng)))
+    return results, deltas, direct
 
 
-def table(rows, path):
+def table(rows, direct, path):
     def text(s, digits=3):
         if s is None:
             return "—"
@@ -126,6 +137,12 @@ def table(rows, path):
         lines.append("| " + " | ".join(map(str, (r["cohort"], f"{r['outer']}×{r['inner']}", r["arm"],
                     f"{r['feasible']}/{r['total']}", text(r["design_delta_db"]), text(r["true_delta_db"]),
                     text(r["time_ratio"]), f"{median_time:.2f}"))) + " |")
+    lines += ["", "## Envelope supervision relative to reduced cost alone", "",
+              "| Cohort | Budget | Design SCNR (dB) | True SCNR (dB) |",
+              "| --- | --- | ---: | ---: |"]
+    for r in direct:
+        cells = r["cohort"], f"{r['outer']}×{r['inner']}", text(r["design_delta_db"]), text(r["true_delta_db"])
+        lines.append("| " + " | ".join(cells) + " |")
     path.write_text("\n".join(lines) + "\n")
 
 
@@ -178,7 +195,7 @@ def main():
     eval_rows = [row for p in sorted(roots.glob("evaluation-*/designs.jsonl")) for row in jsonl(p)]
     labels = jsonl(roots / "training/training-labels.jsonl")
     audit = summarize_teacher(teacher, labels)
-    result, delta = compare(eval_rows)
+    result, delta, direct = compare(eval_rows)
     archive = json.loads(sorted(roots.glob("evaluation-*/archive.json"))[0].read_text())
     args.output.mkdir(parents=True, exist_ok=False)
     write_csv(args.output / "paired-results.csv", delta)
@@ -186,8 +203,9 @@ def main():
     write_csv(args.output / "teacher-coverage.csv", [
         {k: v for k, v in r.items() if k not in ("rows", "choi_check")} for r in teacher])
     (args.output / "summary.json").write_text(json.dumps(
-        dict(teacher=audit, archive=archive, evaluation=result), indent=2, allow_nan=False) + "\n")
-    table(result, args.output / "tables.md")
+        dict(teacher=audit, archive=archive, evaluation=result, envelope_vs_reduced=direct),
+        indent=2, allow_nan=False) + "\n")
+    table(result, direct, args.output / "tables.md")
     plot(result, args.output / "proposal-ablation.pdf")
 
 
