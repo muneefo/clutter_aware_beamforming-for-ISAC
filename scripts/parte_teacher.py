@@ -103,6 +103,17 @@ def price_matrices(h, gamma, a, c, dual, mu):
     return herm(np.concatenate((users, base[:, None]), axis=1))
 
 
+def proposal_basis(x, h, bank):
+    zf = np.stack([v[:, :x.K].T for v in bank])
+    target = np.broadcast_to(x.a[:, None], zf.shape)
+    perp = np.broadcast_to(np.stack([v[:, x.K] for v in bank])[:, None], zf.shape)
+    return np.stack((zf, h.transpose(0, 2, 1), target, perp), axis=-1)
+
+
+def project(basis, matrices):
+    return herm(basis.swapaxes(-1, -2).conj() @ matrices @ basis)
+
+
 class Teacher:
     def __init__(self, x):
         self.x = x
@@ -158,7 +169,7 @@ class Teacher:
             q[n] = (v.T * new_p) @ v.conj()
         return q, audited_weights, mix, float(max(0., (-slack / self.noise).max()))
 
-    def solve_block(self, a_raw, c_raw, d0, entering, carried, cap):
+    def solve_block(self, a_raw, c_raw, d0, carried, cap):
         factor = self.safe_power / d0
         normalizer = float(np.max(self.x.sig) * factor)
         a, c = a_raw * (factor / normalizer), c_raw * factor
@@ -208,7 +219,7 @@ class Teacher:
         rows = []
         for j in range(outer_cap):
             eta, a, c, d0, u = receiver(self.x, q, dict.fromkeys(METRICS, 0.))
-            tx = self.solve_block(a, c, d0, eta, carried, cap)
+            tx = self.solve_block(a, c, d0, carried, cap)
             gain_bound = float(10 * np.log10(tx.upper / eta))
             rows.append(dict(lp_solves=len(tx.trace), gap_db=tx.gap_db,
                              outer_upper_gain_db=gain_bound, lower_scnr_db=float(10 * np.log10(tx.lower)),
@@ -236,8 +247,10 @@ class Teacher:
         # The teacher loss uses the sum of scaled primal masses per owner.
         mass = np.zeros((self.x.N, self.x.K + 1))
         np.add.at(mass, tuple(np.asarray(index).T), np.asarray(power) * tx.scale)
+        basis = proposal_basis(self.x, self.h, self.bank)
         return dict(teacher_u=u, active_vectors=np.asarray(atoms), active_indices=np.asarray(index, np.int16),
-                    power=np.asarray(power) * self.safe_power, mass=mass, teacher_matrices=tx.matrices)
+                    power=np.asarray(power) * self.safe_power, mass=mass,
+                    teacher_projection=project(basis, tx.matrices[:, :self.x.K]))
 
 
 def run(args):
