@@ -37,6 +37,8 @@ class IncrementalCutSDP(EigenCutSDP):
                                np.r_[self.problem.noise.ravel(), -self.power_cap, 1.])
         self.indices = [[] for _ in range(self.n)]
         self.previous_matrix = None
+        self.initial_basis = None
+        self.basis_status = None
 
     def restricted(self, matrix, penalty=None):
         build_at = time.perf_counter()
@@ -83,6 +85,9 @@ class IncrementalCutSDP(EigenCutSDP):
             )
             if state == highspy.HighsStatus.kError:
                 raise RuntimeError("HiGHS rejected the new master columns")
+        if self.initial_basis is not None:
+            self.basis_status = int(self.model.setBasis(self.initial_basis))
+            self.initial_basis = None
         self.profile["build"] += time.perf_counter() - build_at
         solve_at = time.perf_counter()
         self.model.run()
