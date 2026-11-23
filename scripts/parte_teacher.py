@@ -103,6 +103,46 @@ def price_matrices(h, gamma, a, c, dual, mu):
     return herm(np.concatenate((users, base[:, None]), axis=1))
 
 
+def principal_prices(base, h, strength):
+    """Principal directions of the shared base and its positive rank-one updates."""
+    beta, modes = np.linalg.eigh(base)
+    top = beta[:, -1:]
+    largest = np.max(np.abs(beta), axis=1, keepdims=True)
+    coords = (modes.swapaxes(1, 2).conj() @ h).transpose(0, 2, 1)
+    weights = strength[..., None] * np.abs(coords)**2
+    ceiling = weights.sum(axis=-1)
+    lower = weights[..., -1]
+    shift = lower.copy()
+    drops = (top - beta)[:, None]
+    active = ceiling > 1e-13
+    pad = FLOOR * (1 + largest + ceiling)
+    for _ in range(10):
+        divisor = np.maximum(1e-75, drops + shift[..., None])
+        q = weights / divisor
+        gradient = (q / divisor).sum(axis=-1)
+        update = np.divide(q.sum(axis=-1) - 1, gradient, out=np.zeros_like(shift), where=gradient > 0)
+        shift = np.clip(shift + update, lower, ceiling)
+    upper_shift = shift + pad
+    verified = (weights / (drops + upper_shift[..., None])).sum(axis=-1) <= 1 - 8 * np.finfo(float).eps
+    candidates = (modes[:, None] @ (coords / np.maximum(1e-75, drops + shift[..., None]))[..., None])[..., 0]
+    top_modes = np.broadcast_to(modes[:, None, :, -1], candidates.shape)
+    candidates = np.where(active[..., None], candidates, top_modes)
+    directions = candidates / np.linalg.norm(candidates, axis=-1, keepdims=True)
+    value = top + np.where(active, shift, 0.)
+    upper = top + np.where(active, upper_shift, ceiling + pad)
+    needs_dense = active & (~verified | (lower < 1e-13 * ceiling))
+    if np.any(needs_dense):
+        tone, owner = np.where(needs_dense)
+        cols = h[tone, :, owner]
+        updated = base[tone] + strength[tone, owner, None, None] * cols[..., None] * cols[:, None, :].conj()
+        eig, vec = np.linalg.eigh(updated)
+        directions[needs_dense] = vec[..., -1]
+        value[needs_dense] = eig[..., -1]
+        upper[needs_dense] = eig[..., -1] + pad[needs_dense]
+    return (np.column_stack((value, top)), np.column_stack((upper, top + FLOOR * (1 + largest))),
+            np.concatenate((directions, modes[:, None, :, -1]), axis=1), int(needs_dense.sum()))
+
+
 def proposal_basis(x, h, bank):
     zf = np.stack([v[:, :x.K].T for v in bank])
     target = np.broadcast_to(x.a[:, None], zf.shape)
@@ -142,13 +182,14 @@ class Teacher:
 
     def witness(self, model, weights):
         """Audit the decoded original QoS and make a separate feasible witness."""
-        slack, anchor_slack, vectors = [], [], []
+        slack, anchor_slack, vectors, gains = [], [], [], []
         for n, (b, o, p) in enumerate(zip(model.bank, model.owners, weights)):
             v = np.asarray(b)
             q = np.abs(self.h[n].conj().T @ v.T) ** 2 * model.signs[n, o].T
             slack.append(q @ p - self.noise[n])
             anchor_slack.append(q[:, :self.x.K] @ self.anchor[n] - self.noise[n])
             vectors.append(v)
+            gains.append(q)
         slack, anchor_slack = np.asarray(slack), np.asarray(anchor_slack)
         budget = 1 - sum(float(p.sum()) for p in weights)
         anchor_budget = 1 - float(self.anchor.sum())
@@ -165,8 +206,12 @@ class Teacher:
         for n, (v, p) in enumerate(zip(vectors, weights)):
             new_p = (1 - mix) * p
             new_p[:self.x.K] += mix * self.anchor[n]
+            if np.any(gains[n] @ new_p < (1 - 1e-10) * self.noise[n]):
+                raise ValueError("Teacher witness fails the independent QoS check")
             audited_weights.append(new_p)
             q[n] = (v.T * new_p) @ v.conj()
+        if sum(p.sum() for p in audited_weights) > 1 + FLOOR:
+            raise ValueError("Teacher witness fails the independent power check")
         return q, audited_weights, mix, float(max(0., (-slack / self.noise).max()))
 
     def solve_block(self, a_raw, c_raw, d0, carried, cap):
@@ -181,34 +226,45 @@ class Teacher:
         trace = []
         for j in range(cap):
             result, widths = model.restricted(a, c)
+            retry = not result.success or result.x[-1] <= 0
+            if retry:
+                model.model.setOptionValue("solver", "ipm")
+                model.model.setOptionValue("presolve", "on")
+                result, widths = model.restricted(a, c)
+                model.model.setOptionValue("solver", "simplex")
+                model.model.setOptionValue("presolve", "off")
             if not result.success or result.x[-1] <= 0:
                 raise RuntimeError(f"Teacher LP failed with HiGHS status {result.status}")
-            p = np.maximum(0., result.x[:-1] / result.x[-1])
-            raw_weights = np.split(p, np.cumsum(widths)[:-1])
-            q, weights, mix, qos = self.witness(model, raw_weights)
-            lower = float(np.einsum("nij,nji->", a, q).real /
-                          (1 + np.einsum("nij,nji->", c, q).real))
             dual = -float(result.eqlin.marginals[0])
             mu = np.maximum(0., -result.ineqlin.marginals[:-1].reshape(self.x.N, self.x.K)) * self.row_scale
             lam = max(0., -float(result.ineqlin.marginals[-1]))
-            matrices = price_matrices(self.h, self.gamma, a, c, dual, mu)
-            eigenvalues, vectors = np.linalg.eigh(matrices)
-            excess = eigenvalues[..., -1] - lam
-            eps = float(max(0., excess.max()))
+            h = self.h
+            base = herm(a - dual * c - (h * mu[:, None, :]) @ h.swapaxes(1, 2).conj())
+            value, safe, vectors, fallback = principal_prices(base, h, mu * (1 + 1 / self.gamma))
+            excess = value - lam
+            eps = float(max(0., safe.max() - lam))
             scale_rc = max(0., lam - dual - float(np.sum(mu * self.noise)))
             upper = dual + eps / (1 + cmin) + scale_rc + FLOOR * (1 + abs(lam) + np.max(mu))
-            gap_db = float(10 * np.log10(upper / lower))
-            trace.append((gap_db, mix, qos, len(p)))
-            if gap_db <= GATE_DB and gap_db >= -1e-7:
+            chosen = excess > 1e-11
+            gap_db = float(10 * np.log10(upper / -result.fun))
+            lower, mix, qos = None, None, None
+            if gap_db <= GATE_DB + 1e-7 or not np.any(chosen):
+                raw_weights = np.split(np.maximum(0., result.x[:-1] / result.x[-1]), np.cumsum(widths)[:-1])
+                q, weights, mix, qos = self.witness(model, raw_weights)
+                clutter = float(np.einsum("nij,nji->", c, q).real)
+                lower = float(np.einsum("nij,nji->", a, q).real / (1 + clutter))
+                gap_db = float(10 * np.log10(upper / lower))
+            trace.append((gap_db, mix, qos, fallback, retry))
+            if lower is not None and -1e-7 <= gap_db <= GATE_DB:
+                matrices = price_matrices(h, self.gamma, a, c, dual, mu)
                 return SimpleNamespace(q=q * self.safe_power, bank=model.bank, owners=model.owners,
-                                       powers=weights, matrices=matrices, scale=result.x[-1],
+                                       powers=weights, matrices=matrices, scale=1 / (1 + clutter),
                                        lower=lower * normalizer, upper=upper * normalizer,
                                        trace=trace, gap_db=gap_db)
-            chosen = excess > 1e-11
             if not np.any(chosen):
                 raise RuntimeError(f"Teacher pricing stalled at {gap_db:.6g} dB")
             for n, owner in zip(*np.where(chosen)):
-                model.bank[n].append(vectors[n, owner, :, -1])
+                model.bank[n].append(vectors[n, owner])
                 model.owners[n].append((owner + 1) % (self.x.K + 1))
         raise RuntimeError(f"Teacher hit the {cap}-LP cap at {gap_db:.6g} dB")
 
@@ -223,8 +279,9 @@ class Teacher:
             gain_bound = float(10 * np.log10(tx.upper / eta))
             rows.append(dict(lp_solves=len(tx.trace), gap_db=tx.gap_db,
                              outer_upper_gain_db=gain_bound, lower_scnr_db=float(10 * np.log10(tx.lower)),
-                             max_witness_mix=max(t[1] for t in tx.trace),
-                             max_decoded_qos_shortfall=max(t[2] for t in tx.trace)))
+                             max_witness_mix=max(t[1] for t in tx.trace if t[1] is not None),
+                             max_decoded_qos_shortfall=max(t[2] for t in tx.trace if t[2] is not None),
+                             dense_prices=sum(t[3] for t in tx.trace), ipm_retries=sum(t[4] for t in tx.trace)))
             if j > 0 and -1e-7 <= gain_bound <= GATE_DB:
                 labels = self.pack(tx, u)
                 meta = dict(status="converged", seconds=perf_counter() - started,
