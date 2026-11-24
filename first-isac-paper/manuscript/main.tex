@@ -252,7 +252,7 @@ Table~\ref{tab:reconciliation} compares true covariance scores for estimated-ker
 Twenty Gaussian starts on each of three draws gave median AO spreads of 0.434 dB in design SCNR and 0.280 dB in true SCNR. The prespecified \(\max(0.1\,\mathrm{dB},2\times\mathrm{median\ spread})\) rule gives tolerances of 0.867 and 0.561 dB. Under \(1\%\) relative RMS channel error, even a 1 dB explicit SINR tightening preserves all requirements for only \(38.5\%\) and \(10.6\%\) of perturbed channel realizations averaged over draws at the two thresholds. The appendix gives the perturbation model and full margin table.
 
 \subsection{MATLAB baseline on the workstation}
-We timed the tutorial authors' alternating-optimization routine \texttt{solve\_BLP\_AO}~\cite{liu2026clutter} in MATLAB on a Windows workstation. The driver starts the clock immediately before the call and stops it on return. The call includes the receive updates, CVX/MOSEK transmit solves and final stream recovery. Channel generation and endpoint scoring occur outside the call. Table~\ref{tab:pc-ao} gives the median across all attempted draws, including draws that failed the subsequent feasibility check.
+Using MATLAB R2024a Update~5 on 64-bit Windows, we timed the tutorial authors' alternating-optimization routine \texttt{solve\_BLP\_AO}~\cite{liu2026clutter} on seeds 10001--10024. The driver starts the clock immediately before the call and stops it on return. The call includes the receive updates, CVX/MOSEK transmit solves and final stream recovery. Channel generation and endpoint scoring occur outside the call. Table~\ref{tab:pc-ao} gives the median across all attempted draws, including draws that failed the subsequent feasibility check.
 
 \begin{table}[t]
 \caption{Runtime of the tutorial authors' MATLAB AO implementation. Each setting uses one timed call per channel draw on seeds 10001--10024.}
@@ -269,9 +269,17 @@ Users & SINR (dB) & Median time (s) & Feasible/total\\
 \end{tabular}
 \end{table}
 
-A separate two-draw check at four users and 8 dB preserved the source of both \texttt{solve\_BLP\_AO} and its Dinkelbach transmit solver. Both matched the pinned tutorial source. On 64-bit Windows with MATLAB R2024a Update~5, AO took 75.562 and 80.195 s on seeds 10001 and 10002, respectively. Both designs passed the power and SINR checks after four AO updates, with true SCNRs of 13.419 and 13.415 dB. The two-draw median was 77.878 s.
+The full-run manifest preserves the source of both \texttt{solve\_BLP\_AO} and its Dinkelbach transmit solver. Both match the pinned tutorial source.
 
-At 8 dB, increasing the load from four to six users raised the median AO time by 28.207 s. The archived aggregates identify the operating points and coverage. The historical processor, thread settings and software versions were not recorded in those aggregates. In a separate eight-draw MATLAB sweep at four users, the same AO method achieved mean true SCNRs of 13.575 and 13.555 dB at 8 and 12 dB required SINR, respectively, using estimated-kernel designs and linear-domain averaging.
+At 8 dB, increasing the load from four to six users raised the median AO time by 28.207 s. At four users and 8 dB, both rejected calls completed six AO updates and stayed within the 100 W power budget. Their worst-user SINRs were 7.7810 dB (seed 10010) and 7.9979 dB (seed 10015), below the 8 dB target even with the audit tolerance of \(10^{-4}\) dB. Restricting the median to the 22 feasible calls gives 49.407 s. In a separate eight-draw MATLAB sweep at four users, the same AO method achieved mean true SCNRs of 13.575 and 13.555 dB at 8 and 12 dB required SINR, respectively, using estimated-kernel designs and linear-domain averaging.
+
+\begin{figure*}[t]
+ \centering\includegraphics[width=.92\textwidth]{../result-figures/sensing_quality.pdf}
+ \caption{Quality of the accelerated MATLAB designs on the same 24 channel draws as Table~\ref{tab:pc-ao}. Top: paired median true-SCNR loss relative to each feasible AO endpoint; lower is better. Bottom: endpoints within 0.1 dB of AO over the feasible AO references. The LP budgets contain 1, 6 and 15 allocations. All accelerated endpoints passed the power and SINR checks.}
+ \label{fig:pc-quality}
+\end{figure*}
+
+The same workstation run measures sensing quality as well as time. At the 15-allocation budget, the learned proposal's median true-SCNR losses were 0.012, 0.069 and 0.124 dB for \((K,\gamma_{\rm dB})=(4,8),(4,12),(6,8)\), while its paired median speedups over AO were 32.2, 32.5 and 46.9. Figure~\ref{fig:pc-quality} also reports the stricter per-scene 0.1 dB quality hits. All 216 learned endpoints across the three budgets passed the physical feasibility audit, compared with 70 of 72 AO endpoints.
 
 \subsection{Quality at matched budgets}
 On 32 independent draws at four users and 8 dB, analytic pricing improved median paired true SCNR over count-matched random directions by 1.747 dB at six allocations and 1.884 dB at fifteen allocations.
@@ -342,12 +350,12 @@ Figure~\ref{fig:l2o-architecture} shows how the first LP's dual prices feed the 
 \end{enumerate}
 \end{minipage}\par\smallskip
 
-Table~\ref{tab:learning} uses 64 unseen maps. The supplement includes 64 original-map draws. All 1,920 endpoints passed the physical checks. At \(1\times1\) the shared master returns identical scores. On unseen maps at \(2\times1\), the two learned arms have median paired design SCNR losses of 0.209--0.255 dB. At \(3\times2\) the losses shrink to about 0.012 dB. The matched random baseline has a comparable median gap at six solves. The envelope policy's first-pass user proposals never cross the positive-power threshold in either cohort. Its paired median SCNR changes from reduced cost alone are below 0.000061 dB in magnitude. The two-draw MATLAB pilot used the earlier SPSA proposal policy.
+Table~\ref{tab:learning} uses 64 unseen maps. The supplement includes 64 original-map draws. All 1,920 endpoints passed the physical checks. At \(1\times1\) the shared master returns identical scores. On unseen maps at \(2\times1\), the two learned arms have median paired design SCNR losses of 0.209--0.255 dB. At \(3\times2\) the losses shrink to about 0.012 dB. The matched random baseline has a comparable median gap at six solves. The envelope policy's first-pass user proposals never cross the positive-power threshold in either cohort. Its paired median SCNR changes from reduced cost alone are below 0.000061 dB in magnitude. The 24-draw MATLAB proposal comparison in Fig.~\ref{fig:pc-quality} used the earlier SPSA policy.
 
 \section{Reproducibility and Conclusion}
 The reproducibility package includes code, locks, raw records and regeneration commands on the \href{https://github.com/muneefo/clutter_aware_beamforming-for-ISAC/tree/letters-revision}{project revision branch}. The tutorial input revision is \texttt{0f864c4}. The Python measurements use CPython 3.12.14, SciPy 1.17.0 and HiGHS 1.8.0 on an Intel Xeon Platinum 8573C. The serial ladder uses one pinned CPU and one BLAS and solver thread. The parallel tone condition uses two one-thread workers. The appendix and manifests give all seed bands and environment details.
 
-Clutter-kernel linearity supports a power LP with analytic direction pricing and a fixed-receiver covariance certificate. The expanded cohort reports small median gaps at fifteen allocations under both scoring kernels. Basis reuse reduces initial simplex work on highly correlated channels, as measured by initial simplex pivots. Envelope supervision gave modest, setting-dependent time changes in the workstation sweep. The absolute times support slow-timescale block updates.
+Clutter-kernel linearity supports a power LP with analytic direction pricing and a fixed-receiver covariance certificate. On the workstation, the earlier 15-allocation learned policy retained median true-SCNR gaps of 0.012--0.124 dB with 32--47-fold paired median speedups over AO. The expanded cohort also reports small gaps at fifteen allocations under both scoring kernels. Basis reuse reduces initial simplex work on highly correlated channels, as measured by initial simplex pivots. Envelope supervision gave modest, setting-dependent time changes in the threshold sweep. The absolute times support slow-timescale block updates.
 
 \bibliographystyle{IEEEtran}
 \bibliography{letters}

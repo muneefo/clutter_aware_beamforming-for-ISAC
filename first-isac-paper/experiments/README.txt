@@ -62,3 +62,20 @@ Recreating the training and plots:
    true SCNR for each LP budget, grouped by user count and threshold.
  - python plot_budget.py heldout_budget.csv budget-gains.pdf recreates the
    manuscript figure using numpy and matplotlib.
+
+Capture a representative transmit beampattern
+=============================================
+The scene checkpoints above contain scalar results only. To retain the actual
+beamformers, run the dedicated one-scene capture in a fresh folder:
+
+    P = run_beampattern_capture(repo, fullfile(paperResults,'manifest.mat'));
+
+Set paperResults to the completed paper_mc_v1 folder. A trained_model.mat path
+or the in-memory outWU structure can also be passed. The default is seed 10009
+at four users and 8 dB, using
+the 15-allocation budget. This is the lower-index scene adjacent to the median
+learned-policy SCNR gap. The function reruns AO, physics pricing, the fixed
+proposal and the learned proposal, then saves their W and U matrices. It
+exports a vector PDF, a PNG and a CSV with the target response, strongest
+dominant-clutter response and their difference. The three red dotted guides
+mark the strongest separated cold-clutter directions in covMat_BLP.mat.
