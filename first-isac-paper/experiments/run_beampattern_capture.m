@@ -69,8 +69,8 @@ for c=1:size(cfg.conditions,1)
             warmSeed=400000+c;
             assert(~ismember(warmSeed,cfg.seeds),'Reserved warm-up seed.');
             warm=channel_scene(x,warmSeed);
-            % Fail early if the original CVX SDP backend is misconfigured.
-            run_ao(warm,data,Vseed(warmSeed));
+            % Warm only the fast LP path. Beampattern capture reports no time,
+            % so an additional tutorial AO warm-up would repeat the slow solve.
             design_beams(warm,settings(struct('outer',1,'inner',1)),backend,model);
             warmed=true;
         end
