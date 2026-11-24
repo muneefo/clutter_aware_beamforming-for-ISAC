@@ -196,8 +196,11 @@ Draw 111–114 atom-level diagnostics when available.
 The revised sources are `first-isac-paper/manuscript/main.tex` and
 `first-isac-paper/manuscript/appendix.tex`. The archived manuscript PDF and
 historical Table I remain in their original locations. The latest PDFs,
-with the L2O architecture and pseudocode, are in
-`results/partf-2026-11-23-visual/`. The original release PDFs, Letter-size
+with the original MATLAB AO baseline and the workstation L2O sweep, are in
+`results/letters-matlab-workstation/`. AO time and coverage come from the AO rows of
+`first-isac-paper/result-figures/summary.csv`. The separate AO score sweep is
+`twc-resources/scnr_vs_sinr_three_methods.csv`. The workstation L2O figure
+uses `results/letters-matlab-workstation/l2o-summary.csv`. The original release PDFs, Letter-size
 figures, table inputs and provenance manifest are in
 `results/partf-2026-11-23/`. The nine verified references, abstract and
 conclusion evidence mapping, and changes from the prior draft are in

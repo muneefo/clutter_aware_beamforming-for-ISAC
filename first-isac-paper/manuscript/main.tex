@@ -25,7 +25,7 @@
 \setlength{\jot}{2pt}
 
 \begin{abstract}
-We develop block-level beamforming for wideband integrated sensing and communication with transmit-dependent clutter. At fixed receive filters, clutter-kernel linearity and Charnes--Cooper yield a power-allocation linear program (LP). A Hermitian eigenvalue oracle prices directions and bounds the covariance gap before stream recovery. On 32 matched single-thread Python draws, six and fifteen allocations gave median paired speedups of \(6.87\times\) and \(2.48\times\) over alternating semidefinite optimization, with median true sensing losses of \(0.219\) and \(0.052\) dB. A separate 96-pair study found median true losses of \(0.012\)--\(0.142\) dB at fifteen allocations across three conditions. All 288 terminal certificates covered the gaps to converged fixed-receiver references and were often loose. A two-stage learning-to-optimize (L2O) policy proposes directions from the first LP's dual prices. On unseen clutter maps, L2O shortened runtime and reduced design SCNR at matched budgets. These results support slow-timescale covariance design.
+We develop block-level beamforming for wideband integrated sensing and communication with transmit-dependent clutter. At fixed receive filters, clutter-kernel linearity and Charnes--Cooper yield a power-allocation linear program (LP). A Hermitian eigenvalue oracle prices directions and bounds the covariance gap before stream recovery. On a Windows workstation, the tutorial authors' MATLAB alternating-optimization solver took a median 50.227 s per design at four users and an 8 dB SINR requirement over 24 draws. A separate 96-pair study found median true losses of \(0.012\)--\(0.142\) dB at fifteen allocations across three conditions. All 288 terminal certificates covered the gaps to converged fixed-receiver references and were often loose. A two-stage learning-to-optimize (L2O) policy proposes directions from the first LP's dual prices. On unseen clutter maps, the six-allocation L2O policies incurred a median design SCNR loss of about 0.012 dB relative to analytic pricing. These results support slow-timescale covariance design.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -231,7 +231,7 @@ The \(t\) coefficient is nonpositive by dual feasibility, and \(\mathbf1^\top y\
 The bound applies under \(\widehat V_n\) to the tightened covariance problem at the terminal master's fixed receiver \(U\), before rank truncation. Global optimality of the joint nonconvex transceiver is outside its scope. The priced solver accepts a recovered candidate only if its nominal SINR margin is at least \(-10^{-4}\) dB, its power is within \(P(1+10^{-7})\), and its fixed-\(U\) estimated SCNR is at least \(1-10^{-10}\) times the incumbent. It refreshes \(U\) from accepted streams at the outer boundary. The terminal pass prices the final LP and adds zero columns. For \(J\) atoms the master has \(J+1\) variables, \(NK+1\) inequalities and one equality. Pricing costs \(O(N(K+1)N_t^3)\) per dense pass. Kernel application and stream recovery also contribute to runtime.
 
 \section{Measured Results}
-The benchmark uses 32 tones, \(N_t=N_r=N_s=16\), 100 W, 28 GHz and 120 kHz spacing. The numeric comparisons use the pinned matrices and preserve the original normalization in~\eqref{eq:target}. Times measure design and feasibility acceptance. Design gaps score \(\widehat V_n\) and true gaps score \(V_n\). End-to-end gaps are signed AO minus LP differences on matched streams and receivers. Bracketed intervals summarize paired bootstrap resampling unless identified as exact hit-rate intervals.
+The benchmark uses 32 tones, \(N_t=N_r=N_s=16\), 100 W, 28 GHz and 120 kHz spacing. The numeric comparisons use the pinned matrices and preserve the original normalization in~\eqref{eq:target}. Runtime measurements use the MATLAB solver-call boundaries specified below. Design gaps score \(\widehat V_n\) and true gaps score \(V_n\). End-to-end gaps are signed AO minus LP differences on matched streams and receivers. Bracketed intervals summarize paired bootstrap resampling unless identified as exact hit-rate intervals.
 
 \begin{table}[t]
  \caption{Reconciliation with Fig.~12(b) for \(K=4\). True covariance SCNR is in dB. Each replay mean uses 32 draws and linear-domain averaging.}
@@ -247,36 +247,34 @@ The benchmark uses 32 tones, \(N_t=N_r=N_s=16\), 100 W, 28 GHz and 120 kHz spaci
 \end{table}
 
 \subsection{Reconciliation and quality tolerances}
-Table~\ref{tab:reconciliation} compares true covariance scores for estimated-kernel designs. The pinned replay lies 1.58--1.60 dB below the digitized \(K=4\) curve. Stream truncation had no material effect on the 64 baseline draws at 0.001 dB resolution. The tested cap, tolerance, path-loss and fixed-coefficient power controls each shifted the mean by less than 0.05 dB. Changing only the loaded slow-time length left the two checked scores identical. The exact published Monte Carlo and calibration inputs remain unavailable. The matched timing claims use the local Python reference.
+Table~\ref{tab:reconciliation} compares true covariance scores for estimated-kernel designs. The pinned replay lies 1.58--1.60 dB below the digitized \(K=4\) curve. Stream truncation had no material effect on the 64 baseline draws at 0.001 dB resolution. The tested cap, tolerance, path-loss and fixed-coefficient power controls each shifted the mean by less than 0.05 dB. Changing only the loaded slow-time length left the two checked scores identical. The exact published Monte Carlo and calibration inputs remain unavailable. The Python replay supplies the quality reference for the ablations.
 
 Twenty Gaussian starts on each of three draws gave median AO spreads of 0.434 dB in design SCNR and 0.280 dB in true SCNR. The prespecified \(\max(0.1\,\mathrm{dB},2\times\mathrm{median\ spread})\) rule gives tolerances of 0.867 and 0.561 dB. Under \(1\%\) relative RMS channel error, even a 1 dB explicit SINR tightening preserves all requirements for only \(38.5\%\) and \(10.6\%\) of perturbed channel realizations averaged over draws at the two thresholds. The appendix gives the perturbation model and full margin table.
 
+\subsection{MATLAB baseline on the workstation}
+We timed the tutorial authors' alternating-optimization routine \texttt{solve\_BLP\_AO}~\cite{liu2026clutter} in MATLAB on a Windows workstation. The driver starts the clock immediately before the call and stops it on return. The call includes the receive updates, CVX/MOSEK transmit solves and final stream recovery. Channel generation and endpoint scoring occur outside the call. Table~\ref{tab:pc-ao} gives the median across all attempted draws, including draws that failed the subsequent feasibility check.
+
 \begin{table}[t]
- \caption{Single-thread Python ladder on 32 matched draws at \(K=4\) and 8 dB. Time and true SCNR are medians. B4 uses three single-SDP outer rounds. B5 uses 28 certified, physically eligible pairs.}
- \label{tab:ladder}
- \centering\footnotesize
- \setlength{\tabcolsep}{3pt}
- \begin{tabular}{@{}llrrr@{}}
- \toprule
- Arm & Configuration & Time (s) & True (dB) & Eligible\\
- \midrule
- \TabRows{\LetterAssets/ladder.tex}
- \bottomrule
- \end{tabular}
+\caption{Runtime of the tutorial authors' MATLAB AO implementation. Each setting uses one timed call per channel draw on seeds 10001--10024.}
+\label{tab:pc-ao}
+\centering\footnotesize
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+Users & SINR (dB) & Median time (s) & Feasible/total\\
+\midrule
+4 & 8  & 50.227 & 22/24\\
+4 & 12 & 47.527 & 24/24\\
+6 & 8  & 78.434 & 24/24\\
+\bottomrule
+\end{tabular}
 \end{table}
 
-\subsection{Attribution and operating points}
-Table~\ref{tab:ladder} uses independent seeds 16001--16032. The structured start gives a median paired speedup of \(1.44\times\) [1.35, 1.55] relative to B1, and capping that version at \(3\times2\) gives another \(1.50\times\) [1.39, 1.73]. With persistent masters on both sides, one Charnes--Cooper SDP per outer step gives \(1.12\times\) at three outer steps. Tone decomposition costs 3.361 s serially and 2.949 s with two tone workers versus 0.531 s for the serial matched joint SDP. The supplement reports iteration counts and the timed coverage.
+At 8 dB, increasing the load from four to six users raised the median AO time by 28.207 s. The archived aggregates identify the operating points and coverage. The historical processor, thread settings and software versions were not recorded in those aggregates. In a separate eight-draw MATLAB sweep at four users, the same AO method achieved mean true SCNRs of 13.575 and 13.555 dB at 8 and 12 dB required SINR, respectively, using estimated-kernel designs and linear-domain averaging.
 
-Analytic pricing adds computation compared with random generation and improves median paired true SCNR by 1.747 dB at \(3\times2\) and 1.884 dB at \(5\times3\) with matched counts. The descriptive B1-to-B8 ratios are \(6.87\times\) [6.43, 7.29] and \(2.48\times\) [2.40, 2.59], with paired median true losses of 0.219 and 0.052 dB. These results include the combined effects of the algorithms and their numerical paths. The timed semidefinite baseline uses an audited eigencut implementation with HiGHS solving its restricted LPs. A separate native SCS cross-check concerns the first fixed-receiver SDP. The MATLAB/CVX comparative timing and parsing breakdown remain unverified.
+\subsection{Quality at matched budgets}
+On 32 independent draws at four users and 8 dB, analytic pricing improved median paired true SCNR over count-matched random directions by 1.747 dB at six allocations and 1.884 dB at fifteen allocations.
 
-\begin{figure}[t]
- \centering\includegraphics[width=\columnwidth]{\LetterAssets/pareto.pdf}
- \caption{Paired design gap to local AO and wall time for \(K=4\), 8 dB. Marker shapes denote outer by inner budget labels and filled markers are nondominated. CC uses one transmit SDP per outer round. The dotted line is the registered 0.867 dB tolerance.}
- \label{fig:pareto}
-\end{figure}
-
-At seeds 10001--10032, the three conditions \((K,\gamma_{\rm dB})=(4,8),(4,12),(6,8)\) give 96 matched pairs per core budget. The \(3\times2\) LP hits the design tolerance on all 96 pairs and the true tolerance on 31, 32 and 29 of 32, respectively. At \(5\times3\) the median design gaps are \(0.076,0.091,0.103\) dB and the median true gaps are \(0.012,0.064,0.142\) dB. Fig.~\ref{fig:pareto} compares all five registered budgets at \(K=4\) and 8 dB. Three endpoints in the wider sweep failed physical acceptance and used 31 paired draws. The appendix reports coverage, quartiles, intervals and empirical distributions.
+At seeds 10001--10032, the three conditions \((K,\gamma_{\rm dB})=(4,8),(4,12),(6,8)\) give 96 matched pairs per core budget. The \(3\times2\) LP hits the design tolerance on all 96 pairs and the true tolerance on 31, 32 and 29 of 32, respectively. At \(5\times3\) the median design gaps are \(0.076,0.091,0.103\) dB and the median true gaps are \(0.012,0.064,0.142\) dB. Three endpoints in the wider sweep failed physical acceptance and used 31 paired draws. The appendix reports coverage and hit-rate intervals.
 
 \begin{figure}[t]
  \centering\includegraphics[width=\columnwidth]{\LetterAssets/certificate.pdf}
@@ -290,26 +288,33 @@ Fig.~\ref{fig:certificate} uses 288 terminal masters with three budgets. Referen
 Priced atoms received all decoded terminal LP power at \(3\times2\) and \(5\times3\). The condition medians of the share of added atoms active at termination were 19.8--19.9\% and 7.6--7.7\%, respectively, using \(10^{-8}P_s\) as the cutoff. Same-\(U\) fixed and random controls both trailed priced allocation by at least 1.99 dB in paired median design objective across the tested conditions and deployable budgets.
 
 \begin{figure*}[t]
- \centering\includegraphics[width=\textwidth]{\LetterAssets/tracking-scaling.pdf}
- \caption{Correlated-channel time to the registered design target (left), with a fresh offline reference per frame, and array-size scaling under the common \(1\times1\) cap (right). Whiskers on the scaling curves give the interquartile range. The scaling model uses the factorized ideal map and fixed mean sensor disturbance.}
- \label{fig:tracking}
+ \centering\includegraphics[width=.88\textwidth]{pc-l2o-comparison.pdf}
+ \caption{MATLAB R2024a/MOSEK 11.1 measurements on the workstation. Columns give user count. Top: true SCNR averaged over eight common scenes in linear units. Middle: median design time. Bottom: median paired percentage change in design time for envelope supervision relative to reduced cost. Shading and whiskers give pointwise 95\% scene-bootstrap intervals.}
+ \label{fig:pc-l2o}
 \end{figure*}
 
 \subsection{Block timing and scope}
-At 120 kHz with normal cyclic prefix, the NR slot duration is \(125\,\mu\mathrm{s}\) (3GPP TS 38.211 V18.3.0, Tables 4.2-1 and 4.3.2-1). The 36.5 ms median \(1\times1\) design time at \(K=4\) and 8 dB is about 292 slots. Correlated tracking used three updates on each of 32 chains per correlation. At \(\rho=0.99\), basis reuse cut median initial pivots from 203.5 to 4 compared with dictionary reuse alone. Cold and basis-reuse medians were 72 and 73 ms, with a paired cold-to-reuse ratio of 0.988 [0.962, 1.013]. The cold median spans about 576 NR slots. At \(\rho=0.90\) basis reuse increased runtime relative to cold starts. Fig.~\ref{fig:tracking} also shows that at 64 antennas the \(1\times1\) medians were 0.153 s for priced LP, 1.164 s for joint SDP and 6.753 s for per-tone SDP in the controlled scaling model. These timings characterize slow-timescale transceiver design.
+Fig.~\ref{fig:pc-l2o} uses eight channel draws (11001--11008) per setting, three timed repetitions per policy and six LP solves per design. Both policies passed all 864 timed trials in total. At four users and 8 dB the median design times were 65.73 ms for reduced cost and 64.47 ms with envelope supervision. The AO archive and this sweep use different channel draws, so a paired AO-to-L2O speedup requires additional measurements. At 12 users and 4 dB, envelope supervision reduced the median paired time by 5.03\% (pointwise 95\% interval, 1.41--7.03\%), with a median true SCNR decrease of 0.0034 dB. Across thresholds the dominant timing difference was user load: both policies took about three times as long at 12 users as at four.
 
 The linearity in~\eqref{eq:linear} concerns the block transmit covariance and the averaged cold-clutter model of~\cite[Sec.~VI-A]{liu2026clutter}. In the symbol-level STAP/SLP formulation, the disturbance covariance has the form \(R_{\mathrm{cc},n}=X_n V_{\mathrm{cc},n}^{\mathrm{st}}X_n\HH\), where \(X_n\) depends on the actual waveform samples~\cite[Sec.~VI-B]{liu2026clutter}. Its quadratic dependence on those samples lies outside the block power-master derivation.
 
 \begin{table}[t]
- \caption{Learning-to-optimize ablation on 64 held-out clutter maps. SCNR changes are paired design medians in dB with 95\% intervals. Time is the paired median ratio to analytic pricing.}
+ \caption{Learning-to-optimize ablation on 64 held-out clutter maps. SCNR changes are paired design medians in dB with 95\% intervals.}
  \label{tab:learning}
  \centering\footnotesize
  \setlength{\tabcolsep}{2.5pt}
- \begin{tabular}{@{}lllr@{}}
+ \begin{tabular}{@{}lll@{}}
  \toprule
- Budget & Directions & SCNR change & Time ratio\\
+ Budget & Directions & SCNR change\\
  \midrule
- \TabRows{\LetterAssets/learning-heldout.tex}
+ $2\times1$ & Random & $-0.209$ [$-0.334$, $-0.057$] \\
+$2\times1$ & Gradient & $-0.217$ [$-0.324$, $-0.146$] \\
+$2\times1$ & Reduced cost & $-0.255$ [$-0.384$, $-0.184$] \\
+$2\times1$ & Envelope & $-0.209$ [$-0.298$, $-0.055$] \\
+$3\times2$ & Random & $-0.012$ [$-0.030$, $-0.004$] \\
+$3\times2$ & Gradient & $-0.019$ [$-0.031$, $-0.005$] \\
+$3\times2$ & Reduced cost & $-0.012$ [$-0.031$, $-0.005$] \\
+$3\times2$ & Envelope & $-0.012$ [$-0.030$, $-0.004$] \\
  \bottomrule
  \end{tabular}
 \end{table}
@@ -335,12 +340,12 @@ Figure~\ref{fig:l2o-architecture} shows how the first LP's dual prices feed the 
 \end{enumerate}
 \end{minipage}\par\smallskip
 
-Table~\ref{tab:learning} uses 64 unseen maps. The supplement includes 64 original-map draws. All 1,920 endpoints passed the physical checks. At \(1\times1\) the shared master returns identical scores. On unseen maps at \(2\times1\), both learned arms reduce median paired design time by about 10--12\%, with design SCNR losses of 0.209--0.255 dB. At \(3\times2\) the losses shrink to about 0.012 dB. The matched random baseline has a comparable median gap at six solves. The envelope policy's first-pass user proposals never cross the positive-power threshold in either cohort. Its paired median SCNR changes from reduced cost alone are below 0.000061 dB in magnitude. The archived SPSA arm awaits its original checkpoint.
+Table~\ref{tab:learning} uses 64 unseen maps. The supplement includes 64 original-map draws. All 1,920 endpoints passed the physical checks. At \(1\times1\) the shared master returns identical scores. On unseen maps at \(2\times1\), the two learned arms have median paired design SCNR losses of 0.209--0.255 dB. At \(3\times2\) the losses shrink to about 0.012 dB. The matched random baseline has a comparable median gap at six solves. The envelope policy's first-pass user proposals never cross the positive-power threshold in either cohort. Its paired median SCNR changes from reduced cost alone are below 0.000061 dB in magnitude. The archived SPSA arm awaits its original checkpoint.
 
 \section{Reproducibility and Conclusion}
 The reproducibility package includes code, locks, raw records and regeneration commands on the \href{https://github.com/muneefo/clutter_aware_beamforming-for-ISAC/tree/letters-revision}{project revision branch}. The tutorial input revision is \texttt{0f864c4}. The Python measurements use CPython 3.12.14, SciPy 1.17.0 and HiGHS 1.8.0 on an Intel Xeon Platinum 8573C. The serial ladder uses one pinned CPU and one BLAS and solver thread. The parallel tone condition uses two one-thread workers. The appendix and manifests give all seed bands and environment details.
 
-Clutter-kernel linearity supports a power LP with analytic direction pricing and a fixed-receiver covariance certificate. The matched Python ladder shows speedups over the joint AO--SDP reference, and the expanded cohort reports small median gaps at fifteen allocations under both scoring kernels. Basis reuse reduces initial simplex work on highly correlated channels, with no demonstrated wall-time advantage over a fresh start there. The L2O direction policies yield a speed--SCNR trade-off at the measured budgets. The absolute times support slow-timescale block updates.
+Clutter-kernel linearity supports a power LP with analytic direction pricing and a fixed-receiver covariance certificate. The expanded cohort reports small median gaps at fifteen allocations under both scoring kernels. Basis reuse reduces initial simplex work on highly correlated channels, as measured by initial simplex pivots. Envelope supervision gave modest, setting-dependent time changes in the workstation sweep. The absolute times support slow-timescale block updates.
 
 \bibliographystyle{IEEEtran}
 \bibliography{letters}

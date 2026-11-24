@@ -32,7 +32,7 @@ For calibration, the least-squares kernel maps vectorized probing transmit covar
 \end{tabular}
 \end{table*}
 
-Table~\ref{tab:archive} preserves the historical MATLAB aggregate reconstruction. The source time for the \(K=4\), 8 dB, 15-LP physics row is 1.3826 s, displayed as 1.383 s. The specified alternatives 1.39 s and 1.395 s are absent from the supplied draft and archive. Tracing them requires the historical draft or log. The main Letter uses matched Python timings at their own registered budgets. The historical raw MATLAB scenes and original SPSA weights are unavailable, so the reconstruction reads the stored aggregates.
+Table~\ref{tab:archive} preserves the historical MATLAB aggregate reconstruction. The source time for the \(K=4\), 8 dB, 15-LP physics row is 1.3826 s, displayed as 1.383 s. The specified alternatives 1.39 s and 1.395 s are absent from the supplied draft and archive. Tracing them requires the historical draft or log. The main Letter reports the archived MATLAB AO times and a separate MATLAB L2O sweep. The historical raw MATLAB scenes and original SPSA weights are unavailable, so the reconstruction reads the stored aggregates.
 
 The independent Python replay on seeds 9001--9032 retained all 64 feasible designs and exactly reproduced the archived design and true SCNR, nominal achieved margin and power. The true medians are 13.437 and 13.463 dB at six and fifteen LPs. The paired median gain is 0.068 dB with interquartile endpoints 0.034 and 0.116 dB. Twenty-nine of 32 gains are positive. These results form a separate cohort from the expanded 10001--10032 study.
 
@@ -57,24 +57,11 @@ SINR (dB) & Setting (dB) & Median margin (dB) & True cost (dB) & 1\% error & 3\%
 \end{table*}
 
 \section{Ablation Implementations and Timing Scope}
-The joint Python SDP enforces real symmetric sensing and complex Hermitian user cones by spectral separation. Dinkelbach iteration~\cite{dinkelbach} updates the fractional objective. A restricted LP supplies a feasible PSD representation and full-matrix separation bounds the SDP value. HiGHS solves the restricted LP. A native SCS 3.2.11 warm-up is a separate subproblem cross-check. The MATLAB driver and static parser checks are included. Measured MATLAB/CVX/MOSEK times, backend tolerance equivalence and parsing overhead require a licensed run.
+The joint Python SDP enforces real symmetric sensing and complex Hermitian user cones by spectral separation. Dinkelbach iteration~\cite{dinkelbach} updates the fractional objective. A restricted LP supplies a feasible PSD representation and full-matrix separation bounds the SDP value. HiGHS solves the restricted LP. A native SCS 3.2.11 warm-up is a separate subproblem cross-check. The MATLAB driver and static parser checks are included. The historical MATLAB AO aggregate contains end-to-end solver times. A parsing breakdown requires separate instrumentation.
 
-B4 uses one Charnes--Cooper matrix SDP per outer update~\cite{charnes}. Its persistent-master single-thread ratios are \(1.12\times\) [1.09, 1.17] and \(1.13\times\) [1.06, 1.17] at three and five steps. Rebuilding the B4 master each solve slowed the variant. The \(5\times3\) cap alone gives \(1.02\times\) [0.99, 1.08]. B5 decomposes the solve per tone with a bisected global price. When power jumps across the budget, convex interpolation between the bracket endpoints gives a feasible covariance. Two workers give \(1.15\times\) [1.12, 1.18] versus the serial variant. Both B5 timing blocks retained 28/32 draws. Two rejected masters reported HiGHS status 15 and two failed the primal--dual gap gate. An untimed cold-master diagnostic certified all four seeds. The original timed coverage is retained.
+B4 uses one Charnes--Cooper matrix SDP per outer update~\cite{charnes}. B5 decomposes the solve per tone with a bisected global price. When power jumps across the budget, convex interpolation between the bracket endpoints gives a feasible covariance. The per-tone comparison retained 28/32 draws. Two rejected masters reported HiGHS status 15 and two failed the primal--dual gap gate. An untimed cold-master diagnostic certified all four seeds. The original timed coverage is retained.
 
-B6 holds the initial bank fixed. B7 and B8 append matching counts by tone, owner and nonterminal iteration. B7 includes random direction generation and excludes precomputing the matched schedule. Table~\ref{tab:components} shows selected components. Worker stages overlap in the parallel case, and the archive gives exclusive wall time and separate summed worker times. Other wall time is retained in the logs. The complete ladder, two-thread figures, feasible counts and paired bootstrap intervals are in the Part B summary.
-
-\begin{table*}[t]
-\caption{Selected single-thread component times in seconds, reported as component medians over eligible draws. Component medians and medians of sums can differ.}
-\label{tab:components}
-\centering\footnotesize
-\begin{tabular}{@{}lrrrrrr@{}}
-\toprule
-Arm & Build & Solve & Price & MVDR & Kernel & Recovery\\
-\midrule
-\TabRows{\LetterAssets/components.tex}
-\bottomrule
-\end{tabular}
-\end{table*}
+B6 holds the initial bank fixed. B7 and B8 append matching counts by tone, owner and nonterminal iteration. B7 includes random direction generation and excludes precomputing the matched schedule. The Part B archive includes per-draw feasibility and iteration counts.
 
 \section{Core Distributions, Tracking and Scaling}
 \begin{table*}[t]
@@ -82,24 +69,26 @@ Arm & Build & Solve & Price & MVDR & Kernel & Recovery\\
 \label{tab:core}
 \centering\footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}rrclllll@{}}
+\begin{tabular}{@{}rrcllll@{}}
 \toprule
-\(K\) & SINR & Budget & Time (s) & Design gap (dB) & True gap (dB) & Design hits & True hits\\
+\(K\) & SINR & Budget & Design gap (dB) & True gap (dB) & Design hits & True hits\\
 \midrule
-\TabRows{\LetterAssets/core.tex}
+4 & 8 & $1\times1$ & $1.689$ [$1.466$, $1.787$] & $2.023$ [$1.729$, $2.138$] & 0/32 [0.0, 10.9] & 0/32 [0.0, 10.9] \\
+4 & 8 & $3\times2$ & $0.164$ [$0.077$, $0.206$] & $0.172$ [$0.110$, $0.191$] & 32/32 [89.1, 100.0] & 31/32 [83.8, 99.9] \\
+4 & 8 & $5\times3$ & $0.076$ [$-0.040$, $0.162$] & $0.012$ [$-0.029$, $0.109$] & 32/32 [89.1, 100.0] & 32/32 [89.1, 100.0] \\
+4 & 12 & $1\times1$ & $1.664$ [$1.426$, $1.811$] & $2.024$ [$1.708$, $2.143$] & 0/32 [0.0, 10.9] & 0/32 [0.0, 10.9] \\
+4 & 12 & $3\times2$ & $0.219$ [$0.098$, $0.290$] & $0.182$ [$0.131$, $0.251$] & 32/32 [89.1, 100.0] & 32/32 [89.1, 100.0] \\
+4 & 12 & $5\times3$ & $0.091$ [$0.007$, $0.197$] & $0.064$ [$-0.026$, $0.143$] & 32/32 [89.1, 100.0] & 31/32 [83.8, 99.9] \\
+6 & 8 & $1\times1$ & $1.997$ [$1.860$, $2.147$] & $2.350$ [$2.215$, $2.517$] & 0/32 [0.0, 10.9] & 0/32 [0.0, 10.9] \\
+6 & 8 & $3\times2$ & $0.226$ [$0.152$, $0.308$] & $0.285$ [$0.164$, $0.368$] & 32/32 [89.1, 100.0] & 29/32 [75.0, 98.0] \\
+6 & 8 & $5\times3$ & $0.103$ [$-0.060$, $0.214$] & $0.142$ [$0.045$, $0.216$] & 32/32 [89.1, 100.0] & 31/32 [83.8, 99.9] \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-Each core condition uses 32 pairs, resampling draws within a condition. Table~\ref{tab:core} gives signed gaps and exact Clopper--Pearson intervals. Fig.~\ref{fig:ecdfs} gives empirical CDFs. Quartiles and Pareto coordinates appear in the Part C tables. The wider sweep attempted all 1,088 endpoints. The physical gate excluded Gaussian \(2\times1\) on seed 10006 and per-tone \(5\times3\) and \(8\times3\) on seed 10008. The latter two share one traversal. Their affected plot points retain 31 pairs. Distinct AO trajectories can produce negative signed gaps relative to the Gaussian comparator.
+Each core condition uses 32 pairs, resampling draws within a condition. Table~\ref{tab:core} gives signed gaps and exact Clopper--Pearson intervals. Quartiles and Pareto coordinates appear in the Part C tables. The wider sweep attempted all 1,088 endpoints. The physical gate excluded Gaussian \(2\times1\) on seed 10006 and per-tone \(5\times3\) and \(8\times3\) on seed 10008. The latter two share one traversal. Their affected plot points retain 31 pairs. Distinct AO trajectories can produce negative signed gaps relative to the Gaussian comparator.
 
-\begin{figure*}[t]
-\centering\includegraphics[width=\textwidth]{\BenchResults/partc-2026-11-22/summary/core-ecdf.pdf}
-\caption{Time, design gap and true-SCNR gap by condition and budget. Vertical marks on score plots give zero and the corresponding registered tolerance.}
-\label{fig:ecdfs}
-\end{figure*}
-
-For tracking, \(h_t=\rho h_{t-1}+\sqrt{1-\rho^2}\,w_t\) uses fixed path loss within a chain and matched Gaussian innovations. Each of 32 chains per correlation gives three scored transitions after initial preparation. A fresh offline reference per frame supplies the first-hit target. Both reuse arms carry the same previous basic columns and current feasible dictionary. The basis arm also maps the simplex basis to retained columns, scale and constraint rows. Time includes transport and reoptimization. All 96 frames reach the target for each arm and correlation. All 192 requested transfers were accepted. Bootstrap intervals resample whole chains. At \(\rho=0.99\), the dictionary-to-basis time ratio is 1.031 [1.007, 1.044] and cold-to-basis is 0.988 [0.962, 1.013]. At \(\rho=0.90\), cold-to-basis is 0.937 [0.925, 0.947]. The threshold is used as controlled evaluation instrumentation.
+For tracking, \(h_t=\rho h_{t-1}+\sqrt{1-\rho^2}\,w_t\) uses fixed path loss within a chain and matched Gaussian innovations. Each of 32 chains per correlation gives three scored transitions after initial preparation. A fresh offline reference per frame supplies the first-hit target. Both reuse arms carry the same previous basic columns and current feasible dictionary. The basis arm also maps the simplex basis to retained columns, scale and constraint rows. Time includes transport and reoptimization. All 96 frames reach the target for each arm and correlation. All 192 requested transfers were accepted. Bootstrap intervals resample whole chains. The threshold is used as controlled evaluation instrumentation.
 
 Scaling takes sensor prefixes of one Gaussian draw per seed to form \(N_t=N_r=N_s\in\{8,16,32,64\}\). It preserves scatterer angles and powers, extends steering factors, and uses isotropic disturbance at the archived mean sensor power. The 16-element factorized map matched the archived ideal vectorized map in a numerical check. Each method-size pair uses seeds 22101--22132, 32 tones, four users, 8 dB and a common \(1\times1\) cap. Every design passed the gate with zero timeouts in the declared 30-second cap.
 
@@ -121,22 +110,23 @@ The first loss minimizes the negative first-master reduced cost of the predicted
 \caption{Matched directions on the 64 original-map draws. Effects are paired medians relative to analytic pricing, with 95\% bootstrap intervals for the SCNR scores in dB.}
 \label{tab:learning-extra}
 \centering\footnotesize
-\begin{tabular}{@{}llllr@{}}
+\begin{tabular}{@{}llll@{}}
 \toprule
-Budget & Direction source & Design SCNR change & True SCNR change & Time ratio\\
+Budget & Direction source & Design SCNR change & True SCNR change\\
 \midrule
-\TabRows{\LetterAssets/learning-benchmark.tex}
+$2\times1$ & Random & $-0.740$ [$-0.834$, $-0.677$] & $-0.885$ [$-0.966$, $-0.814$] \\
+$2\times1$ & Gradient & $-0.540$ [$-0.620$, $-0.494$] & $-0.650$ [$-0.738$, $-0.589$] \\
+$2\times1$ & Reduced cost & $-0.748$ [$-0.846$, $-0.679$] & $-0.889$ [$-0.983$, $-0.821$] \\
+$2\times1$ & Envelope & $-0.740$ [$-0.834$, $-0.677$] & $-0.885$ [$-0.971$, $-0.811$] \\
+$3\times2$ & Random & $-0.052$ [$-0.086$, $-0.021$] & $-0.038$ [$-0.077$, $0.001$] \\
+$3\times2$ & Gradient & $-0.050$ [$-0.080$, $-0.021$] & $-0.044$ [$-0.082$, $-0.034$] \\
+$3\times2$ & Reduced cost & $-0.044$ [$-0.084$, $-0.011$] & $-0.038$ [$-0.077$, $0.005$] \\
+$3\times2$ & Envelope & $-0.052$ [$-0.087$, $-0.021$] & $-0.038$ [$-0.077$, $0.001$] \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-\begin{figure*}[t]
-\centering\includegraphics[width=.92\textwidth]{\BenchResults/parte-2026-11-23/summary/proposal-ablation.pdf}
-\caption{Matched time ratios and design SCNR changes against analytic pricing. Horizontal and vertical whiskers are paired bootstrap intervals. Panels use separately scaled axes.}
-\label{fig:learning-extra}
-\end{figure*}
-
-Inference includes feature construction, forward evaluation and direction normalization. At deployable budgets its medians range from 0.69 to 0.79 ms. At \(3\times2\) on the original map, the paired median true changes are both \(-0.038\) dB with intervals containing zero. The original-map effects appear in Table~\ref{tab:learning-extra}. Fig.~\ref{fig:learning-extra} includes both cohorts. The envelope policy's zero above-threshold activity covers 34,176 first-user proposal placements across budgets and cohorts. In the direct paired comparison, adding envelope supervision changes median SCNR by less than \(0.000061\) dB in absolute value.
+At \(3\times2\) on the original map, the paired median true changes are both \(-0.038\) dB with intervals containing zero. The original-map effects appear in Table~\ref{tab:learning-extra}. The envelope policy's zero above-threshold activity covers 34,176 first-user proposal placements across budgets and cohorts. In the direct paired comparison, adding envelope supervision changes median SCNR by less than \(0.000061\) dB in absolute value.
 
 The archived 58-parameter SPSA policy~\cite{spall} was trained with an anchor-repair rollout. Draw 112 displays 13.5516 dB for both fixed and learned proposals. The original checkpoint is required for the matched atom cosine and activity audit and frozen holdout run. The measured zero activity above concerns the new envelope policy.
 
