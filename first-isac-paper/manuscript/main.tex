@@ -269,6 +269,8 @@ Users & SINR (dB) & Median time (s) & Feasible/total\\
 \end{tabular}
 \end{table}
 
+A separate two-draw check at four users and 8 dB preserved the source of both \texttt{solve\_BLP\_AO} and its Dinkelbach transmit solver. Both matched the pinned tutorial source. On 64-bit Windows with MATLAB R2024a Update~5, AO took 75.562 and 80.195 s on seeds 10001 and 10002, respectively. Both designs passed the power and SINR checks after four AO updates, with true SCNRs of 13.419 and 13.415 dB. The two-draw median was 77.878 s.
+
 At 8 dB, increasing the load from four to six users raised the median AO time by 28.207 s. The archived aggregates identify the operating points and coverage. The historical processor, thread settings and software versions were not recorded in those aggregates. In a separate eight-draw MATLAB sweep at four users, the same AO method achieved mean true SCNRs of 13.575 and 13.555 dB at 8 and 12 dB required SINR, respectively, using estimated-kernel designs and linear-domain averaging.
 
 \subsection{Quality at matched budgets}
@@ -340,7 +342,7 @@ Figure~\ref{fig:l2o-architecture} shows how the first LP's dual prices feed the 
 \end{enumerate}
 \end{minipage}\par\smallskip
 
-Table~\ref{tab:learning} uses 64 unseen maps. The supplement includes 64 original-map draws. All 1,920 endpoints passed the physical checks. At \(1\times1\) the shared master returns identical scores. On unseen maps at \(2\times1\), the two learned arms have median paired design SCNR losses of 0.209--0.255 dB. At \(3\times2\) the losses shrink to about 0.012 dB. The matched random baseline has a comparable median gap at six solves. The envelope policy's first-pass user proposals never cross the positive-power threshold in either cohort. Its paired median SCNR changes from reduced cost alone are below 0.000061 dB in magnitude. The archived SPSA arm awaits its original checkpoint.
+Table~\ref{tab:learning} uses 64 unseen maps. The supplement includes 64 original-map draws. All 1,920 endpoints passed the physical checks. At \(1\times1\) the shared master returns identical scores. On unseen maps at \(2\times1\), the two learned arms have median paired design SCNR losses of 0.209--0.255 dB. At \(3\times2\) the losses shrink to about 0.012 dB. The matched random baseline has a comparable median gap at six solves. The envelope policy's first-pass user proposals never cross the positive-power threshold in either cohort. Its paired median SCNR changes from reduced cost alone are below 0.000061 dB in magnitude. The two-draw MATLAB pilot used the earlier SPSA proposal policy.
 
 \section{Reproducibility and Conclusion}
 The reproducibility package includes code, locks, raw records and regeneration commands on the \href{https://github.com/muneefo/clutter_aware_beamforming-for-ISAC/tree/letters-revision}{project revision branch}. The tutorial input revision is \texttt{0f864c4}. The Python measurements use CPython 3.12.14, SciPy 1.17.0 and HiGHS 1.8.0 on an Intel Xeon Platinum 8573C. The serial ladder uses one pinned CPU and one BLAS and solver thread. The parallel tone condition uses two one-thread workers. The appendix and manifests give all seed bands and environment details.

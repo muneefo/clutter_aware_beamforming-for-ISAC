@@ -32,7 +32,7 @@ For calibration, the least-squares kernel maps vectorized probing transmit covar
 \end{tabular}
 \end{table*}
 
-Table~\ref{tab:archive} preserves the historical MATLAB aggregate reconstruction. The source time for the \(K=4\), 8 dB, 15-LP physics row is 1.3826 s, displayed as 1.383 s. The specified alternatives 1.39 s and 1.395 s are absent from the supplied draft and archive. Tracing them requires the historical draft or log. The main Letter reports the archived MATLAB AO times and a separate MATLAB L2O sweep. The historical raw MATLAB scenes and original SPSA weights are unavailable, so the reconstruction reads the stored aggregates.
+Table~\ref{tab:archive} preserves the historical MATLAB aggregate reconstruction. The source time for the \(K=4\), 8 dB, 15-LP physics row is 1.3826 s, displayed as 1.383 s. The specified alternatives 1.39 s and 1.395 s are absent from the supplied draft and archive. Tracing them requires the historical draft or log. The main Letter reports the archived MATLAB AO times and a separate MATLAB L2O sweep. The complete 24-draw raw records are unavailable. The two-draw pilot has its own raw records and manifest, including its 58 transmit and 44 receive policy weights. Its two feasible AO outcomes do not identify the two failed draws in the larger archive.
 
 The independent Python replay on seeds 9001--9032 retained all 64 feasible designs and exactly reproduced the archived design and true SCNR, nominal achieved margin and power. The true medians are 13.437 and 13.463 dB at six and fifteen LPs. The paired median gain is 0.068 dB with interquartile endpoints 0.034 and 0.116 dB. Twenty-nine of 32 gains are positive. These results form a separate cohort from the expanded 10001--10032 study.
 
@@ -128,7 +128,7 @@ $3\times2$ & Envelope & $-0.052$ [$-0.087$, $-0.021$] & $-0.038$ [$-0.077$, $0.0
 
 At \(3\times2\) on the original map, the paired median true changes are both \(-0.038\) dB with intervals containing zero. The original-map effects appear in Table~\ref{tab:learning-extra}. The envelope policy's zero above-threshold activity covers 34,176 first-user proposal placements across budgets and cohorts. In the direct paired comparison, adding envelope supervision changes median SCNR by less than \(0.000061\) dB in absolute value.
 
-The archived 58-parameter SPSA policy~\cite{spall} was trained with an anchor-repair rollout. Draw 112 displays 13.5516 dB for both fixed and learned proposals. The original checkpoint is required for the matched atom cosine and activity audit and frozen holdout run. The measured zero activity above concerns the new envelope policy.
+The archived 58-parameter SPSA policy~\cite{spall} was trained with an anchor-repair rollout. Draw 112 displays 13.5516 dB for both fixed and learned proposals. The two-draw pilot manifest preserves policy weights. Their identity with the Draw 112 checkpoint has yet to be verified. The measured zero activity above concerns the new envelope policy.
 
 \section{Reproduction Map}
 The \href{https://github.com/muneefo/clutter_aware_beamforming-for-ISAC}{project repository} is the release destination for the reviewed source, Python hash locks, MATLAB dependency audit, protocol and run manifests. The numeric study uses CPython 3.12.14, SciPy 1.17.0, NumPy 2.3.5 and HiGHS 1.8.0 on Linux and Xeon Platinum 8573C hardware. The serial ladder uses one pinned CPU and one BLAS and solver thread. Two-worker cases use one numerical thread per worker. The recorded versions and actual worker settings are in each manifest.
